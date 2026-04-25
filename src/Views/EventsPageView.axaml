@@ -1,0 +1,203 @@
+﻿<UserControl
+  x:Class="ClassicDiagnostics.Avalonia.Views.EventsPageView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="using:ClassicDiagnostics.Avalonia.Controls"
+  xmlns:m="clr-namespace:ClassicDiagnostics.Avalonia.Models" xmlns:vm="using:ClassicDiagnostics.Avalonia.ViewModels"
+  Margin="2" x:DataType="vm:EventsPageViewModel">
+  <UserControl.Styles>
+    <Style Selector="TextBlock.nav">
+      <Setter Property="TextDecorations">
+        <TextDecorationCollection>
+          <TextDecoration
+            Location="Underline" Stroke="Black"
+            StrokeDashArray="2,2" StrokeThickness="1"/>
+        </TextDecorationCollection>
+      </Setter>
+    </Style>
+
+    <Style Selector="TextBlock.nav:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource ThemeAccentBrush}"/>
+      <Setter Property="Cursor" Value="Help"/>
+    </Style>
+
+    <Style Selector="ListBoxItem">
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+      <Setter Property="BorderBrush" Value="Black"/>
+    </Style>
+
+    <Style Selector="ListBoxItem.handled">
+      <Setter Property="Background" Value="#34c940"/>
+      <Setter Property="Foreground" Value="Black"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Grid ColumnDefinitions="1.1*,4,3*">
+
+    <Grid
+      Grid.Column="0" RowDefinitions="Auto,*,Auto">
+
+      <controls:FilterTextBox
+        Grid.Row="0" Margin="0,0,0,2"
+        DataContext="{Binding EventsFilter}"
+        PlaceholderText="Filter events"
+        Text="{Binding FilterString}"
+        UseCaseSensitiveFilter="{Binding UseCaseSensitiveFilter}"
+        UseRegexFilter="{Binding UseRegexFilter}"
+        UseWholeWordFilter="{Binding UseWholeWordFilter}"/>
+
+      <TreeView
+        Grid.Row="1"
+        ItemsSource="{Binding Nodes}"
+        SelectedItem="{Binding SelectedNode, Mode=TwoWay}">
+        <TreeView.DataTemplates>
+          <TreeDataTemplate
+            DataType="vm:EventTreeNodeBase"
+            ItemsSource="{Binding Children}">
+            <CheckBox
+              Content="{Binding Text}"
+              IsChecked="{Binding IsEnabled, Mode=TwoWay}"/>
+          </TreeDataTemplate>
+        </TreeView.DataTemplates>
+        <TreeView.Styles>
+          <Style
+            x:DataType="vm:EventTreeNodeBase" Selector="TreeViewItem">
+            <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+            <Setter Property="IsVisible" Value="{Binding IsVisible}"/>
+          </Style>
+        </TreeView.Styles>
+      </TreeView>
+
+      <StackPanel
+        Grid.Row="2" Margin="0,2"
+        Orientation="Horizontal" Spacing="2">
+        <Button
+          Command="{Binding DisableAll}"
+          Content="Disable all"/>
+        <Button
+          Command="{Binding EnableDefault}"
+          Content="Enable default"/>
+      </StackPanel>
+
+    </Grid>
+
+    <GridSplitter
+      Grid.Column="1" Width="4"/>
+
+    <Grid
+      Grid.Column="2" RowDefinitions="*,4,2*,Auto">
+
+      <ListBox
+        Name="EventsList"
+        ItemsSource="{Binding RecordedEvents}"
+        SelectedItem="{Binding SelectedEvent, Mode=TwoWay}">
+        <ListBox.Styles>
+          <Style Selector="ListBoxItem">
+            <Setter Property="Classes.handled" Value="{Binding IsHandled, DataType=vm:FiredEvent}"/>
+          </Style>
+        </ListBox.Styles>
+
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto">
+
+              <TextBlock
+                Grid.Column="0"
+                Text="{Binding TriggerTime, StringFormat={}{0:HH:mm:ss.fff}}"/>
+
+              <StackPanel
+                Grid.Column="1" Margin="10,0,0,0"
+                Orientation="Horizontal" Spacing="2">
+                <TextBlock
+                  Classes="nav" DoubleTapped="NavigateTo"
+                  FontWeight="Bold"
+                  Tag="{Binding Event}"
+                  Text="{Binding Event.Name}"/>
+                <TextBlock Text="on"/>
+                <TextBlock
+                  Classes="nav" DoubleTapped="NavigateTo"
+                  Tag="{Binding Originator}"
+                  Text="{Binding Originator.HandlerName}"/>
+              </StackPanel>
+
+              <StackPanel
+                Grid.Column="2" Margin="2,0,0,0"
+                IsVisible="{Binding IsHandled}"
+                Orientation="Horizontal" Spacing="2">
+                <TextBlock Text="::"/>
+                <TextBlock Text="Handled by"/>
+                <TextBlock
+                  Classes="nav" DoubleTapped="NavigateTo"
+                  Tag="{Binding HandledBy}"
+                  Text="{Binding HandledBy.HandlerName}"/>
+              </StackPanel>
+
+              <StackPanel
+                Grid.Column="4" HorizontalAlignment="Right"
+                Orientation="Horizontal">
+                <TextBlock Text="Routing ("/>
+                <TextBlock Text="{Binding Event.RoutingStrategies}"/>
+                <TextBlock Text=")"/>
+              </StackPanel>
+
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <GridSplitter
+        Grid.Row="1" Height="4"/>
+
+      <DockPanel
+        Grid.Row="2" LastChildFill="True">
+        <TextBlock
+          DockPanel.Dock="Top" FontSize="16"
+          Text="Event chain:"/>
+
+        <ListBox ItemsSource="{Binding SelectedEvent.EventChain}">
+          <ListBox.Styles>
+            <Style Selector="ListBoxItem">
+              <Setter Property="Classes.handled" Value="{Binding Handled, x:DataType=m:EventChainLink}"/>
+            </Style>
+          </ListBox.Styles>
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel
+                Background="Transparent" Orientation="Vertical"
+                PointerEntered="ListBoxItem_PointerEntered" PointerExited="ListBoxItem_PointerExited">
+
+                <Rectangle
+                  IsVisible="{Binding BeginsNewRoute}"
+                  Stroke="Gray" StrokeDashArray="2,2"
+                  StrokeThickness="1"/>
+
+                <StackPanel
+                  Orientation="Horizontal" Spacing="2">
+                  <TextBlock
+                    FontWeight="Bold"
+                    Text="{Binding Route}"/>
+                  <TextBlock
+                    Classes="nav" DoubleTapped="NavigateTo"
+                    Tag="{Binding}"
+                    Text="{Binding HandlerName}"/>
+                </StackPanel>
+
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+      </DockPanel>
+
+      <StackPanel
+        Grid.Row="3" Margin="2"
+        Orientation="Horizontal" Spacing="2">
+        <Button
+          Command="{Binding Clear}"
+          Content="Clear"/>
+      </StackPanel>
+
+    </Grid>
+  </Grid>
+</UserControl>

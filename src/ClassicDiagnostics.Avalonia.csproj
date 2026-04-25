@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia"/>
+    <PackageReference Include="Avalonia.Controls.ColorPicker" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" />
+    <PackageReference Include="Avalonia.Themes.Simple"/>
+    <PackageReference Include="CommunityToolkit.Mvvm"/>
+    <PackageReference Include="IgnoresAccessChecksToGenerator">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <IgnoresAccessChecksTo Include="Avalonia" />
+    <IgnoresAccessChecksTo Include="Avalonia.Base" />
+    <IgnoresAccessChecksTo Include="Avalonia.Controls" />
+  </ItemGroup>
+
+</Project>

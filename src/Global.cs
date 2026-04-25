@@ -1,0 +1,9 @@
+﻿global using System.Text;
+global using Avalonia;
+global using Avalonia.Controls;
+global using Avalonia.Data;
+global using Avalonia.Diagnostics;
+global using Avalonia.Input;
+global using Avalonia.Reactive;
+global using Avalonia.Styling;
+global using Avalonia.Utilities;

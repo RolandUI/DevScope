@@ -1,0 +1,46 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <AvaloniaVersion>12.0.0</AvaloniaVersion>
+    <TextMateSharpVersion>2.0.0</TextMateSharpVersion>
+  </PropertyGroup>
+  <ItemGroup Label="Common">
+    <PackageVersion Include="IgnoresAccessChecksToGenerator" Version="0.8.0" />
+    <PackageVersion Include="Svg.Controls.Avalonia" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Svg.Controls.Skia.Avalonia" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageVersion Include="PolySharp" Version="1.15.0" />
+  </ItemGroup>
+  <ItemGroup Label="Avalonia">
+    <PackageVersion Include="Avalonia" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Themes.Simple" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Browser" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="AvaloniaUI.DiagnosticsSupport" Version="2.1.0" />
+  </ItemGroup>
+  <ItemGroup Label="Markdown">
+    <PackageVersion Include="Markdig" Version="1.1.2" />
+    <PackageVersion Include="TextMateSharp" Version="$(TextMateSharpVersion)" />
+    <PackageVersion Include="TextMateSharp.Grammars" Version="$(TextMateSharpVersion)" />
+    <PackageVersion Include="Sylinko.CSharpMath.Avalonia" Version="12.0.0" />
+    <PackageVersion Include="Mermaider" Version="0.6.0" />
+  </ItemGroup>
+  <ItemGroup Label="Testing">
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.1" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.3" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageVersion Include="NUnit" Version="4.3.2" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.5.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
+  </ItemGroup>
+  <ItemGroup Label="ShadUI">
+    <PackageVersion Include="Avalonia.Controls.ColorPicker" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Skia" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="MinVer" Version="7.0.0" />
+    <PackageVersion Include="Lucide.Avalonia" Version="0.2.2" />
+    <PackageVersion Include="SkiaSharp" Version="3.119.3-preview.1.1" />
+    <PackageVersion Include="Xaml.Behaviors.Avalonia" Version="$(AvaloniaVersion)" />
+  </ItemGroup>
+</Project>
