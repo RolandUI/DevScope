@@ -94,7 +94,7 @@
         SelectedItem="{Binding SelectedEvent, Mode=TwoWay}">
         <ListBox.Styles>
           <Style Selector="ListBoxItem">
-            <Setter Property="Classes.handled" Value="{Binding IsHandled, DataType=vm:FiredEvent}"/>
+            <Setter Property="Classes.handled" Value="{Binding IsHandled, x:DataType=vm:FiredEvent}"/>
           </Style>
         </ListBox.Styles>
 
