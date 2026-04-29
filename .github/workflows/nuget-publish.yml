@@ -1,0 +1,56 @@
+name: Publish NuGet Package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-publish:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+          lfs: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dependencies
+        run: |
+          dotnet restore src/ClassicDiagnostics.Avalonia.csproj
+
+      - name: Build
+        run: |
+          dotnet build src/ClassicDiagnostics.Avalonia.csproj --configuration Release --no-restore
+
+      - name: Pack
+        env:
+          RELEASE_BODY: ${{ github.event.release.body }}
+        run: |
+          $year = (Get-Date).Year
+          $version = "${{ github.event.release.tag_name }}" -replace '^v',''
+          $copyright = "Copyright (c) AvaloniaUI OÜ. Migration by Sylinko"
+          
+          $notes = $null -ne $env:RELEASE_BODY ? ($env:RELEASE_BODY -replace '`r`n', '%0A' -replace '`n', '%0A' -replace '`r', '%0A' -replace '"', '\"') : "Release $version"
+          
+          dotnet pack src/ClassicDiagnostics.Avalonia.csproj --configuration Release --no-build -p:PackageVersion=$version -p:Copyright="$copyright" -p:PackageReleaseNotes="$notes" -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -o ${{ github.workspace }}/out
+
+      - name: Upload NuGet packages to Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: ${{ github.workspace }}/out/*.*nupkg
+
+      - name: Publish to NuGet
+        run: |
+          $packages = Get-ChildItem -Path "${{ github.workspace }}/out" -Filter "*.*nupkg"
+          if ($null -eq $packages) { throw 'No nupkg files found!' }
+          foreach ($pkg in $packages) {
+            dotnet nuget push $pkg.FullName --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+          }
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
