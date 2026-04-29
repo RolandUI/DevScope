@@ -7,9 +7,9 @@ namespace ClassicDiagnostics.Avalonia.Views;
 
 internal partial class TreePageView : UserControl
 {
-    private TreeViewItem? _hovered;
-    private TreeView _tree;
+    private readonly TreeView _tree;
     private IDisposable? _adorner;
+    private TreeViewItem? _hovered;
 
     public TreePageView()
     {
@@ -47,7 +47,7 @@ internal partial class TreePageView : UserControl
             return;
         }
 
-        _adorner = ControlHighlightAdorner.Add(visual, visualizeMarginPadding: shouldVisualizeMarginPadding == true);
+        _adorner = ControlHighlightAdorner.Add(visual, shouldVisualizeMarginPadding == true);
     }
 
     private void RemoveAdorner(object? sender, PointerEventArgs e)

@@ -2,8 +2,8 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia"/>
-    <PackageReference Include="Avalonia.Controls.ColorPicker" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" />
+    <PackageReference Include="Avalonia.Controls.ColorPicker"/>
+    <PackageReference Include="Avalonia.Controls.DataGrid"/>
     <PackageReference Include="Avalonia.Themes.Simple"/>
     <PackageReference Include="CommunityToolkit.Mvvm"/>
     <PackageReference Include="IgnoresAccessChecksToGenerator">
@@ -13,9 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <IgnoresAccessChecksTo Include="Avalonia" />
-    <IgnoresAccessChecksTo Include="Avalonia.Base" />
-    <IgnoresAccessChecksTo Include="Avalonia.Controls" />
+    <IgnoresAccessChecksTo Include="Avalonia"/>
+    <IgnoresAccessChecksTo Include="Avalonia.Base"/>
+    <IgnoresAccessChecksTo Include="Avalonia.Controls"/>
   </ItemGroup>
 
 </Project>

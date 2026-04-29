@@ -1,35 +1,36 @@
 ﻿using Avalonia.Controls.Primitives;
 using Avalonia.Media;
-using Avalonia.Reactive;
 
 namespace ClassicDiagnostics.Avalonia.Controls;
 
 internal class ControlHighlightAdorner : Control
 {
-    private static readonly Panel _layoutHighlightAdorner;
+    private readonly static Panel _layoutHighlightAdorner;
+
+    private readonly IPen _pen;
+
     static ControlHighlightAdorner()
     {
         _layoutHighlightAdorner = new Panel
         {
             ClipToBounds = false,
             Children =
-                {
-                    //Padding frame
-                    new Border { BorderBrush = new SolidColorBrush(Colors.Green, 0.5) },
-                    //Content frame
-                    new Border { Background = new SolidColorBrush(Color.FromRgb(160, 197, 232), 0.5) },
-                    //Margin frame
-                    new Border { BorderBrush = new SolidColorBrush(Colors.Yellow, 0.5) }
-                },
+            {
+                //Padding frame
+                new Border { BorderBrush = new SolidColorBrush(Colors.Green, 0.5) },
+                //Content frame
+                new Border { Background = new SolidColorBrush(Color.FromRgb(160, 197, 232), 0.5) },
+                //Margin frame
+                new Border { BorderBrush = new SolidColorBrush(Colors.Yellow, 0.5) },
+            },
         };
         AdornerLayer.SetIsClipEnabled(_layoutHighlightAdorner, false);
     }
-    readonly IPen _pen;
 
     private ControlHighlightAdorner(IPen pen)
     {
         _pen = pen;
-        this.Clip = null;
+        Clip = null;
     }
 
     public static IDisposable? Add(InputElement owner, IBrush highlightBrush)
@@ -40,14 +41,16 @@ internal class ControlHighlightAdorner : Control
             var pen = new Pen(highlightBrush, 2).ToImmutable();
             var adorner = new ControlHighlightAdorner(pen)
             {
-                [AdornerLayer.AdornedElementProperty] = owner
+                [AdornerLayer.AdornedElementProperty] = owner,
             };
             layer.Children.Add(adorner);
 
-            return Disposable.Create((layer, adorner), state =>
-            {
-                state.layer.Children.Remove(state.adorner);
-            });
+            return Disposable.Create(
+                (layer, adorner),
+                state =>
+                {
+                    state.layer.Children.Remove(state.adorner);
+                });
         }
         return default;
     }
@@ -73,7 +76,7 @@ internal class ControlHighlightAdorner : Control
             var marginBorder = (Border)_layoutHighlightAdorner.Children[2];
             if (visualizeMarginPadding)
             {
-                paddingBorder.BorderThickness =  visual.GetValue(TemplatedControl.PaddingProperty);
+                paddingBorder.BorderThickness = visual.GetValue(TemplatedControl.PaddingProperty);
                 contentBorder.Margin = visual.GetValue(TemplatedControl.PaddingProperty);
                 marginBorder.BorderThickness = visual.GetValue(MarginProperty);
                 marginBorder.Margin = InvertThickness(visual.GetValue(MarginProperty));
@@ -85,10 +88,12 @@ internal class ControlHighlightAdorner : Control
                 marginBorder.BorderThickness = default;
                 marginBorder.Margin = default;
             }
-            return Disposable.Create((Layer: layer, Adorner: _layoutHighlightAdorner), state =>
-            {
-                state.Layer.Children.Remove(state.Adorner);
-            });
+            return Disposable.Create(
+                (Layer: layer, Adorner: _layoutHighlightAdorner),
+                state =>
+                {
+                    state.Layer.Children.Remove(state.Adorner);
+                });
         }
         return default;
     }

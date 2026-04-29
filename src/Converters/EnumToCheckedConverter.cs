@@ -1,25 +1,22 @@
-﻿using System;
-using System.Globalization;
-using Avalonia.Data;
+﻿using System.Globalization;
 using Avalonia.Data.Converters;
 
-namespace ClassicDiagnostics.Avalonia.Converters
+namespace ClassicDiagnostics.Avalonia.Converters;
+
+internal class EnumToCheckedConverter : IValueConverter
 {
-    internal class EnumToCheckedConverter : IValueConverter
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        return Equals(value, parameter);
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is bool isChecked && isChecked)
         {
-            return Equals(value, parameter);
+            return parameter;
         }
 
-        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        {
-            if (value is bool isChecked && isChecked)
-            {
-                return parameter;
-            }
-
-            return BindingOperations.DoNothing;
-        }
+        return BindingOperations.DoNothing;
     }
 }

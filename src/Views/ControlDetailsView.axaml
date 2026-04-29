@@ -115,9 +115,11 @@
           </DataGridTemplateColumn>
           <DataGridTemplateColumn
             Width="100" Header="Value">
-            <DataTemplate>
-              <local:PropertyValueEditorView/>
-            </DataTemplate>
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <local:PropertyValueEditorView/>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
           </DataGridTemplateColumn>
           <DataGridTextColumn
             x:DataType="vm:PropertyViewModel"
@@ -234,7 +236,7 @@
                     </Expander.Header>
 
                     <ItemsControl
-                      Grid.Row="1" Margin="20,0,0,0"
+                      Margin="20,0,0,0"
                       ItemsSource="{Binding Setters}">
 
                       <ItemsControl.Styles>

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using Avalonia.Controls;
+﻿using System.Collections.Specialized;
 
 namespace ClassicDiagnostics.Avalonia.Controls;
 

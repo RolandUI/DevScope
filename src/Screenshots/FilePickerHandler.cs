@@ -1,82 +1,77 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Avalonia.Controls;
-using Avalonia.Platform.Storage;
-using Avalonia.Platform.Storage.FileIO;
+﻿using Avalonia.Platform.Storage;
+using ClassicDiagnostics.Avalonia.Views;
 using Lifetimes = Avalonia.Controls.ApplicationLifetimes;
 
-namespace ClassicDiagnostics.Avalonia.Screenshots
+namespace ClassicDiagnostics.Avalonia.Screenshots;
+
+/// <summary>
+///     Show a FileSavePicker to select where save screenshot
+/// </summary>
+public sealed class FilePickerHandler : BaseRenderToStreamHandler
 {
+    private readonly string? _screenshotRoot;
+    private readonly string _title;
+
     /// <summary>
-    /// Show a FileSavePicker to select where save screenshot
+    ///     Instance FilePickerHandler
     /// </summary>
-    public sealed class FilePickerHandler : BaseRenderToStreamHandler
+    public FilePickerHandler() : this(null)
     {
-        private readonly string _title;
-        private readonly string? _screenshotRoot;
 
-        /// <summary>
-        /// Instance FilePickerHandler
-        /// </summary>
-        public FilePickerHandler() : this(null, null)
+    }
+
+    /// <summary>
+    ///     Instance FilePickerHandler with specificated parameter
+    /// </summary>
+    /// <param name="title">SaveFilePicker Title</param>
+    /// <param name="screenshotRoot"></param>
+    public FilePickerHandler(
+        string? title,
+        string? screenshotRoot = default)
+    {
+        _title = title ?? "Save Screenshot to ...";
+        _screenshotRoot = screenshotRoot;
+    }
+
+    private static TopLevel GetTopLevel(Control control)
+    {
+        // If possible, use devtools main window.
+        TopLevel? devToolsTopLevel = null;
+        if (Application.Current?.ApplicationLifetime is Lifetimes.IClassicDesktopStyleApplicationLifetime desktop)
         {
-
+            devToolsTopLevel = desktop.Windows.FirstOrDefault(w => w is MainWindow);
         }
 
-        /// <summary>
-        /// Instance FilePickerHandler with specificated parameter
-        /// </summary>
-        /// <param name="title">SaveFilePicker Title</param>
-        /// <param name="screenshotRoot"></param>
-        public FilePickerHandler(
-            string? title,
-            string? screenshotRoot = default)
+        return devToolsTopLevel ?? TopLevel.GetTopLevel(control)
+            ?? throw new InvalidOperationException("No TopLevel is available.");
+    }
+
+    protected async override Task<Stream?> GetStream(Control control)
+    {
+        var storageProvider = GetTopLevel(control).StorageProvider;
+        IStorageFolder? defaultFolder = null;
+        if (_screenshotRoot is not null)
         {
-            _title = title ?? "Save Screenshot to ...";
-            _screenshotRoot = screenshotRoot;
+            defaultFolder = await storageProvider.TryGetFolderFromPathAsync(_screenshotRoot);
+        }
+        if (defaultFolder is null)
+        {
+            defaultFolder = await storageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Pictures);
         }
 
-        private static TopLevel GetTopLevel(Control control)
-        {
-            // If possible, use devtools main window.
-            TopLevel? devToolsTopLevel = null;
-            if (Application.Current?.ApplicationLifetime is Lifetimes.IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                devToolsTopLevel = desktop.Windows.FirstOrDefault(w => w is Views.MainWindow);
-            }
-
-            return devToolsTopLevel ?? TopLevel.GetTopLevel(control)
-                ?? throw new InvalidOperationException("No TopLevel is available.");
-        }
-
-        protected override async Task<Stream?> GetStream(Control control)
-        {
-            var storageProvider = GetTopLevel(control).StorageProvider;
-            IStorageFolder? defaultFolder = null;
-            if (_screenshotRoot is not null)
-            {
-                defaultFolder = await storageProvider.TryGetFolderFromPathAsync(_screenshotRoot);
-            }
-            if (defaultFolder is null)
-            {
-                defaultFolder = await storageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Pictures);
-            }
-
-            var result = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        var result = await storageProvider.SaveFilePickerAsync(
+            new FilePickerSaveOptions
             {
                 SuggestedStartLocation = defaultFolder,
                 Title = _title,
-                FileTypeChoices = new [] { FilePickerFileTypes.ImagePng },
-                DefaultExtension = ".png"
+                FileTypeChoices = new[] { FilePickerFileTypes.ImagePng },
+                DefaultExtension = ".png",
             });
-            if (result is null)
-            {
-                return null;
-            }
-
-            return await result.OpenWriteAsync();
+        if (result is null)
+        {
+            return null;
         }
+
+        return await result.OpenWriteAsync();
     }
 }

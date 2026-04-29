@@ -1,33 +1,38 @@
 ﻿using Avalonia.Input.Platform;
 using Avalonia.Media;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels
+namespace ClassicDiagnostics.Avalonia.ViewModels;
+
+internal class ResourceSetterViewModel : SetterViewModel
 {
-    internal class ResourceSetterViewModel : SetterViewModel
+
+    public ResourceSetterViewModel(
+        AvaloniaProperty property,
+        object resourceKey,
+        object? resourceValue,
+        bool isDynamic,
+        IClipboard? clipboard) : base(property, resourceValue, clipboard)
     {
-        public object Key { get; }
+        Key = resourceKey;
+        Tint = isDynamic ? Brushes.Orange : Brushes.Brown;
+        ValueTypeTooltip = isDynamic ? "Dynamic Resource" : "Static Resource";
+    }
 
-        public IBrush Tint { get; }
-        
-        public string ValueTypeTooltip { get; }
+    public object Key { get; }
 
-        public ResourceSetterViewModel(AvaloniaProperty property, object resourceKey, object? resourceValue, bool isDynamic, IClipboard? clipboard) : base(property, resourceValue, clipboard)
+    public IBrush Tint { get; }
+
+    public string ValueTypeTooltip { get; }
+
+    public void CopyResourceKey()
+    {
+        var textToCopy = Key?.ToString();
+
+        if (textToCopy is null)
         {
-            Key = resourceKey;
-            Tint = isDynamic ? Brushes.Orange : Brushes.Brown;
-            ValueTypeTooltip = isDynamic ? "Dynamic Resource" : "Static Resource";
+            return;
         }
 
-        public void CopyResourceKey()
-        {
-            var textToCopy = Key?.ToString();
-
-            if (textToCopy is null)
-            {
-                return;
-            }
-
-            CopyToClipboard(textToCopy);
-        }
+        CopyToClipboard(textToCopy);
     }
 }

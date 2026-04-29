@@ -3,7 +3,7 @@
         xmlns:controls="using:ClassicDiagnostics.Avalonia.Controls"
         x:ClassModifier="internal">
   <Design.PreviewWith>
-    <controls:BrushEditor />
+    <controls:BrushEditor/>
   </Design.PreviewWith>
 
   <Style Selector=":is(controls|BrushEditor)">

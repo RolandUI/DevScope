@@ -1,40 +1,40 @@
 ﻿using Avalonia.Collections;
 using Avalonia.Interactivity;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels
+namespace ClassicDiagnostics.Avalonia.ViewModels;
+
+internal class EventOwnerTreeNode : EventTreeNodeBase
 {
-    internal class EventOwnerTreeNode : EventTreeNodeBase
+    public EventOwnerTreeNode(Type type, IEnumerable<RoutedEvent> events, EventsPageViewModel vm)
+        : base(null, type.Name)
     {
-        public EventOwnerTreeNode(Type type, IEnumerable<RoutedEvent> events, EventsPageViewModel vm)
-            : base(null, type.Name)
-        {
-            Children = new AvaloniaList<EventTreeNodeBase>(events.OrderBy(e => e.Name)
+        Children = new AvaloniaList<EventTreeNodeBase>(
+            events.OrderBy(e => e.Name)
                 .Select(e => new EventTreeNode(this, e, vm)));
-            IsExpanded = true;
-        }
+        IsExpanded = true;
+    }
 
-        public override bool? IsEnabled
+    public override bool? IsEnabled
+    {
+        get => base.IsEnabled;
+        set
         {
-            get => base.IsEnabled;
-            set
+            if (base.IsEnabled != value)
             {
-                if (base.IsEnabled != value)
-                {
-                    base.IsEnabled = value;
+                base.IsEnabled = value;
 
-                    if (_updateChildren && value != null)
+                if (_updateChildren && value != null)
+                {
+                    foreach (var child in Children!)
                     {
-                        foreach (var child in Children!)
+                        try
                         {
-                            try
-                            {
-                                child._updateParent = false;
-                                child.IsEnabled = value;
-                            }
-                            finally
-                            {
-                                child._updateParent = true;
-                            }
+                            child._updateParent = false;
+                            child.IsEnabled = value;
+                        }
+                        finally
+                        {
+                            child._updateParent = true;
                         }
                     }
                 }

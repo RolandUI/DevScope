@@ -2,171 +2,169 @@
 using Avalonia.Interactivity;
 using ClassicDiagnostics.Avalonia.Models;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels
+namespace ClassicDiagnostics.Avalonia.ViewModels;
+
+internal class EventsPageViewModel : ViewModelBase
 {
-    internal class EventsPageViewModel : ViewModelBase
+    private readonly static HashSet<RoutedEvent> s_defaultEvents = new()
     {
-        private static readonly HashSet<RoutedEvent> s_defaultEvents = new HashSet<RoutedEvent>()
+        Button.ClickEvent,
+        InputElement.KeyDownEvent,
+        InputElement.KeyUpEvent,
+        InputElement.TextInputEvent,
+        InputElement.PointerReleasedEvent,
+        InputElement.PointerPressedEvent,
+    };
+
+    private FiredEvent? _selectedEvent;
+    private EventTreeNodeBase? _selectedNode;
+
+    public EventsPageViewModel(MainViewModel mainViewModel)
+    {
+        MainView = mainViewModel;
+
+        Nodes = RoutedEventRegistry.Instance.GetAllRegistered()
+            .GroupBy(e => e.OwnerType)
+            .OrderBy(e => e.Key.Name)
+            .Select(g => new EventOwnerTreeNode(g.Key, g, this))
+            .ToArray();
+
+        EventsFilter = new FilterViewModel();
+        EventsFilter.RefreshFilter += (s, e) => UpdateEventFilters();
+
+        EnableDefault();
+    }
+
+    public string Name => "Events";
+
+    public EventTreeNodeBase[] Nodes { get; }
+
+    public ObservableCollection<FiredEvent> RecordedEvents { get; } = new();
+
+    public FiredEvent? SelectedEvent
+    {
+        get => _selectedEvent;
+        set => RaiseAndSetIfChanged(ref _selectedEvent, value);
+    }
+
+    public EventTreeNodeBase? SelectedNode
+    {
+        get => _selectedNode;
+        set => RaiseAndSetIfChanged(ref _selectedNode, value);
+    }
+
+    public FilterViewModel EventsFilter { get; }
+
+    public MainViewModel MainView { get; }
+
+    public void Clear()
+    {
+        RecordedEvents.Clear();
+    }
+
+    public void DisableAll()
+    {
+        EvaluateNodeEnabled(_ => false);
+    }
+
+    public void EnableDefault()
+    {
+        EvaluateNodeEnabled(node => s_defaultEvents.Contains(node.Event));
+    }
+
+    public void RequestTreeNavigateTo(EventChainLink navTarget)
+    {
+        if (navTarget.Handler is Control control)
         {
-            Button.ClickEvent,
-            InputElement.KeyDownEvent,
-            InputElement.KeyUpEvent,
-            InputElement.TextInputEvent,
-            InputElement.PointerReleasedEvent,
-            InputElement.PointerPressedEvent
-        };
-
-        private readonly MainViewModel _mainViewModel;
-        private FiredEvent? _selectedEvent;
-        private EventTreeNodeBase? _selectedNode;
-
-        public EventsPageViewModel(MainViewModel mainViewModel)
-        {
-            _mainViewModel = mainViewModel;
-
-            Nodes = RoutedEventRegistry.Instance.GetAllRegistered()
-                .GroupBy(e => e.OwnerType)
-                .OrderBy(e => e.Key.Name)
-                .Select(g => new EventOwnerTreeNode(g.Key, g, this))
-                .ToArray();
-
-            EventsFilter = new FilterViewModel();
-            EventsFilter.RefreshFilter += (s, e) => UpdateEventFilters();
-
-            EnableDefault();
+            MainView.RequestTreeNavigateTo(control, true);
         }
+    }
 
-        public string Name => "Events";
-
-        public EventTreeNodeBase[] Nodes { get; }
-
-        public ObservableCollection<FiredEvent> RecordedEvents { get; } = new ObservableCollection<FiredEvent>();
-
-        public FiredEvent? SelectedEvent
+    public void SelectEventByType(RoutedEvent evt)
+    {
+        foreach (var node in Nodes)
         {
-            get => _selectedEvent;
-            set => RaiseAndSetIfChanged(ref _selectedEvent, value);
-        }
+            var result = FindNode(node, evt);
 
-        public EventTreeNodeBase? SelectedNode
-        {
-            get => _selectedNode;
-            set => RaiseAndSetIfChanged(ref _selectedNode, value);
-        }
-
-        public FilterViewModel EventsFilter { get; }
-
-        public void Clear()
-        {
-            RecordedEvents.Clear();
-        }
-
-        public void DisableAll()
-        {
-            EvaluateNodeEnabled(_ => false);
-        }
-
-        public void EnableDefault()
-        {
-            EvaluateNodeEnabled(node => s_defaultEvents.Contains(node.Event));
-        }
-
-        public void RequestTreeNavigateTo(EventChainLink navTarget)
-        {
-            if (navTarget.Handler is Control control)
+            if (result != null && result.IsVisible)
             {
-                _mainViewModel.RequestTreeNavigateTo(control, true);
+                SelectedNode = result;
+
+                break;
             }
         }
 
-        public void SelectEventByType(RoutedEvent evt)
+        static EventTreeNodeBase? FindNode(EventTreeNodeBase node, RoutedEvent eventType)
         {
-            foreach (var node in Nodes)
+            if (node is EventTreeNode eventNode && eventNode.Event == eventType)
             {
-                var result = FindNode(node, evt);
-
-                if (result != null && result.IsVisible)
-                {
-                    SelectedNode = result;
-
-                    break;
-                }
+                return node;
             }
 
-            static EventTreeNodeBase? FindNode(EventTreeNodeBase node, RoutedEvent eventType)
+            if (node.Children != null)
             {
-                if (node is EventTreeNode eventNode && eventNode.Event == eventType)
+                foreach (var child in node.Children)
                 {
-                    return node;
-                }
+                    var result = FindNode(child, eventType);
 
-                if (node.Children != null)
-                {
-                    foreach (var child in node.Children)
+                    if (result != null)
                     {
-                        var result = FindNode(child, eventType);
-
-                        if (result != null)
-                        {
-                            return result;
-                        }
-                    }
-                }
-
-                return null;
-            }
-        }
-
-        private void EvaluateNodeEnabled(Func<EventTreeNode, bool> eval)
-        {
-            void ProcessNode(EventTreeNodeBase node)
-            {
-                if (node is EventTreeNode eventNode)
-                {
-                    node.IsEnabled = eval(eventNode);
-                }
-
-                if (node.Children != null)
-                {
-                    foreach (var childNode in node.Children)
-                    {
-                        ProcessNode(childNode);
+                        return result;
                     }
                 }
             }
 
-            foreach (var node in Nodes)
-            {
-                ProcessNode(node);
-            }
+            return null;
         }
+    }
 
-        private void UpdateEventFilters()
+    private void EvaluateNodeEnabled(Func<EventTreeNode, bool> eval)
+    {
+        void ProcessNode(EventTreeNodeBase node)
         {
-            foreach (var node in Nodes)
+            if (node is EventTreeNode eventNode)
             {
-                FilterNode(node, false);
+                node.IsEnabled = eval(eventNode);
             }
 
-            bool FilterNode(EventTreeNodeBase node, bool isParentVisible)
+            if (node.Children != null)
             {
-                bool matchesFilter = EventsFilter.Filter(node.Text);
-                bool hasVisibleChild = false;
-
-                if (node.Children != null)
+                foreach (var childNode in node.Children)
                 {
-                    foreach (var childNode in node.Children)
-                    {
-                        hasVisibleChild |= FilterNode(childNode, matchesFilter);
-                    }
+                    ProcessNode(childNode);
                 }
-
-                node.IsVisible = hasVisibleChild || matchesFilter || isParentVisible;
-
-                return node.IsVisible;
             }
         }
 
-        public MainViewModel MainView => _mainViewModel;
+        foreach (var node in Nodes)
+        {
+            ProcessNode(node);
+        }
+    }
+
+    private void UpdateEventFilters()
+    {
+        foreach (var node in Nodes)
+        {
+            FilterNode(node, false);
+        }
+
+        bool FilterNode(EventTreeNodeBase node, bool isParentVisible)
+        {
+            var matchesFilter = EventsFilter.Filter(node.Text);
+            var hasVisibleChild = false;
+
+            if (node.Children != null)
+            {
+                foreach (var childNode in node.Children)
+                {
+                    hasVisibleChild |= FilterNode(childNode, matchesFilter);
+                }
+            }
+
+            node.IsVisible = hasVisibleChild || matchesFilter || isParentVisible;
+
+            return node.IsVisible;
+        }
     }
 }

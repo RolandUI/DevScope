@@ -1,6 +1,4 @@
-﻿using System;
-using System.Globalization;
-using Avalonia.Data;
+﻿using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 
@@ -12,14 +10,18 @@ internal class BoolToImageConverter : IValueConverter
 
     public IImage? FalseImage { get; set; }
 
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-        value switch
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        return value switch
         {
             true => TrueImage,
             false => FalseImage,
-            _ => null
+            _ => null,
         };
+    }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-        BindingOperations.DoNothing;
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        return BindingOperations.DoNothing;
+    }
 }

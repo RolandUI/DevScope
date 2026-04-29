@@ -1,83 +1,84 @@
-﻿namespace ClassicDiagnostics.Avalonia.Controls
+﻿namespace ClassicDiagnostics.Avalonia.Controls;
+
+//TODO: UpdateSourceTrigger & Binding.ValidationRules could help removing the need for this control.
+internal sealed class CommitTextBox : TextBox
 {
-    //TODO: UpdateSourceTrigger & Binding.ValidationRules could help removing the need for this control.
-    internal sealed class CommitTextBox : TextBox
+
+    /// <summary>
+    ///     Defines the <see cref="CommittedText" /> property.
+    /// </summary>
+    public readonly static DirectProperty<CommitTextBox, string?> CommittedTextProperty =
+        AvaloniaProperty.RegisterDirect<CommitTextBox, string?>(
+            nameof(CommittedText),
+            o => o.CommittedText,
+            (o, v) => o.CommittedText = v);
+
+    private string? _committedText;
+    protected override Type StyleKeyOverride => typeof(TextBox);
+
+    public string? CommittedText
     {
-        protected override Type StyleKeyOverride => typeof(TextBox);
+        get => _committedText;
+        set => SetAndRaise(CommittedTextProperty, ref _committedText, value);
+    }
 
-        /// <summary>
-        ///     Defines the <see cref="CommittedText" /> property.
-        /// </summary>
-        public static readonly DirectProperty<CommitTextBox, string?> CommittedTextProperty =
-            AvaloniaProperty.RegisterDirect<CommitTextBox, string?>(
-                nameof(CommittedText), o => o.CommittedText, (o, v) => o.CommittedText = v);
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
 
-        private string? _committedText;
-
-        public string? CommittedText
+        if (change.Property == CommittedTextProperty)
         {
-            get => _committedText;
-            set => SetAndRaise(CommittedTextProperty, ref _committedText, value);
+            Text = CommittedText;
         }
+    }
 
-        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    protected override void OnKeyUp(KeyEventArgs e)
+    {
+        base.OnKeyUp(e);
+
+        switch (e.Key)
         {
-            base.OnPropertyChanged(change);
+            case Key.Enter:
 
-            if (change.Property == CommittedTextProperty)
-            {
-                Text = CommittedText;
-            }
+                TryCommit();
+
+                e.Handled = true;
+
+                break;
+
+            case Key.Escape:
+
+                Cancel();
+
+                e.Handled = true;
+
+                break;
         }
+    }
 
-        protected override void OnKeyUp(KeyEventArgs e)
+    protected override void OnLostFocus(FocusChangedEventArgs e)
+    {
+        base.OnLostFocus(e);
+
+        TryCommit();
+    }
+
+    private void Cancel()
+    {
+        Text = CommittedText;
+        DataValidationErrors.ClearErrors(this);
+    }
+
+    private void TryCommit()
+    {
+        if (!DataValidationErrors.GetHasErrors(this))
         {
-            base.OnKeyUp(e);
-
-            switch (e.Key)
-            {
-                case Key.Enter:
-
-                    TryCommit();
-
-                    e.Handled = true;
-
-                    break;
-
-                case Key.Escape:
-
-                    Cancel();
-
-                    e.Handled = true;
-
-                    break;
-            }
+            CommittedText = Text;
         }
-
-        protected override void OnLostFocus(FocusChangedEventArgs e)
-        {
-            base.OnLostFocus(e);
-
-            TryCommit();
-        }
-
-        private void Cancel()
+        else
         {
             Text = CommittedText;
             DataValidationErrors.ClearErrors(this);
-        }
-
-        private void TryCommit()
-        {
-            if (!DataValidationErrors.GetHasErrors(this))
-            {
-                CommittedText = Text;
-            }
-            else
-            {
-                Text = CommittedText;
-                DataValidationErrors.ClearErrors(this);
-            }
         }
     }
 }

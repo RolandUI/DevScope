@@ -1,63 +1,62 @@
 ﻿using Avalonia.Input.Platform;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels
+namespace ClassicDiagnostics.Avalonia.ViewModels;
+
+internal class SetterViewModel : ViewModelBase
 {
-    internal class SetterViewModel : ViewModelBase
+
+    private readonly IClipboard? _clipboard;
+    private bool _isActive;
+    private bool _isVisible;
+
+    public SetterViewModel(AvaloniaProperty property, object? value, IClipboard? clipboard)
     {
-        private bool _isActive;
-        private bool _isVisible;
+        Property = property;
+        Name = property.Name;
+        Value = value;
+        IsActive = true;
+        IsVisible = true;
 
-        public AvaloniaProperty Property { get; }
+        _clipboard = clipboard;
+    }
 
-        public string Name { get; }
+    public AvaloniaProperty Property { get; }
 
-        public object? Value { get; }
+    public string Name { get; }
 
-        public bool IsActive
+    public object? Value { get; }
+
+    public bool IsActive
+    {
+        get => _isActive;
+        set => RaiseAndSetIfChanged(ref _isActive, value);
+    }
+
+    public bool IsVisible
+    {
+        get => _isVisible;
+        set => RaiseAndSetIfChanged(ref _isVisible, value);
+    }
+
+    public virtual void CopyValue()
+    {
+        var textToCopy = Value?.ToString();
+
+        if (textToCopy is null)
         {
-            get => _isActive;
-            set => RaiseAndSetIfChanged(ref _isActive, value);
+            return;
         }
 
-        public bool IsVisible
-        {
-            get => _isVisible;
-            set => RaiseAndSetIfChanged(ref _isVisible, value);
-        }
+        CopyToClipboard(textToCopy);
+    }
 
-        private IClipboard? _clipboard;
+    public void CopyPropertyName()
+    {
+        CopyToClipboard(Property.Name);
+    }
 
-        public SetterViewModel(AvaloniaProperty property, object? value, IClipboard? clipboard)
-        {
-            Property = property;
-            Name = property.Name;
-            Value = value;
-            IsActive = true;
-            IsVisible = true;
-
-            _clipboard = clipboard;
-        }
-
-        public virtual void CopyValue()
-        {
-            var textToCopy = Value?.ToString();
-
-            if (textToCopy is null)
-            {
-                return;
-            }
-
-            CopyToClipboard(textToCopy);
-        }
-
-        public void CopyPropertyName()
-        {
-            CopyToClipboard(Property.Name);
-        }
-
-        protected void CopyToClipboard(string value)
-        {
-            _clipboard?.SetTextAsync(value);
-        }
+    protected void CopyToClipboard(string value)
+    {
+        _clipboard?.SetTextAsync(value);
     }
 }

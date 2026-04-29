@@ -1,17 +1,16 @@
 using Avalonia.Markup.Xaml;
 
-namespace ClassicDiagnostics.Avalonia.Views
-{
-    internal partial class HotKeyPageView : UserControl
-    {
-        public HotKeyPageView()
-        {
-            InitializeComponent();
-        }
+namespace ClassicDiagnostics.Avalonia.Views;
 
-        private void InitializeComponent()
-        {
-            AvaloniaXamlLoader.Load(this);
-        }
+internal partial class HotKeyPageView : UserControl
+{
+    public HotKeyPageView()
+    {
+        InitializeComponent();
+    }
+
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
     }
 }

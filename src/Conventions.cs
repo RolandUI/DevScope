@@ -1,8 +1,9 @@
-﻿namespace ClassicDiagnostics.Avalonia
+﻿using ClassicDiagnostics.Avalonia.Screenshots;
+
+namespace ClassicDiagnostics.Avalonia;
+
+internal static class Conventions
 {
-    internal static class Conventions
-    {
-        public static IScreenshotHandler DefaultScreenshotHandler { get; } =
-            new Screenshots.FilePickerHandler();
-    }
+    public static IScreenshotHandler DefaultScreenshotHandler { get; } =
+        new FilePickerHandler();
 }

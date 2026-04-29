@@ -1,245 +1,242 @@
 using Avalonia.VisualTree;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels
+namespace ClassicDiagnostics.Avalonia.ViewModels;
+
+internal class TreePageViewModel : ViewModelBase, IDisposable
 {
-    internal class TreePageViewModel : ViewModelBase, IDisposable
+    private readonly ISet<string> _pinnedProperties;
+    private ControlDetailsViewModel? _details;
+    private TreeNode? _selectedNode;
+
+    public TreePageViewModel(MainViewModel mainView, TreeNode[] nodes, ISet<string> pinnedProperties)
     {
-        private TreeNode? _selectedNode;
-        private ControlDetailsViewModel? _details;
-        private readonly ISet<string> _pinnedProperties;
+        MainView = mainView;
+        Nodes = nodes;
+        _pinnedProperties = pinnedProperties;
+        PropertiesFilter = new FilterViewModel();
+        PropertiesFilter.RefreshFilter += (s, e) => Details?.PropertiesView?.Refresh();
 
-        public TreePageViewModel(MainViewModel mainView, TreeNode[] nodes, ISet<string> pinnedProperties)
+        SettersFilter = new FilterViewModel();
+        SettersFilter.RefreshFilter += (s, e) => Details?.UpdateStyleFilters();
+    }
+
+    public MainViewModel MainView { get; }
+
+    public FilterViewModel PropertiesFilter { get; }
+
+    public FilterViewModel SettersFilter { get; }
+
+    public TreeNode[] Nodes { get; protected set; }
+
+    public TreeNode? SelectedNode
+    {
+        get => _selectedNode;
+        set
         {
-            MainView = mainView;
-            Nodes = nodes;
-            _pinnedProperties = pinnedProperties;
-            PropertiesFilter = new FilterViewModel();
-            PropertiesFilter.RefreshFilter += (s, e) => Details?.PropertiesView?.Refresh();
+            if (RaiseAndSetIfChanged(ref _selectedNode, value))
+            {
+                Details = value != null ?
+                    new ControlDetailsViewModel(this, value.Visual, _pinnedProperties) :
+                    null;
+                Details?.UpdatePropertiesView(MainView.ShowImplementedInterfaces);
+                Details?.UpdateStyleFilters();
+            }
+        }
+    }
 
-            SettersFilter = new FilterViewModel();
-            SettersFilter.RefreshFilter += (s, e) => Details?.UpdateStyleFilters();
+    public ControlDetailsViewModel? Details
+    {
+        get => _details;
+        private set
+        {
+            var oldValue = _details;
+
+            if (RaiseAndSetIfChanged(ref _details, value))
+            {
+                oldValue?.Dispose();
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        foreach (var node in Nodes)
+        {
+            node.Dispose();
         }
 
-        public event EventHandler<string>? ClipboardCopyRequested;
+        _details?.Dispose();
+    }
 
-        public MainViewModel MainView { get; }
+    public event EventHandler<string>? ClipboardCopyRequested;
 
-        public FilterViewModel PropertiesFilter { get; }
-
-        public FilterViewModel SettersFilter { get; }
-
-        public TreeNode[] Nodes { get; protected set; }
-
-        public TreeNode? SelectedNode
+    public TreeNode? FindNode(Control control)
+    {
+        foreach (var node in Nodes)
         {
-            get => _selectedNode;
-            set
+            var result = FindNode(node, control);
+
+            if (result != null)
             {
-                if (RaiseAndSetIfChanged(ref _selectedNode, value))
+                return result;
+            }
+        }
+
+        return null;
+    }
+
+    public void SelectControl(Control control)
+    {
+        var node = default(TreeNode);
+        var c = control;
+
+        while (node == null && c != null)
+        {
+            node = FindNode(c);
+
+            if (node == null)
+            {
+                c = c.GetVisualParent<Control>();
+            }
+        }
+
+        if (node != null)
+        {
+            SelectedNode = node;
+            ExpandNode(node.Parent);
+        }
+    }
+
+    public void CopySelector()
+    {
+        var currentVisual = SelectedNode?.Visual as Visual;
+        if (currentVisual is not null)
+        {
+            var selector = GetVisualSelector(currentVisual);
+
+            ClipboardCopyRequested?.Invoke(this, selector);
+        }
+    }
+
+    public void CopySelectorFromTemplateParent()
+    {
+        var parts = new List<string>();
+
+        var currentVisual = SelectedNode?.Visual as Visual;
+        while (currentVisual is not null)
+        {
+            parts.Add(GetVisualSelector(currentVisual));
+
+            currentVisual = currentVisual.TemplatedParent as Visual;
+        }
+
+        if (parts.Any())
+        {
+            parts.Reverse();
+            var selector = string.Join(" /template/ ", parts);
+
+            ClipboardCopyRequested?.Invoke(this, selector);
+        }
+    }
+
+    public void ExpandRecursively()
+    {
+        if (SelectedNode is { } selectedNode)
+        {
+            ExpandNode(selectedNode);
+
+            var stack = new Stack<TreeNode>();
+            stack.Push(selectedNode);
+
+            while (stack.Count > 0)
+            {
+                var item = stack.Pop();
+                item.IsExpanded = true;
+                foreach (var child in item.Children)
                 {
-                    Details = value != null ?
-                        new ControlDetailsViewModel(this, value.Visual, _pinnedProperties) :
-                        null;
-                    Details?.UpdatePropertiesView(MainView.ShowImplementedInterfaces);
-                    Details?.UpdateStyleFilters();
+                    stack.Push(child);
                 }
             }
         }
+    }
 
-        public ControlDetailsViewModel? Details
+    public void CollapseChildren()
+    {
+        if (SelectedNode is { } selectedNode)
         {
-            get => _details;
-            private set
-            {
-                var oldValue = _details;
+            var stack = new Stack<TreeNode>();
+            stack.Push(selectedNode);
 
-                if (RaiseAndSetIfChanged(ref _details, value))
+            while (stack.Count > 0)
+            {
+                var item = stack.Pop();
+                item.IsExpanded = false;
+                foreach (var child in item.Children)
                 {
-                    oldValue?.Dispose();
+                    stack.Push(child);
                 }
             }
         }
+    }
 
-        public void Dispose()
-        {
-            foreach (var node in Nodes)
-            {
-                node.Dispose();
-            }
+    public void CaptureNodeScreenshot()
+    {
+        MainView.Shot(null);
+    }
 
-            _details?.Dispose();
-        }
-
-        public TreeNode? FindNode(Control control)
-        {
-            foreach (var node in Nodes)
-            {
-                var result = FindNode(node, control);
-
-                if (result != null)
-                {
-                    return result;
-                }
-            }
-
-            return null;
-        }
-
-        public void SelectControl(Control control)
-        {
-            var node = default(TreeNode);
-            Control? c = control;
-
-            while (node == null && c != null)
-            {
-                node = FindNode(c);
-
-                if (node == null)
-                {
-                    c = c.GetVisualParent<Control>();
-                }
-            }
-
-            if (node != null)
-            {
-                SelectedNode = node;
-                ExpandNode(node.Parent);
-            }
-        }
-
-        public void CopySelector()
-        {
-            var currentVisual = SelectedNode?.Visual as Visual;
-            if (currentVisual is not null)
-            {
-                var selector = GetVisualSelector(currentVisual);
-
-                ClipboardCopyRequested?.Invoke(this, selector);
-            }
-        }
-
-        public void CopySelectorFromTemplateParent()
-        {
-            var parts = new List<string>();
-
-            var currentVisual = SelectedNode?.Visual as Visual;
-            while (currentVisual is not null)
-            {
-                parts.Add(GetVisualSelector(currentVisual));
-
-                currentVisual = currentVisual.TemplatedParent as Visual;
-            }
-
-            if (parts.Any())
-            {
-                parts.Reverse();
-                var selector = string.Join(" /template/ ", parts);
-
-                ClipboardCopyRequested?.Invoke(this, selector);
-            }
-        }
-
-        public void ExpandRecursively()
-        {
-            if (SelectedNode is { } selectedNode)
-            {
-                ExpandNode(selectedNode);
-
-                var stack = new Stack<TreeNode>();
-                stack.Push(selectedNode);
-
-                while (stack.Count > 0)
-                {
-                    var item = stack.Pop();
-                    item.IsExpanded = true;
-                    foreach (var child in item.Children)
-                    {
-                        stack.Push(child);
-                    }
-                }
-            }
-        }
-
-        public void CollapseChildren()
-        {
-            if (SelectedNode is { } selectedNode)
-            {
-                var stack = new Stack<TreeNode>();
-                stack.Push(selectedNode);
-
-                while (stack.Count > 0)
-                {
-                    var item = stack.Pop();
-                    item.IsExpanded = false;
-                    foreach (var child in item.Children)
-                    {
-                        stack.Push(child);
-                    }
-                }
-            }
-        }
-
-        public void CaptureNodeScreenshot()
-        {
-            MainView.Shot(null);
-        }
-
-        public void BringIntoView()
-        {
-            (SelectedNode?.Visual as Control)?.BringIntoView();
-        }
+    public void BringIntoView()
+    {
+        (SelectedNode?.Visual as Control)?.BringIntoView();
+    }
 
 
-        public void Focus()
-        {
-            (SelectedNode?.Visual as Control)?.Focus();
-        }
+    public void Focus()
+    {
+        (SelectedNode?.Visual as Control)?.Focus();
+    }
 
-        private static string GetVisualSelector(Visual visual)
-        {
-            var name = string.IsNullOrEmpty(visual.Name) ? "" : $"#{visual.Name}";
-            var classes = string.Concat(visual.Classes
+    private static string GetVisualSelector(Visual visual)
+    {
+        var name = string.IsNullOrEmpty(visual.Name) ? "" : $"#{visual.Name}";
+        var classes = string.Concat(
+            visual.Classes
                 .Where(c => !c.StartsWith(":"))
                 .Select(c => '.' + c));
-            var pseudo = string.Concat(visual.Classes.Where(c => c[0] == ':').Select(c => c));
-            var type = visual.StyleKey;
-            return $$"""{{{type.Assembly.FullName}}}{{type.Namespace}}|{{type.Name}}{{name}}{{classes}}{{pseudo}}""";
-        }
+        var pseudo = string.Concat(visual.Classes.Where(c => c[0] == ':').Select(c => c));
+        var type = visual.StyleKey;
+        return $$"""{{{type.Assembly.FullName}}}{{type.Namespace}}|{{type.Name}}{{name}}{{classes}}{{pseudo}}""";
+    }
 
-        private void ExpandNode(TreeNode? node)
+    private void ExpandNode(TreeNode? node)
+    {
+        if (node != null)
         {
-            if (node != null)
+            node.IsExpanded = true;
+            ExpandNode(node.Parent);
+        }
+    }
+
+    private TreeNode? FindNode(TreeNode node, Control control)
+    {
+        if (node.Visual == control)
+        {
+            return node;
+        }
+        foreach (var child in node.Children)
+        {
+            var result = FindNode(child, control);
+
+            if (result != null)
             {
-                node.IsExpanded = true;
-                ExpandNode(node.Parent);
+                return result;
             }
         }
 
-        private TreeNode? FindNode(TreeNode node, Control control)
-        {
-            if (node.Visual == control)
-            {
-                return node;
-            }
-            else
-            {
-                foreach (var child in node.Children)
-                {
-                    var result = FindNode(child, control);
+        return null;
+    }
 
-                    if (result != null)
-                    {
-                        return result;
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        internal void UpdatePropertiesView()
-        {
-            Details?.UpdatePropertiesView(MainView?.ShowImplementedInterfaces ?? true);
-        }
+    internal void UpdatePropertiesView()
+    {
+        Details?.UpdatePropertiesView(MainView?.ShowImplementedInterfaces ?? true);
     }
 }

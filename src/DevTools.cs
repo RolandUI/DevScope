@@ -11,14 +11,16 @@ namespace ClassicDiagnostics.Avalonia;
 
 internal static class DevTools
 {
-    private static readonly Dictionary<IDevToolsTopLevelGroup, MainWindow> s_open = new();
+    private readonly static Dictionary<IDevToolsTopLevelGroup, MainWindow> s_open = new();
 
     public static IDisposable Attach(TopLevel root, KeyGesture gesture)
     {
-        return Attach(root, new DevToolsOptions()
-        {
-            Gesture = gesture,
-        });
+        return Attach(
+            root,
+            new DevToolsOptions
+            {
+                Gesture = gesture,
+            });
     }
 
     public static IDisposable Attach(TopLevel root, DevToolsOptions options)
@@ -37,11 +39,15 @@ internal static class DevTools
             RoutingStrategies.Tunnel);
     }
 
-    public static IDisposable Open(TopLevel root, DevToolsOptions options) =>
-        Open(new SingleViewTopLevelGroup(root), options, root as Window, null);
+    public static IDisposable Open(TopLevel root, DevToolsOptions options)
+    {
+        return Open(new SingleViewTopLevelGroup(root), options, root as Window, null);
+    }
 
-    internal static IDisposable Open(IDevToolsTopLevelGroup group, DevToolsOptions options) =>
-        Open(group, options, null, null);
+    internal static IDisposable Open(IDevToolsTopLevelGroup group, DevToolsOptions options)
+    {
+        return Open(group, options, null, null);
+    }
 
     internal static IDisposable Attach(Application application, DevToolsOptions options)
     {
@@ -54,39 +60,48 @@ internal static class DevTools
         {
             if (application.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime lifeTime)
             {
-                throw new ArgumentNullException(nameof(application), "DevTools can only attach to applications that support IClassicDesktopStyleApplicationLifetime.");
+                throw new ArgumentNullException(
+                    nameof(application),
+                    "DevTools can only attach to applications that support IClassicDesktopStyleApplicationLifetime.");
             }
 
             if (application.InputManager is not null)
             {
-                result.Add(application.InputManager.PreProcess.Subscribe(e =>
-                {
-                    var owner = lifeTime.MainWindow;
-
-                    if (e is RawKeyEventArgs keyEventArgs
-                        && keyEventArgs.Type == RawKeyEventType.KeyUp
-                        && options.Gesture.Matches(keyEventArgs))
+                result.Add(
+                    application.InputManager.PreProcess.Subscribe(e =>
                     {
-                        openedDisposable.Disposable =
-                            Open(new ClassicDesktopStyleApplicationLifetimeTopLevelGroup(lifeTime), options,
-                                owner, application);
-                        e.Handled = true;
-                    }
-                }));
+                        var owner = lifeTime.MainWindow;
+
+                        if (e is RawKeyEventArgs keyEventArgs
+                            && keyEventArgs.Type == RawKeyEventType.KeyUp
+                            && options.Gesture.Matches(keyEventArgs))
+                        {
+                            openedDisposable.Disposable =
+                                Open(
+                                    new ClassicDesktopStyleApplicationLifetimeTopLevelGroup(lifeTime),
+                                    options,
+                                    owner,
+                                    application);
+                            e.Handled = true;
+                        }
+                    }));
             }
         }
         return result;
     }
 
-    private static IDisposable Open(IDevToolsTopLevelGroup topLevelGroup, DevToolsOptions options,
-        Window? owner, Application? app)
+    private static IDisposable Open(
+        IDevToolsTopLevelGroup topLevelGroup,
+        DevToolsOptions options,
+        Window? owner,
+        Application? app)
     {
         var focusedControl = owner?.FocusManager?.GetFocusedElement() as Control;
         AvaloniaObject root = topLevelGroup switch
         {
             ClassicDesktopStyleApplicationLifetimeTopLevelGroup gr => new ApplicationPage(gr, app ?? Application.Current!),
             SingleViewTopLevelGroup gr => gr.Items.First(),
-            _ => new TopLevelGroup(topLevelGroup)
+            _ => new TopLevelGroup(topLevelGroup),
         };
 
         // If single static toplevel is already visible in another devtools window, focus it.
@@ -116,7 +131,7 @@ internal static class DevTools
             Root = root,
             Width = options.Size.Width,
             Height = options.Size.Height,
-            Tag = topLevelGroup
+            Tag = topLevelGroup,
         };
         window.SetOptions(options);
         window.SelectedControl(focusedControl);

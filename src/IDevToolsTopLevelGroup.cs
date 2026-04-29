@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
+﻿using Avalonia.Controls.ApplicationLifetimes;
 
 namespace ClassicDiagnostics.Avalonia;
 
@@ -41,9 +38,9 @@ internal class SingleViewTopLevelGroup : IDevToolsTopLevelGroup
         _topLevel = topLevel;
         Items = new[] { topLevel ?? throw new ArgumentNullException(nameof(topLevel)) };
     }
-    
+
     public IReadOnlyList<TopLevel> Items { get; }
-    
+
     public override int GetHashCode()
     {
         return _topLevel.GetHashCode();

@@ -10,11 +10,11 @@ namespace ClassicDiagnostics.Avalonia.Views;
 
 internal partial class MainWindow : Window, IStyleHost
 {
-    private readonly IDisposable? _inputSubscription;
     private readonly HashSet<Popup> _frozenPopupStates;
-    private AvaloniaObject? _root;
-    private PixelPoint _lastPointerPosition;
+    private readonly IDisposable? _inputSubscription;
     private HotKeyConfiguration? _hotKeys;
+    private PixelPoint _lastPointerPosition;
+    private AvaloniaObject? _root;
 
     public MainWindow()
     {
@@ -28,7 +28,7 @@ internal partial class MainWindow : Window, IStyleHost
         _inputSubscription = InputManager.Instance?.Process
             .Subscribe(x =>
             {
-                if (x is RawPointerEventArgs  pointerEventArgs)
+                if (x is RawPointerEventArgs pointerEventArgs)
                 {
                     _lastPointerPosition = ((PresentationSource)x.Root).PointToScreen(pointerEventArgs.Position);
                 }
@@ -43,19 +43,19 @@ internal partial class MainWindow : Window, IStyleHost
         EventHandler? lh = default;
         lh = (s, e) =>
         {
-            this.Opened -= lh;
+            Opened -= lh;
             if ((DataContext as MainViewModel)?.StartupScreenIndex is { } index)
             {
-                var screens = this.Screens;
+                var screens = Screens;
                 if (index > -1 && index < screens.ScreenCount)
                 {
                     var screen = screens.All[index];
-                    this.Position = screen.Bounds.TopLeft;
-                    this.WindowState = WindowState.Maximized;
+                    Position = screen.Bounds.TopLeft;
+                    WindowState = WindowState.Maximized;
                 }
             }
         };
-        this.Opened += lh;
+        Opened += lh;
     }
 
     public AvaloniaObject? Root
@@ -72,7 +72,7 @@ internal partial class MainWindow : Window, IStyleHost
 
                 _root = value;
 
-                if (_root is  ICloseable newClosable)
+                if (_root is ICloseable newClosable)
                 {
                     newClosable.Closed += RootClosed;
                     DataContext = new MainViewModel(_root);
@@ -117,15 +117,17 @@ internal partial class MainWindow : Window, IStyleHost
     {
         var point = topLevel.PointToClient(_lastPointerPosition);
 
-        return (Control?)topLevel.GetVisualsAt(point, x =>
-            {
-                if (x is AdornerLayer || !x.IsVisible)
+        return (Control?)topLevel.GetVisualsAt(
+                point,
+                x =>
                 {
-                    return false;
-                }
+                    if (x is AdornerLayer || !x.IsVisible)
+                    {
+                        return false;
+                    }
 
-                return !(x is IInputElement ie) || ie.IsHitTestVisible;
-            })
+                    return !(x is IInputElement ie) || ie.IsHitTestVisible;
+                })
             .FirstOrDefault();
     }
 
@@ -210,7 +212,7 @@ internal partial class MainWindow : Window, IStyleHost
                 Key.LeftCtrl or Key.RightCtrl => modifiers | KeyModifiers.Control,
                 Key.LeftShift or Key.RightShift => modifiers | KeyModifiers.Shift,
                 Key.LeftAlt or Key.RightAlt => modifiers | KeyModifiers.Alt,
-                _ => modifiers
+                _ => modifiers,
             };
         }
     }
@@ -283,7 +285,10 @@ internal partial class MainWindow : Window, IStyleHost
         }
     }
 
-    private void RootClosed(object? sender, EventArgs e) => Close();
+    private void RootClosed(object? sender, EventArgs e)
+    {
+        Close();
+    }
 
     public void SetOptions(DevToolsOptions options)
     {
@@ -298,7 +303,7 @@ internal partial class MainWindow : Window, IStyleHost
 
     internal void SelectedControl(Control? control)
     {
-        if (control is { })
+        if (control is not null)
         {
             (DataContext as MainViewModel)?.SelectControl(control);
         }

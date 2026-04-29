@@ -1,26 +1,24 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using Avalonia.Data.Converters;
 
-namespace ClassicDiagnostics.Avalonia.Converters
+namespace ClassicDiagnostics.Avalonia.Converters;
+
+internal class BoolToOpacityConverter : IValueConverter
 {
-    internal class BoolToOpacityConverter : IValueConverter
+    public double Opacity { get; set; }
+
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        public double Opacity { get; set; }
-
-        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        if (value is bool boolean && boolean)
         {
-            if (value is bool boolean && boolean)
-            {
-                return 1d;
-            }
-
-            return Opacity;
+            return 1d;
         }
 
-        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
+        return Opacity;
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
     }
 }

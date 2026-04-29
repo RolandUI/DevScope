@@ -2,85 +2,84 @@
 using Avalonia.Interactivity;
 using ClassicDiagnostics.Avalonia.Models;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels
+namespace ClassicDiagnostics.Avalonia.ViewModels;
+
+internal class FiredEvent : ViewModelBase
 {
-    internal class FiredEvent : ViewModelBase
+    private readonly RoutedEventArgs _eventArgs;
+    private readonly RoutedEvent? _originalEvent;
+    private EventChainLink? _handledBy;
+
+    public FiredEvent(RoutedEventArgs eventArgs, EventChainLink originator, DateTime triggerTime)
     {
-        private readonly RoutedEventArgs _eventArgs;
-        private readonly RoutedEvent? _originalEvent;
-        private EventChainLink? _handledBy;
+        _eventArgs = eventArgs ?? throw new ArgumentNullException(nameof(eventArgs));
+        Originator = originator ?? throw new ArgumentNullException(nameof(originator));
+        _originalEvent = _eventArgs.RoutedEvent;
+        AddToChain(originator);
+        TriggerTime = triggerTime;
+    }
 
-        public FiredEvent(RoutedEventArgs eventArgs, EventChainLink originator, DateTime triggerTime)
+    public DateTime TriggerTime { get; }
+
+    public RoutedEvent Event => _originalEvent!;
+
+    public bool IsHandled => HandledBy?.Handled == true;
+
+    public ObservableCollection<EventChainLink> EventChain { get; } = new();
+
+    public string DisplayText
+    {
+        get
         {
-            _eventArgs = eventArgs ?? throw new ArgumentNullException(nameof(eventArgs));
-            Originator = originator ?? throw new ArgumentNullException(nameof(originator));
-            _originalEvent = _eventArgs.RoutedEvent;
-            AddToChain(originator);
-            TriggerTime = triggerTime;
-        }
-
-        public bool IsPartOfSameEventChain(RoutedEventArgs e)
-        {
-            // Note, Avalonia might reuse RoutedEventArgs for different events to avoid extra allocations.
-            // Like, PointerEntered and PointerExited will use the same instance of RoutedEventArgs. 
-            return e == _eventArgs && e.RoutedEvent == _originalEvent;
-        }
-
-        public DateTime TriggerTime { get; }
-
-        public RoutedEvent Event => _originalEvent!;
-
-        public bool IsHandled => HandledBy?.Handled == true;
-
-        public ObservableCollection<EventChainLink> EventChain { get; } = new ObservableCollection<EventChainLink>();
-
-        public string DisplayText
-        {
-            get
+            if (IsHandled)
             {
-                if (IsHandled)
-                {
-                    return $"{Event.Name} on {Originator.HandlerName};" + Environment.NewLine +
-                           $"strategies: {Event.RoutingStrategies}; handled by: {HandledBy!.HandlerName}";
-                }
+                return $"{Event.Name} on {Originator.HandlerName};" + Environment.NewLine +
+                    $"strategies: {Event.RoutingStrategies}; handled by: {HandledBy!.HandlerName}";
+            }
 
-                return $"{Event.Name} on {Originator.HandlerName}; strategies: {Event.RoutingStrategies}";
+            return $"{Event.Name} on {Originator.HandlerName}; strategies: {Event.RoutingStrategies}";
+        }
+    }
+
+    public EventChainLink Originator { get; }
+
+    public EventChainLink? HandledBy
+    {
+        get => _handledBy;
+        set
+        {
+            if (_handledBy != value)
+            {
+                _handledBy = value;
+                RaisePropertyChanged();
+                RaisePropertyChanged(nameof(IsHandled));
+                RaisePropertyChanged(nameof(DisplayText));
+            }
+        }
+    }
+
+    public bool IsPartOfSameEventChain(RoutedEventArgs e)
+    {
+        // Note, Avalonia might reuse RoutedEventArgs for different events to avoid extra allocations.
+        // Like, PointerEntered and PointerExited will use the same instance of RoutedEventArgs. 
+        return e == _eventArgs && e.RoutedEvent == _originalEvent;
+    }
+
+    public void AddToChain(EventChainLink link)
+    {
+        if (EventChain.Count > 0)
+        {
+            var prevLink = EventChain[EventChain.Count - 1];
+
+            if (prevLink.Route != link.Route)
+            {
+                link.BeginsNewRoute = true;
             }
         }
 
-        public EventChainLink Originator { get; }
+        EventChain.Add(link);
 
-        public EventChainLink? HandledBy
-        {
-            get => _handledBy;
-            set
-            {
-                if (_handledBy != value)
-                {
-                    _handledBy = value;
-                    RaisePropertyChanged();
-                    RaisePropertyChanged(nameof(IsHandled));
-                    RaisePropertyChanged(nameof(DisplayText));
-                }
-            }
-        }
-
-        public void AddToChain(EventChainLink link)
-        {
-            if (EventChain.Count > 0)
-            {
-                var prevLink = EventChain[EventChain.Count - 1];
-
-                if (prevLink.Route != link.Route)
-                {
-                    link.BeginsNewRoute = true;
-                }
-            }
-
-            EventChain.Add(link);
-
-            if (HandledBy == null && link.Handled)
-                HandledBy = link;
-        }
+        if (HandledBy == null && link.Handled)
+            HandledBy = link;
     }
 }

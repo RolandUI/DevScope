@@ -1,65 +1,62 @@
+namespace ClassicDiagnostics.Avalonia;
 
-
-namespace ClassicDiagnostics.Avalonia
+public static class VisualTreeDebug
 {
-    public static class VisualTreeDebug
+    public static string PrintVisualTree(Visual visual)
     {
-        public static string PrintVisualTree(Visual visual)
+        var result = StringBuilderCache.Acquire();
+        PrintVisualTree(visual, result, 0);
+        return StringBuilderCache.GetStringAndRelease(result);
+    }
+
+    private static void PrintVisualTree(Visual visual, StringBuilder builder, int indent)
+    {
+        var control = visual as Control;
+
+        builder.Append(Indent(indent - 1));
+
+        if (indent > 0)
         {
-            var result = StringBuilderCache.Acquire();
-            PrintVisualTree(visual, result, 0);
-            return StringBuilderCache.GetStringAndRelease(result);
+            builder.Append(" +- ");
         }
 
-        private static void PrintVisualTree(Visual visual, StringBuilder builder, int indent)
+        builder.Append(visual.GetType().Name);
+
+        if (control != null)
         {
-            Control? control = visual as Control;
+            builder.Append(" ");
+            builder.AppendLine(control.Classes.ToString());
 
-            builder.Append(Indent(indent - 1));
-
-            if (indent > 0)
+            foreach (var property in AvaloniaPropertyRegistry.Instance.GetRegistered(control))
             {
-                builder.Append(" +- ");
-            }
+                var value = control.GetDiagnostic(property);
 
-            builder.Append(visual.GetType().Name);
-
-            if (control != null)
-            {
-                builder.Append(" ");
-                builder.AppendLine(control.Classes.ToString());
-
-                foreach (var property in AvaloniaPropertyRegistry.Instance.GetRegistered(control))
+                if (value.Priority != BindingPriority.Unset)
                 {
-                    var value = control.GetDiagnostic(property);
-
-                    if (value.Priority != BindingPriority.Unset)
-                    {
-                        builder.Append(Indent(indent));
-                        builder.Append(" |  ");
-                        builder.Append(value.Property.Name);
-                        builder.Append(" = ");
-                        builder.Append(value.Value ?? "(null)");
-                        builder.Append(" [");
-                        builder.Append(value.Priority);
-                        builder.AppendLine("]");
-                    }
+                    builder.Append(Indent(indent));
+                    builder.Append(" |  ");
+                    builder.Append(value.Property.Name);
+                    builder.Append(" = ");
+                    builder.Append(value.Value ?? "(null)");
+                    builder.Append(" [");
+                    builder.Append(value.Priority);
+                    builder.AppendLine("]");
                 }
             }
-            else
-            {
-                builder.AppendLine();
-            }
-
-            foreach (var child in visual.VisualChildren)
-            {
-                PrintVisualTree(child, builder, indent + 1);
-            }
         }
-
-        private static string Indent(int indent)
+        else
         {
-            return new string(' ' , Math.Max(indent, 0) * 4);
+            builder.AppendLine();
         }
+
+        foreach (var child in visual.VisualChildren)
+        {
+            PrintVisualTree(child, builder, indent + 1);
+        }
+    }
+
+    private static string Indent(int indent)
+    {
+        return new string(' ', Math.Max(indent, 0) * 4);
     }
 }

@@ -1,20 +1,20 @@
 ﻿namespace ClassicDiagnostics.Avalonia;
 
 /// <summary>
-/// Kinds of diagnostic views available in DevTools
+///     Kinds of diagnostic views available in DevTools
 /// </summary>
 public enum DevToolsViewKind
 {
     /// <summary>
-    /// The Logical Tree diagnostic view
+    ///     The Logical Tree diagnostic view
     /// </summary>
     LogicalTree,
     /// <summary>
-    /// The Visual Tree diagnostic view
+    ///     The Visual Tree diagnostic view
     /// </summary>
     VisualTree,
     /// <summary>
-    /// Events diagnostic view
+    ///     Events diagnostic view
     /// </summary>
     Events,
 }

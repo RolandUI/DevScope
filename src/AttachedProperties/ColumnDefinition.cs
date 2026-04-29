@@ -1,14 +1,14 @@
 ﻿namespace ClassicDiagnostics.Avalonia.AttachedProperties;
 
 /// <summary>
-/// See discussion https://github.com/AvaloniaUI/Avalonia/discussions/6773
+///     See discussion https://github.com/AvaloniaUI/Avalonia/discussions/6773
 /// </summary>
-static class ColumnDefinitionAssist
+internal static class ColumnDefinitionAssist
 {
     private readonly static GridLength ZeroWidth = new(0, GridUnitType.Pixel);
 
     private readonly static AttachedProperty<GridLength?> LastWidthProperty =
-        AvaloniaProperty.RegisterAttached<ColumnDefinition, GridLength?>("LastWidth", typeof(ColumnDefinition), null);
+        AvaloniaProperty.RegisterAttached<ColumnDefinition, GridLength?>("LastWidth", typeof(ColumnDefinition));
 
     public readonly static AttachedProperty<bool> IsVisibleProperty =
         AvaloniaProperty.RegisterAttached<ColumnDefinition, bool>(

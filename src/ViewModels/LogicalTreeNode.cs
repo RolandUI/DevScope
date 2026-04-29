@@ -3,126 +3,131 @@ using Avalonia.LogicalTree;
 using ClassicDiagnostics.Avalonia.Controls;
 using ClassicDiagnostics.Avalonia.Views;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels
+namespace ClassicDiagnostics.Avalonia.ViewModels;
+
+internal class LogicalTreeNode : TreeNode
 {
-    internal class LogicalTreeNode : TreeNode
+    public LogicalTreeNode(AvaloniaObject avaloniaObject, TreeNode? parent)
+        : base(avaloniaObject, parent)
     {
-        public LogicalTreeNode(AvaloniaObject avaloniaObject, TreeNode? parent)
-            : base(avaloniaObject, parent)
+        Children = avaloniaObject switch
         {
-            Children =  avaloniaObject switch
-            {
-                ILogical logical => new LogicalTreeNodeCollection(this, logical),
-                TopLevelGroup host => new TopLevelGroupHostLogical(this, host),
-                _ => TreeNodeCollection.Empty
-            };
+            ILogical logical => new LogicalTreeNodeCollection(this, logical),
+            TopLevelGroup host => new TopLevelGroupHostLogical(this, host),
+            _ => TreeNodeCollection.Empty,
+        };
+    }
+
+    public override TreeNodeCollection Children { get; }
+
+    public static LogicalTreeNode[] Create(object control)
+    {
+        var logical = control as AvaloniaObject;
+        return logical != null ? new[] { new LogicalTreeNode(logical, null) } : Array.Empty<LogicalTreeNode>();
+    }
+
+    internal class LogicalTreeNodeCollection : TreeNodeCollection
+    {
+        private readonly ILogical _control;
+        private IDisposable? _subscription;
+
+        public LogicalTreeNodeCollection(TreeNode owner, ILogical control)
+            : base(owner)
+        {
+            _control = control;
         }
 
-        public override TreeNodeCollection Children { get; }
-
-        public static LogicalTreeNode[] Create(object control)
+        public override void Dispose()
         {
-            var logical = control as AvaloniaObject;
-            return logical != null ? new[] { new LogicalTreeNode(logical, null) } : Array.Empty<LogicalTreeNode>();
+            base.Dispose();
+            _subscription?.Dispose();
         }
 
-        internal class LogicalTreeNodeCollection : TreeNodeCollection
+        protected override void Initialize(AvaloniaList<TreeNode> nodes)
         {
-            private readonly ILogical _control;
-            private IDisposable? _subscription;
+            _subscription = _control.LogicalChildren.ForEachItem(
+                (i, item) => nodes.Insert(i, new LogicalTreeNode((AvaloniaObject)item, Owner)),
+                (i, item) => nodes.RemoveAt(i),
+                () => nodes.Clear());
+        }
+    }
 
-            public LogicalTreeNodeCollection(TreeNode owner, ILogical control)
-                : base(owner)
-            {
-                _control = control;
-            }
+    internal class TopLevelGroupHostLogical : TreeNodeCollection
+    {
+        private readonly TopLevelGroup _group;
+        private readonly List<IDisposable> _subscriptions = [];
 
-            public override void Dispose()
-            {
-                base.Dispose();
-                _subscription?.Dispose();
-            }
-
-            protected override void Initialize(AvaloniaList<TreeNode> nodes)
-            {
-                _subscription = _control.LogicalChildren.ForEachItem(
-                    (i, item) => nodes.Insert(i, new LogicalTreeNode((AvaloniaObject)item, Owner)),
-                    (i, item) => nodes.RemoveAt(i),
-                    () => nodes.Clear());
-            }
+        public TopLevelGroupHostLogical(TreeNode owner, TopLevelGroup host) : base(owner)
+        {
+            _group = host;
         }
 
-        internal class TopLevelGroupHostLogical : TreeNodeCollection
+        protected override void Initialize(AvaloniaList<TreeNode> nodes)
         {
-            private readonly TopLevelGroup _group;
-            private readonly List<IDisposable> _subscriptions = [];
-
-            public TopLevelGroupHostLogical(TreeNode owner, TopLevelGroup host) : base(owner)
+            for (var i = 0; i < _group.Items.Count; i++)
             {
-                _group = host;
+                var window = _group.Items[i];
+                if (window is MainWindow)
+                {
+                    continue;
+                }
+                nodes.Add(new LogicalTreeNode(window, Owner));
             }
 
-            protected override void Initialize(AvaloniaList<TreeNode> nodes)
+            void GroupOnAdded(object? sender, TopLevel e)
             {
-                for (var i = 0; i < _group.Items.Count; i++)
+                if (e is MainWindow)
                 {
-                    var window = _group.Items[i];
-                    if (window is MainWindow)
-                    {
-                        continue;
-                    }
-                    nodes.Add(new LogicalTreeNode(window, Owner));
+                    return;
                 }
-                void GroupOnAdded(object? sender, TopLevel e)
+
+                nodes.Add(new LogicalTreeNode(e, Owner));
+            }
+
+            void GroupOnRemoved(object? sender, TopLevel e)
+            {
+                if (e is MainWindow)
                 {
-                    if (e is MainWindow)
-                    {
-                        return;
-                    }
-
-                    nodes.Add(new LogicalTreeNode(e, Owner));
+                    return;
                 }
-                void GroupOnRemoved(object? sender, TopLevel e)
-                {
-                    if (e is MainWindow)
-                    {
-                        return;
-                    }
 
-                    nodes.Add(new LogicalTreeNode(e, Owner));
-                }
-                
-                _group.Added += GroupOnAdded;
-                _group.Removed += GroupOnRemoved;
+                nodes.Add(new LogicalTreeNode(e, Owner));
+            }
 
-                _subscriptions.Add(new AnonymousDisposable(() =>
+            _group.Added += GroupOnAdded;
+            _group.Removed += GroupOnRemoved;
+
+            _subscriptions.Add(
+                new AnonymousDisposable(() =>
                 {
                     _group.Added -= GroupOnAdded;
                     _group.Removed -= GroupOnRemoved;
                 }));
-            }
+        }
 
-            public override void Dispose()
+        public override void Dispose()
+        {
+            foreach (var disposable in _subscriptions)
             {
-                foreach (var disposable in _subscriptions) disposable.Dispose();
-                _subscriptions.Clear();
-
-                base.Dispose();
+                disposable.Dispose();
             }
+            _subscriptions.Clear();
+
+            base.Dispose();
         }
     }
+}
 
-    file sealed class AnonymousDisposable(Action dispose) : IDisposable
+file sealed class AnonymousDisposable(Action dispose) : IDisposable
+{
+    private bool _isDisposed;
+
+    public void Dispose()
     {
-        private bool _isDisposed;
+        if (_isDisposed)
+            return;
 
-        public void Dispose()
-        {
-            if (_isDisposed)
-                return;
-
-            dispose();
-            _isDisposed = true;
-        }
+        dispose();
+        _isDisposed = true;
     }
 }

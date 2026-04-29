@@ -1,51 +1,48 @@
-﻿using Avalonia.Controls;
+﻿namespace ClassicDiagnostics.Avalonia.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels
+internal class PseudoClassViewModel : ViewModelBase
 {
-    internal class PseudoClassViewModel : ViewModelBase
+    private readonly IPseudoClasses _pseudoClasses;
+    private readonly StyledElement _source;
+    private bool _isActive;
+    private bool _isUpdating;
+
+    public PseudoClassViewModel(string name, StyledElement source)
     {
-        private readonly IPseudoClasses _pseudoClasses;
-        private readonly StyledElement _source;
-        private bool _isActive;
-        private bool _isUpdating;
+        Name = name;
+        _source = source;
+        _pseudoClasses = _source.Classes;
 
-        public PseudoClassViewModel(string name, StyledElement source)
+        Update();
+    }
+
+    public string Name { get; }
+
+    public bool IsActive
+    {
+        get => _isActive;
+        set
         {
-            Name = name;
-            _source = source;
-            _pseudoClasses = _source.Classes;
+            RaiseAndSetIfChanged(ref _isActive, value);
 
-            Update();
-        }
-
-        public string Name { get; }
-
-        public bool IsActive
-        {
-            get => _isActive;
-            set
+            if (!_isUpdating)
             {
-                RaiseAndSetIfChanged(ref _isActive, value);
-
-                if (!_isUpdating)
-                {
-                    _pseudoClasses.Set(Name, value);
-                }
+                _pseudoClasses.Set(Name, value);
             }
         }
+    }
 
-        public void Update()
+    public void Update()
+    {
+        try
         {
-            try
-            {
-                _isUpdating = true;
+            _isUpdating = true;
 
-                IsActive = _source.Classes.Contains(Name);
-            }
-            finally
-            {
-                _isUpdating = false;
-            }
+            IsActive = _source.Classes.Contains(Name);
+        }
+        finally
+        {
+            _isUpdating = false;
         }
     }
 }

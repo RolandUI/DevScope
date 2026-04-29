@@ -5,7 +5,7 @@ namespace ClassicDiagnostics.Avalonia.Views;
 
 internal partial class ControlDetailsView : UserControl
 {
-    private DataGrid _dataGrid;
+    private readonly DataGrid _dataGrid;
 
     public ControlDetailsView()
     {
@@ -25,18 +25,18 @@ internal partial class ControlDetailsView : UserControl
         {
             controlDetails.NavigateToSelectedProperty();
         }
-            
+
     }
 
     public void PropertyNamePressed(object sender, PointerPressedEventArgs e)
     {
-        var mainVm = (ControlDetailsViewModel?) DataContext;
+        var mainVm = (ControlDetailsViewModel?)DataContext;
 
         if (mainVm is null)
         {
             return;
         }
-            
+
         if (sender is Control control && control.DataContext is SetterViewModel setterVm)
         {
             mainVm.SelectProperty(setterVm.Property);

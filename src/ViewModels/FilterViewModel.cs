@@ -2,119 +2,117 @@
 using System.ComponentModel;
 using System.Text.RegularExpressions;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels
+namespace ClassicDiagnostics.Avalonia.ViewModels;
+
+internal class FilterViewModel : ViewModelBase, INotifyDataErrorInfo
 {
-    internal class FilterViewModel : ViewModelBase, INotifyDataErrorInfo
+    private readonly Dictionary<string, string> _errors = new();
+    private Regex? _filterRegex;
+    private string _filterString = string.Empty;
+    private bool _useRegexFilter, _useCaseSensitiveFilter, _useWholeWordFilter;
+
+    public string FilterString
     {
-        private readonly Dictionary<string, string> _errors = new Dictionary<string, string>();
-        private string _filterString = string.Empty;
-        private bool _useRegexFilter, _useCaseSensitiveFilter, _useWholeWordFilter;
-        private Regex? _filterRegex;
-
-        public event EventHandler? RefreshFilter;
-
-        public bool HasErrors => _errors.Count > 0;
-
-        public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
-
-        public bool Filter(string input)
+        get => _filterString;
+        set
         {
-            return _filterRegex?.IsMatch(input) ?? true;
+            if (RaiseAndSetIfChanged(ref _filterString, value))
+            {
+                UpdateFilterRegex();
+                RefreshFilter?.Invoke(this, EventArgs.Empty);
+            }
         }
+    }
 
-        private void UpdateFilterRegex()
+    public bool UseRegexFilter
+    {
+        get => _useRegexFilter;
+        set
         {
-            void ClearError()
+            if (RaiseAndSetIfChanged(ref _useRegexFilter, value))
             {
-                if (_errors.Remove(nameof(FilterString)))
-                {
-                    ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(nameof(FilterString)));
-                }
+                UpdateFilterRegex();
+                RefreshFilter?.Invoke(this, EventArgs.Empty);
             }
+        }
+    }
 
-            try
+    public bool UseCaseSensitiveFilter
+    {
+        get => _useCaseSensitiveFilter;
+        set
+        {
+            if (RaiseAndSetIfChanged(ref _useCaseSensitiveFilter, value))
             {
-                var options = RegexOptions.Compiled;
-                var pattern = UseRegexFilter
-                    ? FilterString.Trim() : Regex.Escape(FilterString.Trim());
-                if (!UseCaseSensitiveFilter)
-                {
-                    options |= RegexOptions.IgnoreCase;
-                }
-                if (UseWholeWordFilter)
-                {
-                    pattern = $"\\b(?:{pattern})\\b";
-                }
-
-                _filterRegex = new Regex(pattern, options);
-                ClearError();
+                UpdateFilterRegex();
+                RefreshFilter?.Invoke(this, EventArgs.Empty);
             }
-            catch (Exception exception)
+        }
+    }
+
+    public bool UseWholeWordFilter
+    {
+        get => _useWholeWordFilter;
+        set
+        {
+            if (RaiseAndSetIfChanged(ref _useWholeWordFilter, value))
             {
-                _errors[nameof(FilterString)] = exception.Message;
+                UpdateFilterRegex();
+                RefreshFilter?.Invoke(this, EventArgs.Empty);
+            }
+        }
+    }
+
+    public bool HasErrors => _errors.Count > 0;
+
+    public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
+
+    public IEnumerable GetErrors(string? propertyName)
+    {
+        if (propertyName != null
+            && _errors.TryGetValue(propertyName, out var error))
+        {
+            yield return error;
+        }
+    }
+
+    public event EventHandler? RefreshFilter;
+
+    public bool Filter(string input)
+    {
+        return _filterRegex?.IsMatch(input) ?? true;
+    }
+
+    private void UpdateFilterRegex()
+    {
+        void ClearError()
+        {
+            if (_errors.Remove(nameof(FilterString)))
+            {
                 ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(nameof(FilterString)));
             }
         }
 
-        public string FilterString
+        try
         {
-            get => _filterString;
-            set
+            var options = RegexOptions.Compiled;
+            var pattern = UseRegexFilter ? FilterString.Trim() : Regex.Escape(FilterString.Trim());
+            if (!UseCaseSensitiveFilter)
             {
-                if (RaiseAndSetIfChanged(ref _filterString, value))
-                {
-                    UpdateFilterRegex();
-                    RefreshFilter?.Invoke(this, EventArgs.Empty);
-                }
+                options |= RegexOptions.IgnoreCase;
             }
-        }
+            if (UseWholeWordFilter)
+            {
+                pattern = $"\\b(?:{pattern})\\b";
+            }
 
-        public bool UseRegexFilter
-        {
-            get => _useRegexFilter;
-            set
-            {
-                if (RaiseAndSetIfChanged(ref _useRegexFilter, value))
-                {
-                    UpdateFilterRegex();
-                    RefreshFilter?.Invoke(this, EventArgs.Empty);
-                }
-            }
+            _filterRegex = new Regex(pattern, options);
+            ClearError();
         }
-
-        public bool UseCaseSensitiveFilter
+        catch (Exception exception)
         {
-            get => _useCaseSensitiveFilter;
-            set
-            {
-                if (RaiseAndSetIfChanged(ref _useCaseSensitiveFilter, value))
-                {
-                    UpdateFilterRegex();
-                    RefreshFilter?.Invoke(this, EventArgs.Empty);
-                }
-            }
-        }
-
-        public bool UseWholeWordFilter
-        {
-            get => _useWholeWordFilter;
-            set
-            {
-                if (RaiseAndSetIfChanged(ref _useWholeWordFilter, value))
-                {
-                    UpdateFilterRegex();
-                    RefreshFilter?.Invoke(this, EventArgs.Empty);
-                }
-            }
-        }
-
-        public IEnumerable GetErrors(string? propertyName)
-        {
-            if (propertyName != null
-                && _errors.TryGetValue(propertyName, out var error))
-            {
-                yield return error;
-            }
+            _errors[nameof(FilterString)] = exception.Message;
+            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(nameof(FilterString)));
         }
     }
 }

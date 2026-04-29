@@ -1,6 +1,4 @@
-﻿using System;
-using System.Globalization;
-using Avalonia.Data;
+﻿using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 
@@ -8,10 +6,8 @@ namespace ClassicDiagnostics.Avalonia.Converters;
 
 internal class BrushSelectorConveter : AvaloniaObject, IValueConverter
 {
-    public static readonly DirectProperty<BrushSelectorConveter, IBrush?> BrushProperty =
-        AvaloniaProperty.RegisterDirect<BrushSelectorConveter, IBrush?>(nameof(Brush)
-            , o => o.Brush
-            , (o, v) => o.Brush = v);
+    public readonly static DirectProperty<BrushSelectorConveter, IBrush?> BrushProperty =
+        AvaloniaProperty.RegisterDirect<BrushSelectorConveter, IBrush?>(nameof(Brush), o => o.Brush, (o, v) => o.Brush = v);
 
     public IBrush? Brush { get; set; }
 
@@ -21,12 +17,12 @@ internal class BrushSelectorConveter : AvaloniaObject, IValueConverter
         {
             return Brush;
         }
-        else if (value is ISolidColorBrush a
+        if (value is ISolidColorBrush a
             && parameter is ISolidColorBrush b
             && a.Color == b.Color
             && a.Transform == b.Transform
             && b.Opacity == a.Opacity
-            )
+           )
         {
             return Brush;
         }

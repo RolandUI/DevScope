@@ -7,13 +7,13 @@
   <Grid RowDefinitions="auto,*" Grid.IsSharedSizeScope="True">
     <Grid>
       <Grid.ColumnDefinitions>
-        <ColumnDefinition SharedSizeGroup="A" Width="auto" />
-        <ColumnDefinition Width="8" />
-        <ColumnDefinition SharedSizeGroup="B" Width="*" />
+        <ColumnDefinition SharedSizeGroup="A" Width="auto"/>
+        <ColumnDefinition Width="8"/>
+        <ColumnDefinition SharedSizeGroup="B" Width="*"/>
       </Grid.ColumnDefinitions>
 
-      <TextBlock FontWeight="Bold" Text="Action" />
-      <TextBlock Grid.Column="2" FontWeight="Bold" Text="Gesture" />
+      <TextBlock FontWeight="Bold" Text="Action"/>
+      <TextBlock Grid.Column="2" FontWeight="Bold" Text="Gesture"/>
     </Grid>
 
     <ItemsControl Grid.Row="1" Grid.ColumnSpan="3" ItemsSource="{Binding HotKeyDescriptions}">
@@ -21,13 +21,13 @@
         <DataTemplate>
           <Grid>
             <Grid.ColumnDefinitions>
-              <ColumnDefinition SharedSizeGroup="A" Width="auto" />
-              <ColumnDefinition Width="8" />
-              <ColumnDefinition SharedSizeGroup="B" Width="*" />
+              <ColumnDefinition SharedSizeGroup="A" Width="auto"/>
+              <ColumnDefinition Width="8"/>
+              <ColumnDefinition SharedSizeGroup="B" Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="{Binding BriefDescription}" ToolTip.Tip="{Binding DetailedDescription}" />
-            <TextBlock Grid.Column="2" Text="{Binding Gesture}" />
+            <TextBlock Text="{Binding BriefDescription}" ToolTip.Tip="{Binding DetailedDescription}"/>
+            <TextBlock Grid.Column="2" Text="{Binding Gesture}"/>
           </Grid>
         </DataTemplate>
       </ItemsControl.ItemTemplate>

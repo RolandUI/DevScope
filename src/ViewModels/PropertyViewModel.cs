@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ClassicDiagnostics.Avalonia.ViewModels;
+﻿namespace ClassicDiagnostics.Avalonia.ViewModels;
 
 internal abstract class PropertyViewModel : ViewModelBase
 {
@@ -14,7 +12,6 @@ internal abstract class PropertyViewModel : ViewModelBase
     public abstract object? Value { get; set; }
     public abstract string Priority { get; }
     public abstract bool? IsAttached { get; }
-    public abstract void Update();
     public abstract Type PropertyType { get; }
 
     public string Type => PropertyType == AssignedType ?
@@ -25,5 +22,6 @@ internal abstract class PropertyViewModel : ViewModelBase
 
     public bool IsPinned { get => _isPinned; set => RaiseAndSetIfChanged(ref _isPinned, value); }
 
-    public string FullName => $"{GetType().Name.Replace("PropertyViewModel","")}:{DeclaringType?.FullName}.{Name}";
+    public string FullName => $"{GetType().Name.Replace("PropertyViewModel", "")}:{DeclaringType?.FullName}.{Name}";
+    public abstract void Update();
 }

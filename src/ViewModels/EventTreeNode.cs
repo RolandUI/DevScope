@@ -2,126 +2,127 @@
 using Avalonia.Threading;
 using ClassicDiagnostics.Avalonia.Models;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels
+namespace ClassicDiagnostics.Avalonia.ViewModels;
+
+internal class EventTreeNode : EventTreeNodeBase
 {
-    internal class EventTreeNode : EventTreeNodeBase
+    private readonly EventsPageViewModel _parentViewModel;
+    private FiredEvent? _currentEvent;
+    private bool _isRegistered;
+
+    public EventTreeNode(EventOwnerTreeNode parent, RoutedEvent @event, EventsPageViewModel vm)
+        : base(parent, @event.Name)
     {
-        private readonly EventsPageViewModel _parentViewModel;
-        private bool _isRegistered;
-        private FiredEvent? _currentEvent;
+        Event = @event ?? throw new ArgumentNullException(nameof(@event));
+        _parentViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
+    }
 
-        public EventTreeNode(EventOwnerTreeNode parent, RoutedEvent @event, EventsPageViewModel vm)
-            : base(parent, @event.Name)
+    public RoutedEvent Event { get; }
+
+    public override bool? IsEnabled
+    {
+        get => base.IsEnabled;
+        set
         {
-            Event = @event ?? throw new ArgumentNullException(nameof(@event));
-            _parentViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
-        }
-
-        public RoutedEvent Event { get; }
-
-        public override bool? IsEnabled
-        {
-            get => base.IsEnabled;
-            set
+            if (base.IsEnabled != value)
             {
-                if (base.IsEnabled != value)
+                base.IsEnabled = value;
+                UpdateTracker();
+                if (Parent != null && _updateParent)
                 {
-                    base.IsEnabled = value;
-                    UpdateTracker();
-                    if (Parent != null && _updateParent)
+                    try
                     {
-                        try
-                        {
-                            Parent._updateChildren = false;
-                            Parent.UpdateChecked();
-                        }
-                        finally
-                        {
-                            Parent._updateChildren = true;
-                        }
+                        Parent._updateChildren = false;
+                        Parent.UpdateChecked();
+                    }
+                    finally
+                    {
+                        Parent._updateChildren = true;
                     }
                 }
             }
         }
+    }
 
-        private void UpdateTracker()
+    private void UpdateTracker()
+    {
+        if (IsEnabled.GetValueOrDefault() && !_isRegistered)
         {
-            if (IsEnabled.GetValueOrDefault() && !_isRegistered)
-            {
-                var allRoutes = RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble;
+            var allRoutes = RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble;
 
-                // FIXME: This leaks event handlers.
-                Event.AddClassHandler(typeof(object), HandleEvent, allRoutes, handledEventsToo: true);
-                Event.RouteFinished.Subscribe(HandleRouteFinished);
-                
-                _isRegistered = true;
+            // FIXME: This leaks event handlers.
+            Event.AddClassHandler(typeof(object), HandleEvent, allRoutes, true);
+            Event.RouteFinished.Subscribe(HandleRouteFinished);
+
+            _isRegistered = true;
+        }
+    }
+
+    private void HandleEvent(object? sender, RoutedEventArgs e)
+    {
+        if (!_isRegistered || IsEnabled == false)
+            return;
+        if (sender is Visual v && v.DoesBelongToDevTool())
+            return;
+
+        var s = sender!;
+        var handled = e.Handled;
+        var route = e.Route;
+        var triggerTime = DateTime.Now;
+
+        void handler()
+        {
+            if (_currentEvent == null || !_currentEvent.IsPartOfSameEventChain(e))
+            {
+                _currentEvent = new FiredEvent(e, new EventChainLink(s, handled, route), triggerTime);
+
+                _parentViewModel.RecordedEvents.Add(_currentEvent);
+
+                while (_parentViewModel.RecordedEvents.Count > 100)
+                {
+                    _parentViewModel.RecordedEvents.RemoveAt(0);
+                }
+            }
+            else
+            {
+                _currentEvent.AddToChain(new EventChainLink(s, handled, route));
             }
         }
 
-        private void HandleEvent(object? sender, RoutedEventArgs e)
+        ;
+
+        if (!Dispatcher.UIThread.CheckAccess())
+            Dispatcher.UIThread.Post(handler);
+        else
+            handler();
+    }
+
+    private void HandleRouteFinished(RoutedEventArgs e)
+    {
+        if (!_isRegistered || IsEnabled == false)
+            return;
+        if (e.Source is Visual v && v.DoesBelongToDevTool())
+            return;
+
+        var s = e.Source;
+        var handled = e.Handled;
+        var route = e.Route;
+
+        void handler()
         {
-            if (!_isRegistered || IsEnabled == false)
-                return;
-            if (sender is Visual v && v.DoesBelongToDevTool())
-                return;
-
-            var s = sender!;
-            var handled = e.Handled;
-            var route = e.Route;
-            var triggerTime = DateTime.Now;
-
-            void handler()
+            if (_currentEvent != null && handled)
             {
-                if (_currentEvent == null || !_currentEvent.IsPartOfSameEventChain(e))
-                {
-                    _currentEvent = new FiredEvent(e, new EventChainLink(s, handled, route), triggerTime);
+                var linkIndex = _currentEvent.EventChain.Count - 1;
+                var link = _currentEvent.EventChain[linkIndex];
 
-                    _parentViewModel.RecordedEvents.Add(_currentEvent);
-
-                    while (_parentViewModel.RecordedEvents.Count > 100)
-                        _parentViewModel.RecordedEvents.RemoveAt(0);
-                }
-                else
-                {
-                    _currentEvent.AddToChain(new EventChainLink(s, handled, route));
-                }
-            };
-
-            if (!Dispatcher.UIThread.CheckAccess())
-                Dispatcher.UIThread.Post(handler);
-            else
-                handler();
-        }
-        
-        private void HandleRouteFinished(RoutedEventArgs e)
-        {
-            if (!_isRegistered || IsEnabled == false)
-                return;
-            if (e.Source is Visual v && v.DoesBelongToDevTool())
-                return;
-
-            var s = e.Source;
-            var handled = e.Handled;
-            var route = e.Route;
-
-            void handler()
-            {
-                if (_currentEvent != null && handled)
-                {
-                    var linkIndex = _currentEvent.EventChain.Count - 1;
-                    var link = _currentEvent.EventChain[linkIndex];
-
-                    link.Handled = true;
-                    _currentEvent.HandledBy ??= link;
-                }
+                link.Handled = true;
+                _currentEvent.HandledBy ??= link;
             }
-
-            if (!Dispatcher.UIThread.CheckAccess())
-                Dispatcher.UIThread.Post(handler);
-            else
-                handler();
         }
 
-
+        if (!Dispatcher.UIThread.CheckAccess())
+            Dispatcher.UIThread.Post(handler);
+        else
+            handler();
     }
 }
