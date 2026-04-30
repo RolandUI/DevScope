@@ -15,7 +15,7 @@
 
 ## 👋 Introduction
 
-With the release of Avalonia 12, the beloved open-source F12 DevTools (`Avalonia.Diagnostics`) has been retired and replaced by the highly advanced, commercial [Avalonia Accelerate](https://avaloniaui.net/Accelerate) suite. 
+With the release of Avalonia 12, the beloved open-source F12 DevTools ([Avalonia.Diagnostics](https://github.com/AvaloniaUI/Avalonia.Diagnostics)) has been retired and replaced by the highly advanced, commercial [Avalonia Accelerate](https://avaloniaui.net/Accelerate) suite. 
 
 While the new Accelerate tools are incredibly powerful and represent the future of Avalonia development, we recognize that some developers and small projects still rely on the classic, lightweight, and offline DevTools for basic UI profiling. `ClassicDiagnostics.Avalonia` is a community-maintained migration of the Avalonia 11 `Avalonia.Diagnostics` codebase, adapted to run seamlessly on Avalonia 12. 
 
