@@ -1,8 +1,8 @@
 ﻿using Avalonia.Input.Raw;
 
-namespace ClassicDiagnostics.Avalonia;
+namespace ClassicDiagnostics.Avalonia.Extensions;
 
-internal static class KeyGestureExtesions
+internal static class KeyGestureExtensions
 {
     public static bool Matches(this KeyGesture gesture, RawKeyEventArgs keyEvent)
     {

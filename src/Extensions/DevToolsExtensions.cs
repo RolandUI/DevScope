@@ -1,4 +1,5 @@
-﻿namespace ClassicDiagnostics.Avalonia;
+﻿// ReSharper disable once CheckNamespace
+namespace ClassicDiagnostics.Avalonia;
 
 /// <summary>
 ///     Extension methods for attaching DevTools..

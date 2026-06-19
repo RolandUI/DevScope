@@ -1,7 +1,7 @@
 ﻿using Avalonia.Media;
 using Avalonia.Media.Imaging;
 
-namespace ClassicDiagnostics.Avalonia;
+namespace ClassicDiagnostics.Avalonia.Extensions;
 
 internal static class VisualExtensions
 {
@@ -14,7 +14,7 @@ internal static class VisualExtensions
     public static void RenderTo(this Control source, Stream destination, double dpi = 96)
     {
         var transform = source.CompositionVisual?.TransformMatrix;
-        if (transform == null)
+        if (transform is null)
             return;
 
         var rect = new Rect(source.Bounds.Size).TransformToAABB(transform.Value);

@@ -36,7 +36,7 @@ public class DevToolsOptions
     public bool ShowImplementedInterfaces { get; set; } = true;
 
     /// <summary>
-    ///     Allow to customize SreenshotHandler
+    ///     Allow to customize ScreenshotHandler
     /// </summary>
     /// <remarks>Default handler is <see cref="Screenshots.FilePickerHandler" /></remarks>
     public IScreenshotHandler ScreenshotHandler { get; set; }

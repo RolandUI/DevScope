@@ -1,7 +1,7 @@
 ﻿namespace ClassicDiagnostics.Avalonia.Screenshots;
 
 /// <summary>
-///     Base class for render Screenshto to stream
+///     Base class for render Screenshot to stream
 /// </summary>
 public abstract class BaseRenderToStreamHandler : IScreenshotHandler
 {

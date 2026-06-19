@@ -4,10 +4,10 @@ using Avalonia.Media;
 
 namespace ClassicDiagnostics.Avalonia.Converters;
 
-internal class BrushSelectorConveter : AvaloniaObject, IValueConverter
+internal class BrushSelectorConverter : AvaloniaObject, IValueConverter
 {
-    public readonly static DirectProperty<BrushSelectorConveter, IBrush?> BrushProperty =
-        AvaloniaProperty.RegisterDirect<BrushSelectorConveter, IBrush?>(nameof(Brush), o => o.Brush, (o, v) => o.Brush = v);
+    public readonly static DirectProperty<BrushSelectorConverter, IBrush?> BrushProperty =
+        AvaloniaProperty.RegisterDirect<BrushSelectorConverter, IBrush?>(nameof(Brush), o => o.Brush, (o, v) => o.Brush = v);
 
     public IBrush? Brush { get; set; }
 

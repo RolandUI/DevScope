@@ -1,11 +1,11 @@
 ﻿<UserControl
   x:Class="ClassicDiagnostics.Avalonia.Views.MainView" xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:convertes="using:ClassicDiagnostics.Avalonia.Converters"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:converters="using:ClassicDiagnostics.Avalonia.Converters"
   xmlns:viewModels="using:ClassicDiagnostics.Avalonia.ViewModels"
   x:DataType="viewModels:MainViewModel">
   <UserControl.Resources>
     <x:Double x:Key="SampleSize">16</x:Double>
-    <convertes:BrushSelectorConveter
+    <converters:BrushSelectorConverter
       x:Key="bsc"
       Brush="{DynamicResource HighlightBrush}"/>
   </UserControl.Resources>

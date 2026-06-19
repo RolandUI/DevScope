@@ -2,7 +2,7 @@
 
 namespace ClassicDiagnostics.Avalonia;
 
-internal static class TypeExtesnions
+internal static class TypeExtensions
 {
     private readonly static ConditionalWeakTable<Type, string> s_getTypeNameCache = new();
 
