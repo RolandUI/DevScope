@@ -5,19 +5,13 @@ using Avalonia.Collections;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 
-internal abstract class TreeNodeCollection : IAvaloniaReadOnlyList<TreeNode>, IList, IDisposable
+internal abstract class TreeNodeCollection(TreeNode owner) : IAvaloniaReadOnlyList<TreeNode>, IList, IDisposable
 {
-
     internal readonly static TreeNodeCollection Empty = new EmptyTreeNodeCollection();
 
     private AvaloniaList<TreeNode>? _inner;
 
-    public TreeNodeCollection(TreeNode owner)
-    {
-        Owner = owner;
-    }
-
-    protected TreeNode Owner { get; }
+    protected TreeNode Owner { get; } = owner;
 
     public TreeNode this[int index] => EnsureInitialized()[index];
 
@@ -47,12 +41,11 @@ internal abstract class TreeNodeCollection : IAvaloniaReadOnlyList<TreeNode>, IL
 
     public virtual void Dispose()
     {
-        if (_inner is object)
+        if (_inner == null) return;
+
+        foreach (var node in _inner)
         {
-            foreach (var node in _inner)
-            {
-                node.Dispose();
-            }
+            node.Dispose();
         }
     }
 
@@ -124,13 +117,8 @@ internal abstract class TreeNodeCollection : IAvaloniaReadOnlyList<TreeNode>, IL
         return _inner;
     }
 
-    private class EmptyTreeNodeCollection : TreeNodeCollection
+    private class EmptyTreeNodeCollection() : TreeNodeCollection(null!) // TODO: check null! safety
     {
-        public EmptyTreeNodeCollection() : base(default!)
-        {
-
-        }
-
         protected override void Initialize(AvaloniaList<TreeNode> nodes)
         {
 

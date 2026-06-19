@@ -6,15 +6,15 @@ namespace ClassicDiagnostics.Avalonia.ViewModels;
 
 internal class EventsPageViewModel : ViewModelBase, IDisposable
 {
-    private readonly static HashSet<RoutedEvent> s_defaultEvents = new()
-    {
+    private readonly static HashSet<RoutedEvent> DefaultEvents =
+    [
         Button.ClickEvent,
         InputElement.KeyDownEvent,
         InputElement.KeyUpEvent,
         InputElement.TextInputEvent,
         InputElement.PointerReleasedEvent,
         InputElement.PointerPressedEvent,
-    };
+    ];
 
     public EventsPageViewModel(MainViewModel mainViewModel)
     {
@@ -24,7 +24,7 @@ internal class EventsPageViewModel : ViewModelBase, IDisposable
             .GroupBy(e => e.OwnerType)
             .OrderBy(e => e.Key.Name)
             .Select(g => new EventOwnerTreeNode(g.Key, g, this))
-            .ToArray();
+            .ToList();
 
         EventsFilter = new FilterViewModel();
         EventsFilter.RefreshFilter += OnEventsFilterRefreshFilter;
@@ -32,9 +32,7 @@ internal class EventsPageViewModel : ViewModelBase, IDisposable
         EnableDefault();
     }
 
-    public string Name => "Events";
-
-    public EventTreeNodeBase[] Nodes { get; }
+    public IReadOnlyList<EventTreeNodeBase> Nodes { get; }
 
     public ObservableCollection<FiredEvent> RecordedEvents { get; } = new();
 
@@ -66,7 +64,7 @@ internal class EventsPageViewModel : ViewModelBase, IDisposable
 
     public void EnableDefault()
     {
-        EvaluateNodeEnabled(node => s_defaultEvents.Contains(node.Event));
+        EvaluateNodeEnabled(node => DefaultEvents.Contains(node.Event));
     }
 
     public void RequestTreeNavigateTo(EventChainLink navTarget)
@@ -82,36 +80,17 @@ internal class EventsPageViewModel : ViewModelBase, IDisposable
         foreach (var node in Nodes)
         {
             var result = FindNode(node, evt);
-
-            if (result != null && result.IsVisible)
+            if (result is { IsVisible: true })
             {
                 SelectedNode = result;
-
                 break;
             }
         }
 
         static EventTreeNodeBase? FindNode(EventTreeNodeBase node, RoutedEvent eventType)
         {
-            if (node is EventTreeNode eventNode && eventNode.Event == eventType)
-            {
-                return node;
-            }
-
-            if (node.Children != null)
-            {
-                foreach (var child in node.Children)
-                {
-                    var result = FindNode(child, eventType);
-
-                    if (result != null)
-                    {
-                        return result;
-                    }
-                }
-            }
-
-            return null;
+            if (node is EventTreeNode eventNode && eventNode.Event == eventType) return node;
+            return node.Children?.Select(child => FindNode(child, eventType)).OfType<EventTreeNodeBase>().FirstOrDefault();
         }
     }
 

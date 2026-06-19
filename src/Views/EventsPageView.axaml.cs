@@ -23,21 +23,20 @@ internal partial class EventsPageView : UserControl
 
     public void NavigateTo(object sender, TappedEventArgs e)
     {
-        if (DataContext is EventsPageViewModel vm && sender is Control control)
-        {
-            switch (control.Tag)
-            {
-                case EventChainLink chainLink:
-                {
-                    vm.RequestTreeNavigateTo(chainLink);
-                    break;
-                }
-                case RoutedEvent evt:
-                {
-                    vm.SelectEventByType(evt);
+        if (DataContext is not EventsPageViewModel viewModel || sender is not Control control) return;
 
-                    break;
-                }
+        switch (control.Tag)
+        {
+            case EventChainLink chainLink:
+            {
+                viewModel.RequestTreeNavigateTo(chainLink);
+                break;
+            }
+            case RoutedEvent evt:
+            {
+                viewModel.SelectEventByType(evt);
+
+                break;
             }
         }
     }
@@ -52,10 +51,10 @@ internal partial class EventsPageView : UserControl
             _recordedEventsOwner = null;
         }
 
-        if (DataContext is EventsPageViewModel vm)
+        if (DataContext is EventsPageViewModel viewModel)
         {
-            vm.RecordedEvents.CollectionChanged += OnRecordedEventsChanged;
-            _recordedEventsOwner = vm;
+            viewModel.RecordedEvents.CollectionChanged += OnRecordedEventsChanged;
+            _recordedEventsOwner = viewModel;
         }
     }
 
@@ -75,17 +74,12 @@ internal partial class EventsPageView : UserControl
 
     private void OnRecordedEventsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        if (sender is ObservableCollection<FiredEvent> events)
-        {
-            var evt = events.LastOrDefault();
+        if (sender is not ObservableCollection<FiredEvent> events) return;
 
-            if (evt is null)
-            {
-                return;
-            }
+        var @event = events.LastOrDefault();
+        if (@event is null) return;
 
-            Dispatcher.UIThread.Post(() => _events.ScrollIntoView(evt));
-        }
+        Dispatcher.UIThread.Post(() => _events.ScrollIntoView(@event));
     }
 
     private void InitializeComponent()
@@ -95,12 +89,9 @@ internal partial class EventsPageView : UserControl
 
     private void ListBoxItem_PointerEntered(object? sender, PointerEventArgs e)
     {
-        if (DataContext is EventsPageViewModel vm
-            && sender is Control control
-            && control.DataContext is EventChainLink chainLink
-            && chainLink.Handler is Visual visual)
+        if (DataContext is EventsPageViewModel viewModel && sender is Control { DataContext: EventChainLink { Handler: Visual visual } })
         {
-            _adorner = ControlHighlightAdorner.Add(visual, vm.MainView.ShouldVisualizeMarginPadding);
+            _adorner = ControlHighlightAdorner.Add(visual, viewModel.MainView.ShouldVisualizeMarginPadding);
         }
     }
 

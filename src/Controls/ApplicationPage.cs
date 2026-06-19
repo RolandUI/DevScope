@@ -4,7 +4,7 @@ using Lifetimes = Avalonia.Controls.ApplicationLifetimes;
 
 namespace ClassicDiagnostics.Avalonia.Controls;
 
-internal class ApplicationPage : TopLevelGroup, ICloseable, IDisposable
+internal class ApplicationPage : TopLevelGroup, ICloseable
 {
     private readonly EventHandler<Lifetimes.ControlledApplicationLifetimeExitEventArgs>? _controlledExitHandler;
     private readonly Lifetimes.IControlledApplicationLifetime? _controlledLifetime;
@@ -16,9 +16,9 @@ internal class ApplicationPage : TopLevelGroup, ICloseable, IDisposable
     public ApplicationPage(ClassicDesktopStyleApplicationLifetimeTopLevelGroup group, Application application)
         : base(group)
     {
-        this.Instance = application;
+        Instance = application;
 
-        if (this.Instance.ApplicationLifetime is Lifetimes.IControlledApplicationLifetime controller)
+        if (Instance.ApplicationLifetime is Lifetimes.IControlledApplicationLifetime controller)
         {
             _controlledLifetime = controller;
             _controlledExitHandler = (s, e) =>
@@ -35,7 +35,7 @@ internal class ApplicationPage : TopLevelGroup, ICloseable, IDisposable
         };
 
         SetCurrentValue(RequestedThemeVariantProperty, application.RequestedThemeVariant);
-        this.Instance.PropertyChanged += ApplicationPageOnPropertyChanged;
+        Instance.PropertyChanged += ApplicationPageOnPropertyChanged;
     }
 
     internal Application Instance { get; }

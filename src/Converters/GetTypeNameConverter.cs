@@ -5,16 +5,17 @@ namespace ClassicDiagnostics.Avalonia.Converters;
 
 internal class GetTypeNameConverter : IValueConverter
 {
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is Type type)
         {
             return type.GetTypeName();
         }
+
         return BindingOperations.DoNothing;
     }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         return BindingOperations.DoNothing;
     }

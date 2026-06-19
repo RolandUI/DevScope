@@ -7,14 +7,9 @@ internal interface IDevToolsTopLevelGroup
     IReadOnlyList<TopLevel> Items { get; }
 }
 
-internal class ClassicDesktopStyleApplicationLifetimeTopLevelGroup : IDevToolsTopLevelGroup
+internal class ClassicDesktopStyleApplicationLifetimeTopLevelGroup(IClassicDesktopStyleApplicationLifetime lifetime) : IDevToolsTopLevelGroup
 {
-    private readonly IClassicDesktopStyleApplicationLifetime _lifetime;
-
-    public ClassicDesktopStyleApplicationLifetimeTopLevelGroup(IClassicDesktopStyleApplicationLifetime lifetime)
-    {
-        _lifetime = lifetime ?? throw new ArgumentNullException(nameof(lifetime));
-    }
+    private readonly IClassicDesktopStyleApplicationLifetime _lifetime = lifetime ?? throw new ArgumentNullException(nameof(lifetime));
 
     public IReadOnlyList<TopLevel> Items => _lifetime.Windows;
 
@@ -29,17 +24,11 @@ internal class ClassicDesktopStyleApplicationLifetimeTopLevelGroup : IDevToolsTo
     }
 }
 
-internal class SingleViewTopLevelGroup : IDevToolsTopLevelGroup
+internal class SingleViewTopLevelGroup(TopLevel topLevel) : IDevToolsTopLevelGroup
 {
-    private readonly TopLevel _topLevel;
+    private readonly TopLevel _topLevel = topLevel;
 
-    public SingleViewTopLevelGroup(TopLevel topLevel)
-    {
-        _topLevel = topLevel;
-        Items = new[] { topLevel ?? throw new ArgumentNullException(nameof(topLevel)) };
-    }
-
-    public IReadOnlyList<TopLevel> Items { get; }
+    public IReadOnlyList<TopLevel> Items { get; } = [topLevel ?? throw new ArgumentNullException(nameof(topLevel))];
 
     public override int GetHashCode()
     {

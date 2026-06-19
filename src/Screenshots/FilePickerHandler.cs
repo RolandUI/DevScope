@@ -25,9 +25,7 @@ public sealed class FilePickerHandler : BaseRenderToStreamHandler
     /// </summary>
     /// <param name="title">SaveFilePicker Title</param>
     /// <param name="screenshotRoot"></param>
-    public FilePickerHandler(
-        string? title,
-        string? screenshotRoot = default)
+    public FilePickerHandler(string? title, string? screenshotRoot = null)
     {
         _title = title ?? "Save Screenshot to ...";
         _screenshotRoot = screenshotRoot;
@@ -49,22 +47,17 @@ public sealed class FilePickerHandler : BaseRenderToStreamHandler
     protected async override Task<Stream?> GetStream(Control control)
     {
         var storageProvider = GetTopLevel(control).StorageProvider;
+
         IStorageFolder? defaultFolder = null;
-        if (_screenshotRoot is not null)
-        {
-            defaultFolder = await storageProvider.TryGetFolderFromPathAsync(_screenshotRoot);
-        }
-        if (defaultFolder is null)
-        {
-            defaultFolder = await storageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Pictures);
-        }
+        if (_screenshotRoot is not null) defaultFolder = await storageProvider.TryGetFolderFromPathAsync(_screenshotRoot);
+        defaultFolder ??= await storageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Pictures);
 
         var result = await storageProvider.SaveFilePickerAsync(
             new FilePickerSaveOptions
             {
                 SuggestedStartLocation = defaultFolder,
                 Title = _title,
-                FileTypeChoices = new[] { FilePickerFileTypes.ImagePng },
+                FileTypeChoices = [FilePickerFileTypes.ImagePng],
                 DefaultExtension = ".png",
             });
         if (result is null)

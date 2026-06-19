@@ -8,7 +8,6 @@ internal abstract class TreeNode : ViewModelBase, IDisposable
 {
     private readonly IDisposable? _classesSubscription;
     private string _classes;
-    private bool _isExpanded;
 
     protected TreeNode(AvaloniaObject avaloniaObject, TreeNode? parent, string? customTypeName = null)
     {
@@ -38,9 +37,7 @@ internal abstract class TreeNode : ViewModelBase, IDisposable
         }
     }
 
-    private bool IsRoot => Visual is TopLevel ||
-        Visual is ContextMenu ||
-        Visual is IPopupHost;
+    private bool IsRoot => Visual is TopLevel or ContextMenu or IPopupHost;
 
     public FontWeight FontWeight { get; }
 
@@ -67,8 +64,8 @@ internal abstract class TreeNode : ViewModelBase, IDisposable
 
     public bool IsExpanded
     {
-        get => _isExpanded;
-        set => SetProperty(ref _isExpanded, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public TreeNode? Parent

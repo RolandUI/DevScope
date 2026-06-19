@@ -6,7 +6,6 @@ internal class TreePageViewModel : ViewModelBase, IDisposable
 {
     private readonly ISet<string> _pinnedProperties;
     private ControlDetailsViewModel? _details;
-    private TreeNode? _selectedNode;
 
     public TreePageViewModel(MainViewModel mainView, TreeNode[] nodes, ISet<string> pinnedProperties)
     {
@@ -14,10 +13,10 @@ internal class TreePageViewModel : ViewModelBase, IDisposable
         Nodes = nodes;
         _pinnedProperties = pinnedProperties;
         PropertiesFilter = new FilterViewModel();
-        PropertiesFilter.RefreshFilter += (s, e) => Details?.PropertiesView?.Refresh();
+        PropertiesFilter.RefreshFilter += (_, _) => Details?.PropertiesView?.Refresh();
 
         SettersFilter = new FilterViewModel();
-        SettersFilter.RefreshFilter += (s, e) => Details?.UpdateStyleFilters();
+        SettersFilter.RefreshFilter += (_, _) => Details?.UpdateStyleFilters();
     }
 
     public MainViewModel MainView { get; }
@@ -30,10 +29,10 @@ internal class TreePageViewModel : ViewModelBase, IDisposable
 
     public TreeNode? SelectedNode
     {
-        get => _selectedNode;
+        get;
         set
         {
-            if (SetProperty(ref _selectedNode, value))
+            if (SetProperty(ref field, value))
             {
                 Details = value != null ?
                     new ControlDetailsViewModel(this, value.Visual, _pinnedProperties) :
@@ -109,11 +108,9 @@ internal class TreePageViewModel : ViewModelBase, IDisposable
 
     public void CopySelector()
     {
-        var currentVisual = SelectedNode?.Visual as Visual;
-        if (currentVisual is not null)
+        if (SelectedNode?.Visual is Visual currentVisual)
         {
             var selector = GetVisualSelector(currentVisual);
-
             ClipboardCopyRequested?.Invoke(this, selector);
         }
     }
@@ -134,7 +131,6 @@ internal class TreePageViewModel : ViewModelBase, IDisposable
         {
             parts.Reverse();
             var selector = string.Join(" /template/ ", parts);
-
             ClipboardCopyRequested?.Invoke(this, selector);
         }
     }
@@ -207,36 +203,28 @@ internal class TreePageViewModel : ViewModelBase, IDisposable
         return $$"""{{{type.Assembly.FullName}}}{{type.Namespace}}|{{type.Name}}{{name}}{{classes}}{{pseudo}}""";
     }
 
-    private void ExpandNode(TreeNode? node)
+    private static void ExpandNode(TreeNode? node)
     {
-        if (node != null)
+        while (true)
         {
-            node.IsExpanded = true;
-            ExpandNode(node.Parent);
+            if (node != null)
+            {
+                node.IsExpanded = true;
+                node = node.Parent;
+                continue;
+            }
+
+            break;
         }
     }
 
-    private TreeNode? FindNode(TreeNode node, Control control)
+    private static TreeNode? FindNode(TreeNode node, Control control)
     {
-        if (node.Visual == control)
-        {
-            return node;
-        }
-        foreach (var child in node.Children)
-        {
-            var result = FindNode(child, control);
-
-            if (result != null)
-            {
-                return result;
-            }
-        }
-
-        return null;
+        return node.Visual == control ? node : node.Children.Select(child => FindNode(child, control)).OfType<TreeNode>().FirstOrDefault();
     }
 
     internal void UpdatePropertiesView()
     {
-        Details?.UpdatePropertiesView(MainView?.ShowImplementedInterfaces ?? true);
+        Details?.UpdatePropertiesView(MainView.ShowImplementedInterfaces);
     }
 }

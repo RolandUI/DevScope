@@ -3,7 +3,6 @@
 //TODO: UpdateSourceTrigger & Binding.ValidationRules could help removing the need for this control.
 internal sealed class CommitTextBox : TextBox
 {
-
     /// <summary>
     ///     Defines the <see cref="CommittedText" /> property.
     /// </summary>
@@ -13,13 +12,12 @@ internal sealed class CommitTextBox : TextBox
             o => o.CommittedText,
             (o, v) => o.CommittedText = v);
 
-    private string? _committedText;
     protected override Type StyleKeyOverride => typeof(TextBox);
 
     public string? CommittedText
     {
-        get => _committedText;
-        set => SetAndRaise(CommittedTextProperty, ref _committedText, value);
+        get;
+        set => SetAndRaise(CommittedTextProperty, ref field, value);
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)

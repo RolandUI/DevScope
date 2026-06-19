@@ -5,13 +5,13 @@ namespace ClassicDiagnostics.Avalonia.Controls;
 
 internal class ControlHighlightAdorner : Control
 {
-    private readonly static Panel _layoutHighlightAdorner;
+    private readonly static Panel LayoutHighlightAdorner;
 
     private readonly IPen _pen;
 
     static ControlHighlightAdorner()
     {
-        _layoutHighlightAdorner = new Panel
+        LayoutHighlightAdorner = new Panel
         {
             ClipToBounds = false,
             Children =
@@ -24,7 +24,7 @@ internal class ControlHighlightAdorner : Control
                 new Border { BorderBrush = new SolidColorBrush(Colors.Yellow, 0.5) },
             },
         };
-        AdornerLayer.SetIsClipEnabled(_layoutHighlightAdorner, false);
+        AdornerLayer.SetIsClipEnabled(LayoutHighlightAdorner, false);
     }
 
     private ControlHighlightAdorner(IPen pen)
@@ -52,7 +52,8 @@ internal class ControlHighlightAdorner : Control
                     state.layer.Children.Remove(state.adorner);
                 });
         }
-        return default;
+
+        return null;
     }
 
     public override void Render(DrawingContext context)
@@ -63,39 +64,34 @@ internal class ControlHighlightAdorner : Control
 
     internal static IDisposable? Add(Visual visual, bool visualizeMarginPadding)
     {
-        if (AdornerLayer.GetAdornerLayer(visual) is { } layer)
+        if (AdornerLayer.GetAdornerLayer(visual) is not { } layer) return null;
+        if (layer.Children.Contains(LayoutHighlightAdorner)) return null;
+
+        layer.Children.Add(LayoutHighlightAdorner);
+        AdornerLayer.SetAdornedElement(LayoutHighlightAdorner, visual);
+        var paddingBorder = (Border)LayoutHighlightAdorner.Children[0];
+        var contentBorder = (Border)LayoutHighlightAdorner.Children[1];
+        var marginBorder = (Border)LayoutHighlightAdorner.Children[2];
+        if (visualizeMarginPadding)
         {
-            if (layer.Children.Contains(_layoutHighlightAdorner))
-            {
-                return default;
-            }
-            layer.Children.Add(_layoutHighlightAdorner);
-            AdornerLayer.SetAdornedElement(_layoutHighlightAdorner, visual);
-            var paddingBorder = (Border)_layoutHighlightAdorner.Children[0];
-            var contentBorder = (Border)_layoutHighlightAdorner.Children[1];
-            var marginBorder = (Border)_layoutHighlightAdorner.Children[2];
-            if (visualizeMarginPadding)
-            {
-                paddingBorder.BorderThickness = visual.GetValue(TemplatedControl.PaddingProperty);
-                contentBorder.Margin = visual.GetValue(TemplatedControl.PaddingProperty);
-                marginBorder.BorderThickness = visual.GetValue(MarginProperty);
-                marginBorder.Margin = InvertThickness(visual.GetValue(MarginProperty));
-            }
-            else
-            {
-                paddingBorder.BorderThickness = default;
-                contentBorder.Margin = default;
-                marginBorder.BorderThickness = default;
-                marginBorder.Margin = default;
-            }
-            return Disposable.Create(
-                (Layer: layer, Adorner: _layoutHighlightAdorner),
-                state =>
-                {
-                    state.Layer.Children.Remove(state.Adorner);
-                });
+            paddingBorder.BorderThickness = visual.GetValue(TemplatedControl.PaddingProperty);
+            contentBorder.Margin = visual.GetValue(TemplatedControl.PaddingProperty);
+            marginBorder.BorderThickness = visual.GetValue(MarginProperty);
+            marginBorder.Margin = InvertThickness(visual.GetValue(MarginProperty));
         }
-        return default;
+        else
+        {
+            paddingBorder.BorderThickness = default;
+            contentBorder.Margin = default;
+            marginBorder.BorderThickness = default;
+            marginBorder.Margin = default;
+        }
+        return Disposable.Create(
+            (Layer: layer, Adorner: LayoutHighlightAdorner),
+            state =>
+            {
+                state.Layer.Children.Remove(state.Adorner);
+            });
     }
 
 

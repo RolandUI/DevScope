@@ -11,15 +11,16 @@ namespace ClassicDiagnostics.Avalonia.ViewModels;
 internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesChangedListener
 {
     // new DataGridPathGroupDescription(nameof(AvaloniaPropertyViewModel.Group))
-    private readonly static IReadOnlyList<DataGridPathGroupDescription> GroupDescriptors = new DataGridPathGroupDescription[]
-    {
+    private readonly static IReadOnlyList<DataGridPathGroupDescription> GroupDescriptors =
+    [
         new(nameof(AvaloniaPropertyViewModel.Group)),
-    };
+    ];
 
-    private readonly static IReadOnlyList<DataGridSortDescription> SortDescriptions = new DataGridSortDescription[]
-    {
-        new DataGridComparerSortDescription(PropertyComparer.Instance!, ListSortDirection.Ascending),
-    };
+    private readonly static IReadOnlyList<DataGridSortDescription> SortDescriptions =
+    [
+        new DataGridComparerSortDescription(PropertyComparer.Instance, ListSortDirection.Ascending),
+    ];
+
     private readonly AvaloniaObject _avaloniaObject;
     private readonly ISet<string> _pinnedProperties;
     private readonly Stack<(string Name, object Entry)> _selectedEntitiesStack = new();
@@ -32,12 +33,12 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
         _avaloniaObject = avaloniaObject;
         _pinnedProperties = pinnedProperties;
         TreePage = treePage;
-        Layout = avaloniaObject is Visual visual ? new ControlLayoutViewModel(visual) : default;
+        Layout = avaloniaObject is Visual visual ? new ControlLayoutViewModel(visual) : null;
 
         NavigateToProperty(_avaloniaObject, (_avaloniaObject as Control)?.Name ?? _avaloniaObject.ToString());
 
-        AppliedFrames = new ObservableCollection<ValueFrameViewModel>();
-        PseudoClasses = new ObservableCollection<PseudoClassViewModel>();
+        AppliedFrames = [];
+        PseudoClasses = [];
 
         if (avaloniaObject is StyledElement styledElement)
         {
@@ -132,19 +133,16 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
 
     public void Dispose()
     {
-        if (_avaloniaObject is INotifyPropertyChanged inpc)
+        if (_avaloniaObject is INotifyPropertyChanged notifyPropertyChanged)
         {
-            inpc.PropertyChanged -= ControlPropertyChanged;
+            notifyPropertyChanged.PropertyChanged -= ControlPropertyChanged;
         }
 
-        if (_avaloniaObject is AvaloniaObject ao)
-        {
-            ao.PropertyChanged -= ControlPropertyChanged;
-        }
+        _avaloniaObject.PropertyChanged -= ControlPropertyChanged;
 
-        if (_avaloniaObject is StyledElement se)
+        if (_avaloniaObject is StyledElement styledElement)
         {
-            se.Classes.RemoveListener(this);
+            styledElement.Classes.RemoveListener(this);
         }
     }
 
@@ -186,7 +184,8 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
                 .Union(AvaloniaPrivateApi.Current.GetRegisteredAttachedProperties(ao.GetType()))
                 .Select(x => new AvaloniaPropertyViewModel(ao, x));
         }
-        return Enumerable.Empty<AvaloniaPropertyViewModel>();
+
+        return [];
     }
 
     private static IEnumerable<PropertyViewModel> GetClrProperties(object o, bool showImplementedInterfaces)
@@ -378,12 +377,12 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
 
         switch (oldSelectedEntity)
         {
-            case AvaloniaObject ao1:
-                ao1.PropertyChanged -= ControlPropertyChanged;
+            case AvaloniaObject oldAvaloniaObject:
+                oldAvaloniaObject.PropertyChanged -= ControlPropertyChanged;
                 break;
 
-            case INotifyPropertyChanged inpc1:
-                inpc1.PropertyChanged -= ControlPropertyChanged;
+            case INotifyPropertyChanged oldNotifyPropertyChanged:
+                oldNotifyPropertyChanged.PropertyChanged -= ControlPropertyChanged;
                 break;
         }
 
@@ -411,12 +410,12 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
 
         switch (o)
         {
-            case AvaloniaObject ao2:
-                ao2.PropertyChanged += ControlPropertyChanged;
+            case AvaloniaObject avaloniaObject:
+                avaloniaObject.PropertyChanged += ControlPropertyChanged;
                 break;
 
-            case INotifyPropertyChanged inpc2:
-                inpc2.PropertyChanged += ControlPropertyChanged;
+            case INotifyPropertyChanged notifyPropertyChanged:
+                notifyPropertyChanged.PropertyChanged += ControlPropertyChanged;
                 break;
         }
     }
@@ -425,7 +424,7 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
     {
         SelectedProperty = null;
 
-        if (SelectedEntity != _avaloniaObject)
+        if (!Equals(SelectedEntity, _avaloniaObject))
         {
             NavigateToProperty(
                 _avaloniaObject,
@@ -460,16 +459,16 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
         if (parameter is PropertyViewModel model)
         {
             var fullname = model.FullName;
-            if (_pinnedProperties.Contains(fullname))
+            if (!_pinnedProperties.Add(fullname))
             {
                 _pinnedProperties.Remove(fullname);
                 model.IsPinned = false;
             }
             else
             {
-                _pinnedProperties.Add(fullname);
                 model.IsPinned = true;
             }
+
             PropertiesView?.Refresh();
         }
     }

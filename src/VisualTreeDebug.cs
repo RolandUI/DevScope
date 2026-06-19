@@ -24,24 +24,22 @@ public static class VisualTreeDebug
 
         if (control != null)
         {
-            builder.Append(" ");
+            builder.Append(' ');
             builder.AppendLine(control.Classes.ToString());
 
             foreach (var property in AvaloniaPrivateApi.Current.GetRegisteredProperties(control))
             {
                 var value = AvaloniaPrivateApi.Current.GetDiagnosticValue(control, property);
+                if (value.Priority == BindingPriority.Unset) continue;
 
-                if (value.Priority != BindingPriority.Unset)
-                {
-                    builder.Append(Indent(indent));
-                    builder.Append(" |  ");
-                    builder.Append(value.Property.Name);
-                    builder.Append(" = ");
-                    builder.Append(value.Value ?? "(null)");
-                    builder.Append(" [");
-                    builder.Append(value.Priority);
-                    builder.AppendLine("]");
-                }
+                builder.Append(Indent(indent));
+                builder.Append(" |  ");
+                builder.Append(value.Property.Name);
+                builder.Append(" = ");
+                builder.Append(value.Value ?? "(null)");
+                builder.Append(" [");
+                builder.Append(value.Priority);
+                builder.AppendLine("]");
             }
         }
         else

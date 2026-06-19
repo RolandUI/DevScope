@@ -5,14 +5,9 @@
 /// </summary>
 public abstract class BaseRenderToStreamHandler : IScreenshotHandler
 {
-
     public async Task Take(Control control)
     {
-#if NET6_0_OR_GREATER
         await using var output = await GetStream(control);
-#else
-            using var output = await GetStream(control);
-#endif
         if (output is not null)
         {
             control.RenderTo(output);

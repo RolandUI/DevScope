@@ -14,14 +14,10 @@ internal class ViewModelBase : INotifyPropertyChanged
 
     protected bool SetProperty<T>([NotNullIfNotNull("value")] ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
-        if (!EqualityComparer<T>.Default.Equals(field, value))
-        {
-            field = value;
-            RaisePropertyChanged(propertyName);
-            return true;
-        }
-
-        return false;
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        RaisePropertyChanged(propertyName);
+        return true;
     }
 
     protected void RaisePropertyChanged([CallerMemberName] string? propertyName = null)

@@ -23,7 +23,7 @@ internal class BindingSetterViewModel : SetterViewModel
 
                 break;
             case TemplateBinding binding:
-                if (binding.Property is AvaloniaProperty templateProperty)
+                if (binding.Property is { } templateProperty)
                 {
                     Path = $"{templateProperty.OwnerType.Name}.{templateProperty.Name}";
                 }

@@ -11,11 +11,12 @@ internal class TopLevelGroup : AvaloniaObject, IDisposable
     public TopLevelGroup(IDevToolsTopLevelGroup group)
     {
         Group = group;
-        if (Group.Items is INotifyCollectionChanged incc)
+
+        if (Group.Items is INotifyCollectionChanged notifyCollectionChanged)
         {
-            _collectionChangedSource = incc;
+            _collectionChangedSource = notifyCollectionChanged;
             _collectionChangedHandler = OnCollectionChanged;
-            incc.CollectionChanged += _collectionChangedHandler;
+            notifyCollectionChanged.CollectionChanged += _collectionChangedHandler;
         }
     }
 

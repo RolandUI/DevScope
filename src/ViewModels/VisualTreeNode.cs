@@ -142,7 +142,7 @@ internal class VisualTreeNode : TreeNode
 
             control.VisualChildren.ForEachItem(
                     (i, item) => nodes.Insert(i, new VisualTreeNode(item, Owner)),
-                    (i, item) => nodes.RemoveAt(i),
+                    (i, _) => nodes.RemoveAt(i),
                     nodes.Clear)
                 .AddTo(_subscriptions);
         }

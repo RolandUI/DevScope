@@ -6,8 +6,6 @@ namespace ClassicDiagnostics.Avalonia.ViewModels;
 internal class ValueFrameViewModel : ViewModelBase
 {
     private readonly IValueFrameDiagnostic _valueFrame;
-    private bool _isActive;
-    private bool _isVisible;
 
     public ValueFrameViewModel(StyledElement styledElement, IValueFrameDiagnostic valueFrame, IClipboard? clipboard)
     {
@@ -24,20 +22,18 @@ internal class ValueFrameViewModel : ViewModelBase
             _ => _valueFrame.Priority.ToString(),
         };
 
-        Setters = new List<SetterViewModel>();
+        Setters = [];
 
         foreach (var (setterProperty, setterValue) in valueFrame.Values)
         {
             var resourceInfo = GetResourceInfo(setterValue);
 
-            SetterViewModel setterVm;
-
+            SetterViewModel setterViewModel;
             if (resourceInfo.HasValue)
             {
                 var resourceKey = resourceInfo.Value.resourceKey;
                 var resourceValue = styledElement.FindResource(resourceKey);
-
-                setterVm = new ResourceSetterViewModel(
+                setterViewModel = new ResourceSetterViewModel(
                     setterProperty,
                     resourceKey,
                     resourceValue,
@@ -46,18 +42,17 @@ internal class ValueFrameViewModel : ViewModelBase
             }
             else
             {
-                var isBinding = IsBinding(setterValue);
-
-                if (isBinding)
+                if (setterValue is BindingBase)
                 {
-                    setterVm = new BindingSetterViewModel(setterProperty, setterValue, clipboard);
+                    setterViewModel = new BindingSetterViewModel(setterProperty, setterValue, clipboard);
                 }
                 else
                 {
-                    setterVm = new SetterViewModel(setterProperty, setterValue, clipboard);
+                    setterViewModel = new SetterViewModel(setterProperty, setterValue, clipboard);
                 }
             }
-            Setters.Add(setterVm);
+
+            Setters.Add(setterViewModel);
         }
 
         Update();
@@ -65,14 +60,14 @@ internal class ValueFrameViewModel : ViewModelBase
 
     public bool IsActive
     {
-        get => _isActive;
-        set => SetProperty(ref _isActive, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool IsVisible
     {
-        get => _isVisible;
-        set => SetProperty(ref _isVisible, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public string? Description { get; }
@@ -86,65 +81,46 @@ internal class ValueFrameViewModel : ViewModelBase
 
     private static (object resourceKey, bool isDynamic)? GetResourceInfo(object? value)
     {
-        if (value is StaticResourceExtension staticResource
-            && staticResource.ResourceKey != null)
+        return value switch
         {
-            return (staticResource.ResourceKey, false);
-        }
-        if (value is DynamicResourceExtension dynamicResource
-            && dynamicResource.ResourceKey != null)
-        {
-            return (dynamicResource.ResourceKey, true);
-        }
-
-        return null;
+            StaticResourceExtension { ResourceKey: not null } staticResource => (staticResource.ResourceKey, false),
+            DynamicResourceExtension { ResourceKey: not null } dynamicResource => (dynamicResource.ResourceKey, true),
+            _ => null
+        };
     }
 
-    private static bool IsBinding(object? value)
+    private static string? SourceToString(object? source)
     {
-        switch (value)
+        switch (source)
         {
-            case Binding:
-            case CompiledBindingExtension:
-            case TemplateBinding:
-                return true;
-        }
-
-        return false;
-    }
-
-    private string? SourceToString(object? source)
-    {
-        if (source is Style style)
-        {
-            StyleBase? currentStyle = style;
-            var selectors = new Stack<string>();
-
-            while (currentStyle is not null)
+            case Style style:
             {
-                if (currentStyle is Style { Selector: { } selector })
+                StyleBase? currentStyle = style;
+                var selectors = new Stack<string>();
+
+                while (currentStyle is not null)
                 {
-                    selectors.Push(selector.ToString());
-                }
-                if (currentStyle is ControlTheme theme)
-                {
-                    selectors.Push("Theme " + theme.TargetType?.Name);
+                    switch (currentStyle)
+                    {
+                        case Style { Selector: { } selector }:
+                            selectors.Push(selector.ToString());
+                            break;
+                        case ControlTheme theme:
+                            selectors.Push("Theme " + theme.TargetType?.Name);
+                            break;
+                    }
+
+                    currentStyle = currentStyle.Parent as StyleBase;
                 }
 
-                currentStyle = currentStyle.Parent as StyleBase;
+                return string.Concat(selectors).Replace("^", "");
             }
-
-            return string.Concat(selectors).Replace("^", "");
+            case ControlTheme controlTheme:
+                return controlTheme.TargetType?.Name;
+            case StyledElement styledElement:
+                return styledElement.StyleKey.Name;
+            default:
+                return null;
         }
-        if (source is ControlTheme controlTheme)
-        {
-            return controlTheme.TargetType?.Name;
-        }
-        if (source is StyledElement styledElement)
-        {
-            return styledElement.StyleKey?.Name;
-        }
-
-        return null;
     }
 }

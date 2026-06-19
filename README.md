@@ -63,6 +63,44 @@ public partial class MainWindow : Window
 }
 ```
 
+You can also attach the tools at the application level after Avalonia has finished initializing:
+
+```csharp
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using ClassicDiagnostics.Avalonia;
+
+public partial class App : Application
+{
+    public override void OnFrameworkInitializationCompleted()
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.MainWindow = new MainWindow();
+        }
+
+        base.OnFrameworkInitializationCompleted();
+
+#if DEBUG
+        this.AttachDevTools();
+#endif
+    }
+}
+```
+
+## Current Scope
+
+`ClassicDiagnostics.Avalonia` is focused on local, classic F12 diagnostics for Avalonia 12+ applications. The current preview keeps the familiar logical tree, visual tree, events, property details, overlays, hotkeys, and screenshot workflow from the original DevTools lineage.
+
+The project is intentionally lightweight: it does not add a remote debugging service, does not replace Avalonia Accelerate, and does not try to become a full external diagnostics platform.
+
+## Known Limitations
+
+- Application-level attach currently targets classic desktop lifetimes. Broader lifetime support is planned, but not promised in the current preview.
+- Work toward an application root and a single global DevTools window is in progress; some paths still follow the legacy per-TopLevel behavior.
+- The property editor is still being refactored and does not yet cover every useful Avalonia shape, such as style classes, flags enums, and collection item editing.
+- Trace viewing and diagnostic clock controls are planned features, not current stable capabilities.
+
 ## ❤️ Acknowledgements
 
 This project is entirely made possible by the rich legacy of the **Avalonia UI** team and its contributors. We are deeply grateful for their years of effort in maintaining the original `Avalonia.Diagnostics`. 

@@ -60,7 +60,7 @@ internal static class VisualExtensions
             renderTransformOriginSetter?.Dispose();
             clipSetter?.Dispose();
             clipToBoundsSetter?.Dispose();
-            source?.InvalidateVisual();
+            source.InvalidateVisual();
         }
     }
 }

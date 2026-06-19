@@ -102,9 +102,7 @@ internal class ThicknessEditor : ContentControl
                 _isUpdatingThickness = false;
             }
         }
-        else if (!_isUpdatingThickness &&
-                 (change.Property == LeftProperty || change.Property == TopProperty ||
-                     change.Property == RightProperty || change.Property == BottomProperty))
+        else if (!_isUpdatingThickness && change.Property.Name is nameof(Left) or nameof(Top) or nameof(Right) or nameof(Bottom))
         {
             SetCurrentValue(ThicknessProperty, new Thickness(Left, Top, Right, Bottom));
         }

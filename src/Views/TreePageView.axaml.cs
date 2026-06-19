@@ -92,9 +92,8 @@ internal partial class TreePageView : UserControl
     {
         var sb = new StringBuilder();
         var bufferStartIndex = -1;
-        for (var ic = 0; ic < text.Length; ic++)
+        foreach (var c in text)
         {
-            var c = text[ic];
             switch (c)
             {
                 case '{':

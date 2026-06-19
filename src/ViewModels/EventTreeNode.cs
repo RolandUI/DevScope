@@ -19,22 +19,21 @@ internal class EventTreeNode(EventOwnerTreeNode parent, RoutedEvent @event, Even
         get => base.IsEnabled;
         set
         {
-            if (base.IsEnabled != value)
+            if (base.IsEnabled == value) return;
+
+            base.IsEnabled = value;
+            UpdateTracker();
+
+            if (Parent == null || !_updateParent) return;
+
+            try
             {
-                base.IsEnabled = value;
-                UpdateTracker();
-                if (Parent != null && _updateParent)
-                {
-                    try
-                    {
-                        Parent._updateChildren = false;
-                        Parent.UpdateChecked();
-                    }
-                    finally
-                    {
-                        Parent._updateChildren = true;
-                    }
-                }
+                Parent._updateChildren = false;
+                Parent.UpdateChecked();
+            }
+            finally
+            {
+                Parent._updateChildren = true;
             }
         }
     }
@@ -86,24 +85,19 @@ internal class EventTreeNode(EventOwnerTreeNode parent, RoutedEvent @event, Even
 
     private void HandleEvent(object? sender, RoutedEventArgs e)
     {
-        if (!_isRegistered || IsEnabled == false)
-            return;
-        if (sender is Visual v && v.DoesBelongToDevTool())
-            return;
+        if (sender is null || !_isRegistered || IsEnabled == false) return;
+        if (sender is Visual v && v.DoesBelongToDevTool()) return;
 
-        var s = sender!;
         var handled = e.Handled;
         var route = e.Route;
         var triggerTime = DateTime.Now;
 
-        void Handler()
+        Dispatcher.UIThread.PostOnDemand(() =>
         {
             if (_currentEvent == null || !_currentEvent.IsPartOfSameEventChain(e))
             {
-                _currentEvent = new FiredEvent(e, new EventChainLink(s, handled, route), triggerTime);
-
+                _currentEvent = new FiredEvent(e, new EventChainLink(sender, handled, route), triggerTime);
                 _parentViewModel.RecordedEvents.Add(_currentEvent);
-
                 while (_parentViewModel.RecordedEvents.Count > 100)
                 {
                     _parentViewModel.RecordedEvents.RemoveAt(0);
@@ -111,32 +105,19 @@ internal class EventTreeNode(EventOwnerTreeNode parent, RoutedEvent @event, Even
             }
             else
             {
-                _currentEvent.AddToChain(new EventChainLink(s, handled, route));
+                _currentEvent.AddToChain(new EventChainLink(sender, handled, route));
             }
-        }
-
-        ;
-
-        if (!Dispatcher.UIThread.CheckAccess())
-            Dispatcher.UIThread.Post(Handler);
-        else
-            Handler();
+        });
     }
 
     private void HandleRouteFinished(RoutedEventArgs e)
     {
-        if (!_isRegistered || IsEnabled == false)
-            return;
-        if (e.Source is Visual v && v.DoesBelongToDevTool())
-            return;
+        if (!_isRegistered || IsEnabled == false) return;
+        if (e.Source is Visual v && v.DoesBelongToDevTool()) return;
 
-        var s = e.Source;
-        var handled = e.Handled;
-        var route = e.Route;
-
-        void handler()
+        Dispatcher.UIThread.PostOnDemand(() =>
         {
-            if (_currentEvent != null && handled)
+            if (_currentEvent != null && e.Handled)
             {
                 var linkIndex = _currentEvent.EventChain.Count - 1;
                 var link = _currentEvent.EventChain[linkIndex];
@@ -144,11 +125,6 @@ internal class EventTreeNode(EventOwnerTreeNode parent, RoutedEvent @event, Even
                 link.Handled = true;
                 _currentEvent.HandledBy ??= link;
             }
-        }
-
-        if (!Dispatcher.UIThread.CheckAccess())
-            Dispatcher.UIThread.Post(handler);
-        else
-            handler();
+        });
     }
 }

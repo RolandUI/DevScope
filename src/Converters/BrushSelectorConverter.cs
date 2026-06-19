@@ -13,23 +13,20 @@ internal class BrushSelectorConverter : AvaloniaObject, IValueConverter
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (ReferenceEquals(value, parameter))
-        {
-            return Brush;
-        }
-        if (value is ISolidColorBrush a
+        if (ReferenceEquals(value, parameter) ||
+            value is ISolidColorBrush a
             && parameter is ISolidColorBrush b
             && a.Color == b.Color
             && a.Transform == b.Transform
-            && b.Opacity == a.Opacity
-           )
+            && b.Opacity == a.Opacity)
         {
             return Brush;
         }
+
         return null;
     }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         return BindingOperations.DoNothing;
     }

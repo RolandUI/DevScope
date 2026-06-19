@@ -4,7 +4,6 @@ namespace ClassicDiagnostics.Avalonia.ViewModels;
 
 internal sealed class AvaloniaPropertyViewModel : PropertyViewModel
 {
-    private readonly Type _propertyType;
     private readonly AvaloniaObject _target;
     private Type _assignedType;
     private string _group;
@@ -20,7 +19,7 @@ internal sealed class AvaloniaPropertyViewModel : PropertyViewModel
             $"[{property.OwnerType.Name}.{property.Name}]" :
             property.Name;
         DeclaringType = property.OwnerType;
-        _propertyType = property.PropertyType;
+        PropertyType = property.PropertyType;
         _assignedType = property.PropertyType;
         _group = property.IsAttached ? "Attached Properties" : "Properties";
         _priority = "Unset";
@@ -56,7 +55,7 @@ internal sealed class AvaloniaPropertyViewModel : PropertyViewModel
     public override string Group => IsPinned ? "Pinned" : _group;
 
     public override Type? DeclaringType { get; }
-    public override Type PropertyType => _propertyType;
+    public override Type PropertyType { get; }
     public override bool IsReadonly => Property.IsReadOnly;
 
     public override void Update()

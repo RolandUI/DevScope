@@ -2,16 +2,9 @@
 
 namespace ClassicDiagnostics.Avalonia.Models;
 
-internal class EventChainLink
+internal class EventChainLink(object handler, bool handled, RoutingStrategies route)
 {
-    public EventChainLink(object handler, bool handled, RoutingStrategies route)
-    {
-        Handler = handler ?? throw new ArgumentNullException(nameof(handler));
-        Handled = handled;
-        Route = route;
-    }
-
-    public object Handler { get; }
+    public object Handler { get; } = handler ?? throw new ArgumentNullException(nameof(handler));
 
     public bool BeginsNewRoute { get; set; }
 
@@ -28,7 +21,7 @@ internal class EventChainLink
         }
     }
 
-    public bool Handled { get; set; }
+    public bool Handled { get; set; } = handled;
 
-    public RoutingStrategies Route { get; }
+    public RoutingStrategies Route { get; } = route;
 }

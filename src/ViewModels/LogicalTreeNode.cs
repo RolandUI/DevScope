@@ -39,7 +39,7 @@ internal class LogicalTreeNode : TreeNode
         {
             _subscription = control.LogicalChildren.ForEachItem(
                 (i, item) => nodes.Insert(i, new LogicalTreeNode((AvaloniaObject)item, Owner)),
-                (i, item) => nodes.RemoveAt(i),
+                (i, _) => nodes.RemoveAt(i),
                 nodes.Clear);
         }
     }

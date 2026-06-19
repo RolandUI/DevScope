@@ -7,18 +7,13 @@ internal class BoolToOpacityConverter : IValueConverter
 {
     public double Opacity { get; set; }
 
-    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is bool boolean && boolean)
-        {
-            return 1d;
-        }
-
-        return Opacity;
+        return value is true ? 1d : Opacity;
     }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException();
     }
 }
