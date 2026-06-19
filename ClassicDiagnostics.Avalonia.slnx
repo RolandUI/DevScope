@@ -6,4 +6,5 @@
     <File Path="README.md" />
   </Folder>
   <Project Path="src/ClassicDiagnostics.Avalonia.csproj" />
+  <Project Path="tests/ClassicDiagnostics.Avalonia.Tests/ClassicDiagnostics.Avalonia.Tests.csproj" />
 </Solution>

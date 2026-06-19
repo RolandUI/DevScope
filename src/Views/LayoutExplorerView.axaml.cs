@@ -24,19 +24,14 @@ internal partial class LayoutExplorerView : UserControl
 
         _borderArea = this.GetControl<ThicknessEditor>("BorderArea");
         _paddingArea = this.GetControl<ThicknessEditor>("PaddingArea");
-
         _horizontalSizeBegin = this.GetControl<Rectangle>("HorizontalSizeBegin");
         _horizontalSizeEnd = this.GetControl<Rectangle>("HorizontalSizeEnd");
         _verticalSizeBegin = this.GetControl<Rectangle>("VerticalSizeBegin");
         _verticalSizeEnd = this.GetControl<Rectangle>("VerticalSizeEnd");
-
         _horizontalSize = this.GetControl<Border>("HorizontalSize");
         _verticalSize = this.GetControl<Border>("VerticalSize");
-
         _contentArea = this.GetControl<Border>("ContentArea");
-
         _layoutRoot = this.GetControl<Grid>("LayoutRoot");
-
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -96,15 +91,12 @@ internal partial class LayoutExplorerView : UserControl
                         _horizontalSize);
 
                     var start = TranslateToRoot(bounds.BottomLeft, area);
-
                     SetPosition(_horizontalSizeBegin, start);
 
                     var end = TranslateToRoot(bounds.BottomRight, area);
-
                     SetPosition(_horizontalSizeEnd, end.WithX(end.X - 1));
 
                     var height = sizeArea.Y - start.Y + 2;
-
                     _horizontalSizeBegin.Height = height;
                     _horizontalSizeEnd.Height = height;
                 }
@@ -114,15 +106,12 @@ internal partial class LayoutExplorerView : UserControl
                     var sizeArea = TranslateToRoot(GetPseudoTransformedBounds(_verticalSize).TopRight, _verticalSize);
 
                     var start = TranslateToRoot(bounds.TopRight, area);
-
                     SetPosition(_verticalSizeBegin, start);
 
                     var end = TranslateToRoot(bounds.BottomRight, area);
-
                     SetPosition(_verticalSizeEnd, end.WithY(end.Y - 1));
 
                     var width = sizeArea.X - start.X + 2;
-
                     _verticalSizeBegin.Width = width;
                     _verticalSizeEnd.Width = width;
                 }
