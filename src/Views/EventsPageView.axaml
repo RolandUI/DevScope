@@ -53,7 +53,7 @@
         SelectedItem="{Binding SelectedNode, Mode=TwoWay}">
         <TreeView.DataTemplates>
           <TreeDataTemplate
-            DataType="vm:EventTreeNodeBase"
+            DataType="m:EventTreeNodeBase"
             ItemsSource="{Binding Children}">
             <CheckBox
               Content="{Binding Text}"
@@ -62,7 +62,7 @@
         </TreeView.DataTemplates>
         <TreeView.Styles>
           <Style
-            x:DataType="vm:EventTreeNodeBase" Selector="TreeViewItem">
+            x:DataType="m:EventTreeNodeBase" Selector="TreeViewItem">
             <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
             <Setter Property="IsVisible" Value="{Binding IsVisible}"/>
           </Style>
@@ -94,7 +94,7 @@
         SelectedItem="{Binding SelectedEvent, Mode=TwoWay}">
         <ListBox.Styles>
           <Style Selector="ListBoxItem">
-            <Setter Property="Classes.handled" Value="{Binding IsHandled, x:DataType=vm:FiredEvent}"/>
+            <Setter Property="Classes.handled" Value="{Binding IsHandled, x:DataType=m:FiredEvent}"/>
           </Style>
         </ListBox.Styles>
 

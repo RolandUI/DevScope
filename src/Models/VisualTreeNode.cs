@@ -5,7 +5,7 @@ using ClassicDiagnostics.Avalonia.Controls;
 using ClassicDiagnostics.Avalonia.Views;
 using Lifetimes = Avalonia.Controls.ApplicationLifetimes;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels;
+namespace ClassicDiagnostics.Avalonia.Models;
 
 internal class VisualTreeNode : TreeNode
 {

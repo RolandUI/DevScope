@@ -1,6 +1,7 @@
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using ClassicDiagnostics.Avalonia.Controls;
+using ClassicDiagnostics.Avalonia.Models;
 using ClassicDiagnostics.Avalonia.ViewModels;
 
 namespace ClassicDiagnostics.Avalonia.Views;

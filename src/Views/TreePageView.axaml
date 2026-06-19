@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:ClassicDiagnostics.Avalonia.ViewModels"
+             xmlns:models="clr-namespace:ClassicDiagnostics.Avalonia.Models"
              x:Class="ClassicDiagnostics.Avalonia.Views.TreePageView"
              x:DataType="vm:TreePageViewModel">
   <Grid ColumnDefinitions="0.35*,4,0.65*">
@@ -11,7 +12,7 @@
               PointerMoved="UpdateAdorner"
               PointerExited="RemoveAdorner">
       <TreeView.DataTemplates>
-        <TreeDataTemplate DataType="vm:TreeNode"
+        <TreeDataTemplate DataType="models:TreeNode"
                           ItemsSource="{Binding Children}">
           <StackPanel Orientation="Horizontal" Spacing="8">
             <TextBlock Text="{Binding Type}" FontWeight="{Binding FontWeight}"/>
@@ -21,7 +22,7 @@
         </TreeDataTemplate>
       </TreeView.DataTemplates>
       <TreeView.Styles>
-        <Style Selector="TreeViewItem" x:DataType="vm:TreeNode">
+        <Style Selector="TreeViewItem" x:DataType="models:TreeNode">
           <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
           <Setter Property="Background" Value="Transparent"/>
         </Style>

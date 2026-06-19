@@ -1,6 +1,7 @@
 ﻿using Avalonia.Collections;
+using ClassicDiagnostics.Avalonia.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels;
+namespace ClassicDiagnostics.Avalonia.Models;
 
 internal abstract class EventTreeNodeBase : ViewModelBase
 {

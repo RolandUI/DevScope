@@ -1,8 +1,9 @@
 using Avalonia.VisualTree;
+using ClassicDiagnostics.Avalonia.Models;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 
-internal class TreePageViewModel : ViewModelBase, IDisposable
+internal class TreePageViewModel : ReactiveViewModelBase
 {
     private readonly ISet<string> _pinnedProperties;
     private ControlDetailsViewModel? _details;
@@ -13,10 +14,14 @@ internal class TreePageViewModel : ViewModelBase, IDisposable
         Nodes = nodes;
         _pinnedProperties = pinnedProperties;
         PropertiesFilter = new FilterViewModel();
-        PropertiesFilter.RefreshFilter += (_, _) => Details?.PropertiesView?.Refresh();
+        PropertiesFilter.RefreshFilter += OnPropertiesFilterRefreshFilter;
+        Disposable.Create(() => PropertiesFilter.RefreshFilter -= OnPropertiesFilterRefreshFilter)
+            .AddTo(LifetimeDisposables);
 
         SettersFilter = new FilterViewModel();
-        SettersFilter.RefreshFilter += (_, _) => Details?.UpdateStyleFilters();
+        SettersFilter.RefreshFilter += OnSettersFilterRefreshFilter;
+        Disposable.Create(() => SettersFilter.RefreshFilter -= OnSettersFilterRefreshFilter)
+            .AddTo(LifetimeDisposables);
     }
 
     public MainViewModel MainView { get; }
@@ -57,14 +62,21 @@ internal class TreePageViewModel : ViewModelBase, IDisposable
         }
     }
 
-    public void Dispose()
+    protected override void Dispose(bool disposing)
     {
+        if (!disposing)
+        {
+            base.Dispose(disposing);
+            return;
+        }
+
         foreach (var node in Nodes)
         {
             node.Dispose();
         }
 
         _details?.Dispose();
+        base.Dispose(disposing);
     }
 
     public event EventHandler<string>? ClipboardCopyRequested;
@@ -127,7 +139,7 @@ internal class TreePageViewModel : ViewModelBase, IDisposable
             currentVisual = currentVisual.TemplatedParent as Visual;
         }
 
-        if (parts.Any())
+        if (parts.Count != 0)
         {
             parts.Reverse();
             var selector = string.Join(" /template/ ", parts);
@@ -185,7 +197,6 @@ internal class TreePageViewModel : ViewModelBase, IDisposable
         (SelectedNode?.Visual as Control)?.BringIntoView();
     }
 
-
     public void Focus()
     {
         (SelectedNode?.Visual as Control)?.Focus();
@@ -194,10 +205,7 @@ internal class TreePageViewModel : ViewModelBase, IDisposable
     private static string GetVisualSelector(Visual visual)
     {
         var name = string.IsNullOrEmpty(visual.Name) ? "" : $"#{visual.Name}";
-        var classes = string.Concat(
-            visual.Classes
-                .Where(c => !c.StartsWith(":"))
-                .Select(c => '.' + c));
+        var classes = string.Concat(visual.Classes.Where(c => !c.StartsWith($":")).Select(c => '.' + c));
         var pseudo = string.Concat(visual.Classes.Where(c => c[0] == ':').Select(c => c));
         var type = visual.StyleKey;
         return $$"""{{{type.Assembly.FullName}}}{{type.Namespace}}|{{type.Name}}{{name}}{{classes}}{{pseudo}}""";
@@ -226,5 +234,15 @@ internal class TreePageViewModel : ViewModelBase, IDisposable
     internal void UpdatePropertiesView()
     {
         Details?.UpdatePropertiesView(MainView.ShowImplementedInterfaces);
+    }
+
+    private void OnPropertiesFilterRefreshFilter(object? sender, EventArgs e)
+    {
+        Details?.PropertiesView?.Refresh();
+    }
+
+    private void OnSettersFilterRefreshFilter(object? sender, EventArgs e)
+    {
+        Details?.UpdateStyleFilters();
     }
 }

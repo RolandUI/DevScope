@@ -1,10 +1,11 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Avalonia.Interactivity;
-using ClassicDiagnostics.Avalonia.Models;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels;
+namespace ClassicDiagnostics.Avalonia.Models;
 
-internal class FiredEvent : ViewModelBase
+internal class FiredEvent : INotifyPropertyChanged
 {
     private readonly RoutedEventArgs _eventArgs;
     private readonly RoutedEvent? _originalEvent;
@@ -17,6 +18,8 @@ internal class FiredEvent : ViewModelBase
         AddToChain(originator);
         TriggerTime = triggerTime;
     }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public DateTime TriggerTime { get; }
 
@@ -59,8 +62,8 @@ internal class FiredEvent : ViewModelBase
 
     public bool IsPartOfSameEventChain(RoutedEventArgs e)
     {
-        // Note, Avalonia might reuse RoutedEventArgs for different events to avoid extra allocations.
-        // Like, PointerEntered and PointerExited will use the same instance of RoutedEventArgs. 
+        // Avalonia can reuse RoutedEventArgs instances for distinct routed events,
+        // so the original event identity is part of this chain check.
         return e == _eventArgs && e.RoutedEvent == _originalEvent;
     }
 
@@ -79,6 +82,13 @@ internal class FiredEvent : ViewModelBase
         EventChain.Add(link);
 
         if (HandledBy == null && link.Handled)
+        {
             HandledBy = link;
+        }
+    }
+
+    private void RaisePropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

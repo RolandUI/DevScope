@@ -6,16 +6,16 @@ using Avalonia.Metadata;
 using Avalonia.Rendering;
 using Avalonia.Threading;
 using ClassicDiagnostics.Avalonia.Controls;
+using ClassicDiagnostics.Avalonia.Models;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 
-internal class MainViewModel : ViewModelBase, IDisposable
+internal class MainViewModel : ReactiveViewModelBase
 {
     private readonly EventsPageViewModel _events;
     private readonly HotKeyPageViewModel _hotKeys;
     private readonly TreePageViewModel _logicalTree;
     private readonly HashSet<string> _pinnedProperties = new();
-    private readonly IDisposable? _pointerOverSubscription;
     private readonly AvaloniaObject _root;
     private readonly TreePageViewModel _visualTree;
     private IDisposable? _currentFocusHighlightAdorner;
@@ -31,10 +31,16 @@ internal class MainViewModel : ViewModelBase, IDisposable
 
         UpdateFocusedControl();
 
-        if (KeyboardDevice.Instance is not null)
-            KeyboardDevice.Instance.PropertyChanged += KeyboardPropertyChanged;
+        var keyboard = KeyboardDevice.Instance;
+        if (keyboard is not null)
+        {
+            keyboard.PropertyChanged += KeyboardPropertyChanged;
+            Disposable.Create(() => keyboard.PropertyChanged -= KeyboardPropertyChanged)
+                .AddTo(LifetimeDisposables);
+        }
+
         SelectedTab = 0;
-        _pointerOverSubscription = InputManager.Instance!.PreProcess
+        InputManager.Instance!.PreProcess
             .Subscribe(e =>
             {
                 if (e is RawPointerEventArgs pointerEventArgs)
@@ -42,7 +48,8 @@ internal class MainViewModel : ViewModelBase, IDisposable
                     PointerOverRoot = pointerEventArgs.Root;
                     PointerOverElement = pointerEventArgs.Root.PointerOverElement;
                 }
-            });
+            })
+            .AddTo(LifetimeDisposables);
     }
 
     public bool FreezePopups
@@ -191,11 +198,14 @@ internal class MainViewModel : ViewModelBase, IDisposable
         private set => SetProperty(ref field, value);
     }
 
-    public void Dispose()
+    protected override void Dispose(bool disposing)
     {
-        if (KeyboardDevice.Instance is not null)
-            KeyboardDevice.Instance.PropertyChanged -= KeyboardPropertyChanged;
-        _pointerOverSubscription?.Dispose();
+        if (!disposing)
+        {
+            base.Dispose(disposing);
+            return;
+        }
+
         _logicalTree.Dispose();
         _visualTree.Dispose();
         _events.Dispose();
@@ -208,6 +218,8 @@ internal class MainViewModel : ViewModelBase, IDisposable
         {
             topLevelGroup.Dispose();
         }
+
+        base.Dispose(disposing);
     }
 
     public void ToggleVisualizeMarginPadding()

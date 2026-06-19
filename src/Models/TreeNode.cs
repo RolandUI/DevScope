@@ -1,8 +1,9 @@
 using Avalonia.Collections;
 using Avalonia.Controls.Primitives;
 using Avalonia.Media;
+using ClassicDiagnostics.Avalonia.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels;
+namespace ClassicDiagnostics.Avalonia.Models;
 
 internal abstract class TreeNode : ViewModelBase, IDisposable
 {

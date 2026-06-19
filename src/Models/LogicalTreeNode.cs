@@ -3,7 +3,7 @@ using Avalonia.LogicalTree;
 using ClassicDiagnostics.Avalonia.Controls;
 using ClassicDiagnostics.Avalonia.Views;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels;
+namespace ClassicDiagnostics.Avalonia.Models;
 
 internal class LogicalTreeNode : TreeNode
 {

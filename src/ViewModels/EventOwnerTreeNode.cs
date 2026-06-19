@@ -1,5 +1,6 @@
 ﻿using Avalonia.Collections;
 using Avalonia.Interactivity;
+using ClassicDiagnostics.Avalonia.Models;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 

@@ -1,8 +1,7 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
+using ClassicDiagnostics.Avalonia.Models;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
-
-internal record HotKeyDescription(string Gesture, string BriefDescription, string? DetailedDescription = null);
 
 internal class HotKeyPageViewModel : ViewModelBase
 {
@@ -42,7 +41,10 @@ internal class HotKeyPageViewModel : ViewModelBase
     private string CreateDescription(KeyGesture gesture)
     {
         if (gesture.Key == Key.None && gesture.KeyModifiers != KeyModifiers.None)
+        {
             return gesture.ToString().Replace("+None", "");
+        }
+
         return gesture.ToString();
     }
 }

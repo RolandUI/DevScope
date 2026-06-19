@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using Avalonia.Collections;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels;
+namespace ClassicDiagnostics.Avalonia.Models;
 
 internal abstract class TreeNodeCollection(TreeNode owner) : IAvaloniaReadOnlyList<TreeNode>, IList, IDisposable
 {

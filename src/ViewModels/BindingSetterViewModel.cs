@@ -14,13 +14,11 @@ internal class BindingSetterViewModel : SetterViewModel
                 Path = binding.Path;
                 Tint = Brushes.CornflowerBlue;
                 ValueTypeTooltip = "Reflection Binding";
-
                 break;
             case CompiledBindingExtension binding:
                 Path = binding.Path!.ToString();
                 Tint = Brushes.DarkGreen;
                 ValueTypeTooltip = "Compiled Binding";
-
                 break;
             case TemplateBinding binding:
                 if (binding.Property is { } templateProperty)
@@ -34,7 +32,6 @@ internal class BindingSetterViewModel : SetterViewModel
 
                 Tint = Brushes.OrangeRed;
                 ValueTypeTooltip = "Template Binding";
-
                 break;
             default:
                 throw new ArgumentException("Invalid binding type", nameof(value));

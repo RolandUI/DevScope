@@ -4,7 +4,7 @@ using ClassicDiagnostics.Avalonia.Models;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 
-internal class EventsPageViewModel : ViewModelBase, IDisposable
+internal class EventsPageViewModel : ReactiveViewModelBase
 {
     private readonly static HashSet<RoutedEvent> DefaultEvents =
     [
@@ -28,6 +28,8 @@ internal class EventsPageViewModel : ViewModelBase, IDisposable
 
         EventsFilter = new FilterViewModel();
         EventsFilter.RefreshFilter += OnEventsFilterRefreshFilter;
+        Disposable.Create(() => EventsFilter.RefreshFilter -= OnEventsFilterRefreshFilter)
+            .AddTo(LifetimeDisposables);
 
         EnableDefault();
     }
@@ -94,14 +96,20 @@ internal class EventsPageViewModel : ViewModelBase, IDisposable
         }
     }
 
-    public void Dispose()
+    protected override void Dispose(bool disposing)
     {
-        EventsFilter.RefreshFilter -= OnEventsFilterRefreshFilter;
+        if (!disposing)
+        {
+            base.Dispose(disposing);
+            return;
+        }
 
         foreach (var node in Nodes)
         {
             node.Dispose();
         }
+
+        base.Dispose(disposing);
     }
 
     private void EvaluateNodeEnabled(Func<EventTreeNode, bool> eval)
