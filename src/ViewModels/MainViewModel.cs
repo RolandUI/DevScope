@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Avalonia.Input.Raw;
 using Avalonia.Media;
@@ -19,19 +18,8 @@ internal class MainViewModel : ViewModelBase, IDisposable
     private readonly IDisposable? _pointerOverSubscription;
     private readonly AvaloniaObject _root;
     private readonly TreePageViewModel _visualTree;
-    private ViewModelBase? _content;
     private IDisposable? _currentFocusHighlightAdorner;
-    private string? _focusedControl;
-    private IBrush? _FocusHighlighter;
-    private bool _freezePopups;
-    private IInputElement? _pointerOverElement;
-    private string? _pointerOverElementName;
-    private IInputRoot? _pointerOverRoot;
     private IScreenshotHandler? _screenshotHandler;
-    private int _selectedTab;
-    private bool _shouldVisualizeMarginPadding = true;
-    private bool _showImplementedInterfaces;
-    private bool _showPropertyType;
 
     public MainViewModel(AvaloniaObject root)
     {
@@ -59,15 +47,15 @@ internal class MainViewModel : ViewModelBase, IDisposable
 
     public bool FreezePopups
     {
-        get => _freezePopups;
-        set => RaiseAndSetIfChanged(ref _freezePopups, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool ShouldVisualizeMarginPadding
     {
-        get => _shouldVisualizeMarginPadding;
-        set => RaiseAndSetIfChanged(ref _shouldVisualizeMarginPadding, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = true;
 
     public bool ShowDirtyRectsOverlay
     {
@@ -95,10 +83,10 @@ internal class MainViewModel : ViewModelBase, IDisposable
 
     public ViewModelBase? Content
     {
-        get => _content;
+        get;
         private set
         {
-            if (_content is TreePageViewModel oldTree &&
+            if (field is TreePageViewModel oldTree &&
                 value is TreePageViewModel newTree &&
                 oldTree?.SelectedNode?.Visual is Control control)
             {
@@ -113,22 +101,27 @@ internal class MainViewModel : ViewModelBase, IDisposable
                         {
                             newTree.SelectControl(control);
                         }
-                        catch { }
+                        catch (Exception exception)
+                        {
+                            DevToolsDiagnostics.Report(
+                                exception,
+                                "Failed to select the previously selected control after switching tree tabs.");
+                        }
                     },
                     TimeSpan.FromMilliseconds(0));
             }
 
-            RaiseAndSetIfChanged(ref _content, value);
+            SetProperty(ref field, value);
         }
     }
 
     public int SelectedTab
     {
-        get => _selectedTab;
+        get;
         // [MemberNotNull(nameof(_content))]
         set
         {
-            _selectedTab = value;
+            field = value;
 
             switch (value)
             {
@@ -152,50 +145,50 @@ internal class MainViewModel : ViewModelBase, IDisposable
 
     public string? FocusedControl
     {
-        get => _focusedControl;
-        private set => RaiseAndSetIfChanged(ref _focusedControl, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public IInputRoot? PointerOverRoot
     {
-        get => _pointerOverRoot;
-        private set => RaiseAndSetIfChanged(ref _pointerOverRoot, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public IInputElement? PointerOverElement
     {
-        get => _pointerOverElement;
+        get;
         private set
         {
-            RaiseAndSetIfChanged(ref _pointerOverElement, value);
+            SetProperty(ref field, value);
             PointerOverElementName = value?.GetType()?.Name;
         }
     }
 
     public string? PointerOverElementName
     {
-        get => _pointerOverElementName;
-        private set => RaiseAndSetIfChanged(ref _pointerOverElementName, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public int? StartupScreenIndex { get; private set; }
 
     public bool ShowImplementedInterfaces
     {
-        get => _showImplementedInterfaces;
-        private set => RaiseAndSetIfChanged(ref _showImplementedInterfaces, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public bool ShowDetailsPropertyType
     {
-        get => _showPropertyType;
-        private set => RaiseAndSetIfChanged(ref _showPropertyType, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public IBrush? FocusHighlighter
     {
-        get => _FocusHighlighter;
-        private set => RaiseAndSetIfChanged(ref _FocusHighlighter, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public void Dispose()
@@ -205,10 +198,15 @@ internal class MainViewModel : ViewModelBase, IDisposable
         _pointerOverSubscription?.Dispose();
         _logicalTree.Dispose();
         _visualTree.Dispose();
+        _events.Dispose();
         _currentFocusHighlightAdorner?.Dispose();
         if (TryGetRenderer() is { } renderer)
         {
             renderer.Diagnostics.DebugOverlays = RendererDebugOverlays.None;
+        }
+        if (_root is TopLevelGroup topLevelGroup)
+        {
+            topLevelGroup.Dispose();
         }
     }
 
@@ -340,20 +338,17 @@ internal class MainViewModel : ViewModelBase, IDisposable
             && visual.VisualRoot != null;
     }
 
-    public async void Shot(object? parameter)
+    public void Shot(object? parameter)
+    {
+        ShotAsync(parameter).Detach("Failed to capture screenshot for the selected control.");
+    }
+
+    private async Task ShotAsync(object? parameter)
     {
         if ((Content as TreePageViewModel)?.SelectedNode?.Visual is Control control
             && _screenshotHandler is not null)
         {
-            try
-            {
-                await _screenshotHandler.Take(control);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-                //TODO: Notify error
-            }
+            await _screenshotHandler.Take(control);
         }
     }
 

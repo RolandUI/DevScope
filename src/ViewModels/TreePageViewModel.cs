@@ -33,7 +33,7 @@ internal class TreePageViewModel : ViewModelBase, IDisposable
         get => _selectedNode;
         set
         {
-            if (RaiseAndSetIfChanged(ref _selectedNode, value))
+            if (SetProperty(ref _selectedNode, value))
             {
                 Details = value != null ?
                     new ControlDetailsViewModel(this, value.Visual, _pinnedProperties) :
@@ -51,7 +51,7 @@ internal class TreePageViewModel : ViewModelBase, IDisposable
         {
             var oldValue = _details;
 
-            if (RaiseAndSetIfChanged(ref _details, value))
+            if (SetProperty(ref _details, value))
             {
                 oldValue?.Dispose();
             }

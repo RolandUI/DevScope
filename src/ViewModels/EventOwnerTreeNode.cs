@@ -41,4 +41,17 @@ internal class EventOwnerTreeNode : EventTreeNodeBase
             }
         }
     }
+
+    public override void Dispose()
+    {
+        if (Children is null)
+        {
+            return;
+        }
+
+        foreach (var child in Children)
+        {
+            child.Dispose();
+        }
+    }
 }

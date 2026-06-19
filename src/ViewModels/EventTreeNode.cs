@@ -4,20 +4,15 @@ using ClassicDiagnostics.Avalonia.Models;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 
-internal class EventTreeNode : EventTreeNodeBase
+internal class EventTreeNode(EventOwnerTreeNode parent, RoutedEvent @event, EventsPageViewModel viewModel) : EventTreeNodeBase(parent, @event.Name)
 {
-    private readonly EventsPageViewModel _parentViewModel;
+    private readonly EventsPageViewModel _parentViewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
+    private IDisposable? _classHandlerRegistration;
     private FiredEvent? _currentEvent;
     private bool _isRegistered;
+    private IDisposable? _routeFinishedSubscription;
 
-    public EventTreeNode(EventOwnerTreeNode parent, RoutedEvent @event, EventsPageViewModel vm)
-        : base(parent, @event.Name)
-    {
-        Event = @event ?? throw new ArgumentNullException(nameof(@event));
-        _parentViewModel = vm ?? throw new ArgumentNullException(nameof(vm));
-    }
-
-    public RoutedEvent Event { get; }
+    public RoutedEvent Event { get; } = @event ?? throw new ArgumentNullException(nameof(@event));
 
     public override bool? IsEnabled
     {
@@ -46,16 +41,47 @@ internal class EventTreeNode : EventTreeNodeBase
 
     private void UpdateTracker()
     {
-        if (IsEnabled.GetValueOrDefault() && !_isRegistered)
+        if (!IsEnabled.GetValueOrDefault())
+        {
+            UnregisterTracker();
+            return;
+        }
+
+        if (!_isRegistered)
         {
             var allRoutes = RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble;
 
-            // FIXME: This leaks event handlers.
-            Event.AddClassHandler(typeof(object), HandleEvent, allRoutes, true);
-            Event.RouteFinished.Subscribe(HandleRouteFinished);
+            // Routed event class handlers are global registrations, so disabling a node must
+            // detach the handler rather than only ignoring callbacks at runtime.
+            _classHandlerRegistration = Event.AddClassHandler(typeof(object), HandleEvent, allRoutes, true);
+            _routeFinishedSubscription = Event.RouteFinished.Subscribe(HandleRouteFinished);
 
             _isRegistered = true;
         }
+    }
+
+    private void UnregisterTracker()
+    {
+        if (!_isRegistered &&
+            _classHandlerRegistration is null &&
+            _routeFinishedSubscription is null)
+        {
+            return;
+        }
+
+        _classHandlerRegistration?.Dispose();
+        _classHandlerRegistration = null;
+
+        _routeFinishedSubscription?.Dispose();
+        _routeFinishedSubscription = null;
+
+        _currentEvent = null;
+        _isRegistered = false;
+    }
+
+    public override void Dispose()
+    {
+        UnregisterTracker();
     }
 
     private void HandleEvent(object? sender, RoutedEventArgs e)
@@ -70,7 +96,7 @@ internal class EventTreeNode : EventTreeNodeBase
         var route = e.Route;
         var triggerTime = DateTime.Now;
 
-        void handler()
+        void Handler()
         {
             if (_currentEvent == null || !_currentEvent.IsPartOfSameEventChain(e))
             {
@@ -92,9 +118,9 @@ internal class EventTreeNode : EventTreeNodeBase
         ;
 
         if (!Dispatcher.UIThread.CheckAccess())
-            Dispatcher.UIThread.Post(handler);
+            Dispatcher.UIThread.Post(Handler);
         else
-            handler();
+            Handler();
     }
 
     private void HandleRouteFinished(RoutedEventArgs e)

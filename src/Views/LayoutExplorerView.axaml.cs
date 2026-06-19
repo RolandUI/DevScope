@@ -16,6 +16,7 @@ internal partial class LayoutExplorerView : UserControl
     private readonly Border _verticalSize;
     private readonly Rectangle _verticalSizeBegin;
     private readonly Rectangle _verticalSizeEnd;
+    private readonly CompositeDisposable _boundsSubscriptions = new();
 
     public LayoutExplorerView()
     {
@@ -36,14 +37,36 @@ internal partial class LayoutExplorerView : UserControl
 
         _layoutRoot = this.GetControl<Grid>("LayoutRoot");
 
+    }
+
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+
+        SubscribeBoundsUpdates();
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+
+        // The guideline chain observes several template visuals; release them when this view leaves
+        // the visual tree so a stale details panel cannot keep layout controls alive.
+        _boundsSubscriptions.Clear();
+    }
+
+    private void SubscribeBoundsUpdates()
+    {
+        _boundsSubscriptions.Clear();
+
         Visual? visual = _contentArea;
         while (visual != null && !ReferenceEquals(visual, this))
         {
             visual.GetPropertyChangedObservable(BoundsProperty)
-                .Subscribe(UpdateSizeGuidelines);
+                .Subscribe(UpdateSizeGuidelines)
+                .DisposeWith(_boundsSubscriptions);
             visual = visual.VisualParent;
         }
-
     }
 
     private void InitializeComponent()

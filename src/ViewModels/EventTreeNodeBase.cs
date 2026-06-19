@@ -4,9 +4,6 @@ namespace ClassicDiagnostics.Avalonia.ViewModels;
 
 internal abstract class EventTreeNodeBase : ViewModelBase
 {
-    private bool? _isEnabled = false;
-    private bool _isExpanded;
-    private bool _isVisible;
     internal bool _updateChildren = true;
     internal bool _updateParent = true;
 
@@ -25,20 +22,20 @@ internal abstract class EventTreeNodeBase : ViewModelBase
 
     public bool IsExpanded
     {
-        get => _isExpanded;
-        set => RaiseAndSetIfChanged(ref _isExpanded, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public virtual bool? IsEnabled
     {
-        get => _isEnabled;
-        set => RaiseAndSetIfChanged(ref _isEnabled, value);
-    }
+        get;
+        set => SetProperty(ref field, value);
+    } = false;
 
     public bool IsVisible
     {
-        get => _isVisible;
-        set => RaiseAndSetIfChanged(ref _isVisible, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public EventTreeNodeBase? Parent
@@ -79,5 +76,9 @@ internal abstract class EventTreeNodeBase : ViewModelBase
 
             return value;
         }
+    }
+
+    public virtual void Dispose()
+    {
     }
 }

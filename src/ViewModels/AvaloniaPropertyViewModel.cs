@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 
-internal class AvaloniaPropertyViewModel : PropertyViewModel
+internal sealed class AvaloniaPropertyViewModel : PropertyViewModel
 {
     private readonly Type _propertyType;
     private readonly AvaloniaObject _target;
@@ -11,10 +11,7 @@ internal class AvaloniaPropertyViewModel : PropertyViewModel
     private string _priority;
     private object? _value;
 
-#nullable disable
-    // Remove "nullable disable" after MemberNotNull will work on our CI.
     public AvaloniaPropertyViewModel(AvaloniaObject o, AvaloniaProperty property)
-#nullable restore
     {
         _target = o;
         Property = property;
@@ -24,6 +21,9 @@ internal class AvaloniaPropertyViewModel : PropertyViewModel
             property.Name;
         DeclaringType = property.OwnerType;
         _propertyType = property.PropertyType;
+        _assignedType = property.PropertyType;
+        _group = property.IsAttached ? "Attached Properties" : "Properties";
+        _priority = "Unset";
         Update();
     }
 
@@ -44,7 +44,12 @@ internal class AvaloniaPropertyViewModel : PropertyViewModel
                 _target.SetValue(Property, value);
                 Update();
             }
-            catch { }
+            catch (Exception exception)
+            {
+                DevToolsDiagnostics.Report(
+                    exception,
+                    $"Failed to set Avalonia property '{Property.OwnerType.Name}.{Property.Name}'.");
+            }
         }
     }
 
@@ -54,7 +59,6 @@ internal class AvaloniaPropertyViewModel : PropertyViewModel
     public override Type PropertyType => _propertyType;
     public override bool IsReadonly => Property.IsReadOnly;
 
-    // [MemberNotNull(nameof(_type), nameof(_group), nameof(_priority))]
     public override void Update()
     {
         if (Property.IsDirect)
@@ -72,9 +76,9 @@ internal class AvaloniaPropertyViewModel : PropertyViewModel
                 value = e.GetBaseException();
             }
 
-            RaiseAndSetIfChanged(ref _value, value, nameof(Value));
-            RaiseAndSetIfChanged(ref _assignedType, valueType ?? Property.PropertyType, nameof(AssignedType));
-            RaiseAndSetIfChanged(ref _priority, "Direct", nameof(Priority));
+            SetProperty(ref _value, value, nameof(Value));
+            SetProperty(ref _assignedType, valueType ?? Property.PropertyType, nameof(AssignedType));
+            SetProperty(ref _priority, "Direct", nameof(Priority));
 
             _group = "Properties";
         }
@@ -86,7 +90,7 @@ internal class AvaloniaPropertyViewModel : PropertyViewModel
 
             try
             {
-                var diag = _target.GetDiagnostic(Property);
+                var diag = AvaloniaPrivateApi.Current.GetDiagnosticValue(_target, Property);
 
                 value = diag.Value;
                 valueType = value?.GetType();
@@ -97,18 +101,18 @@ internal class AvaloniaPropertyViewModel : PropertyViewModel
                 value = e.GetBaseException();
             }
 
-            RaiseAndSetIfChanged(ref _value, value, nameof(Value));
-            RaiseAndSetIfChanged(ref _assignedType, valueType ?? Property.PropertyType, nameof(AssignedType));
+            SetProperty(ref _value, value, nameof(Value));
+            SetProperty(ref _assignedType, valueType ?? Property.PropertyType, nameof(AssignedType));
 
             if (priority != null)
             {
-                RaiseAndSetIfChanged(ref _priority, priority.ToString()!, nameof(Priority));
-                RaiseAndSetIfChanged(ref _group, IsAttached == true ? "Attached Properties" : "Properties", nameof(Group));
+                SetProperty(ref _priority, priority.ToString()!, nameof(Priority));
+                SetProperty(ref _group, IsAttached == true ? "Attached Properties" : "Properties", nameof(Group));
             }
             else
             {
-                RaiseAndSetIfChanged(ref _priority, "Unset", nameof(Priority));
-                RaiseAndSetIfChanged(ref _group, "Unset", nameof(Group));
+                SetProperty(ref _priority, "Unset", nameof(Priority));
+                SetProperty(ref _group, "Unset", nameof(Group));
             }
         }
         RaisePropertyChanged(nameof(Type));

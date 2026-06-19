@@ -8,7 +8,6 @@ internal class FiredEvent : ViewModelBase
 {
     private readonly RoutedEventArgs _eventArgs;
     private readonly RoutedEvent? _originalEvent;
-    private EventChainLink? _handledBy;
 
     public FiredEvent(RoutedEventArgs eventArgs, EventChainLink originator, DateTime triggerTime)
     {
@@ -45,12 +44,12 @@ internal class FiredEvent : ViewModelBase
 
     public EventChainLink? HandledBy
     {
-        get => _handledBy;
+        get;
         set
         {
-            if (_handledBy != value)
+            if (field != value)
             {
-                _handledBy = value;
+                field = value;
                 RaisePropertyChanged();
                 RaisePropertyChanged(nameof(IsHandled));
                 RaisePropertyChanged(nameof(DisplayText));
@@ -69,7 +68,7 @@ internal class FiredEvent : ViewModelBase
     {
         if (EventChain.Count > 0)
         {
-            var prevLink = EventChain[EventChain.Count - 1];
+            var prevLink = EventChain[^1];
 
             if (prevLink.Route != link.Route)
             {

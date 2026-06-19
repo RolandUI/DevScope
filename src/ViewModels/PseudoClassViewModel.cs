@@ -4,7 +4,6 @@ internal class PseudoClassViewModel : ViewModelBase
 {
     private readonly IPseudoClasses _pseudoClasses;
     private readonly StyledElement _source;
-    private bool _isActive;
     private bool _isUpdating;
 
     public PseudoClassViewModel(string name, StyledElement source)
@@ -20,10 +19,10 @@ internal class PseudoClassViewModel : ViewModelBase
 
     public bool IsActive
     {
-        get => _isActive;
+        get;
         set
         {
-            RaiseAndSetIfChanged(ref _isActive, value);
+            SetProperty(ref field, value);
 
             if (!_isUpdating)
             {

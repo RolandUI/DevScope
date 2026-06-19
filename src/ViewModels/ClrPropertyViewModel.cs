@@ -3,22 +3,18 @@ using System.Reflection;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 
-internal class ClrPropertyViewModel : PropertyViewModel
+internal sealed class ClrPropertyViewModel : PropertyViewModel
 {
-    private readonly Type _propertyType;
     private readonly object _target;
     private Type _assignedType;
     private object? _value;
 
-#nullable disable
-    // Remove "nullable disable" after MemberNotNull will work on our CI.
     public ClrPropertyViewModel(object o, PropertyInfo property)
-#nullable restore
     {
         _target = o;
         Property = property;
 
-        if (property.DeclaringType == null || !property.DeclaringType.IsInterface)
+        if (property.DeclaringType is not { IsInterface: true })
         {
             Name = property.Name;
         }
@@ -28,7 +24,8 @@ internal class ClrPropertyViewModel : PropertyViewModel
         }
 
         DeclaringType = property.DeclaringType;
-        _propertyType = property.PropertyType;
+        PropertyType = property.PropertyType;
+        _assignedType = property.PropertyType;
 
         Update();
     }
@@ -38,8 +35,9 @@ internal class ClrPropertyViewModel : PropertyViewModel
     public override string Name { get; }
     public override string Group => IsPinned ? "Pinned" : "CLR Properties";
 
+    public override Type PropertyType { get; }
     public override Type AssignedType => _assignedType;
-    public override Type PropertyType => _propertyType;
+
     public override bool IsReadonly => !Property.CanWrite;
 
     public override object? Value
@@ -52,17 +50,21 @@ internal class ClrPropertyViewModel : PropertyViewModel
                 Property.SetValue(_target, value);
                 Update();
             }
-            catch { }
+            catch (Exception exception)
+            {
+                DevToolsDiagnostics.Report(
+                    exception,
+                    $"Failed to set CLR property '{Property.DeclaringType?.Name}.{Property.Name}'.");
+            }
         }
     }
 
     public override string Priority => string.Empty;
 
-    public override bool? IsAttached => default;
+    public override bool? IsAttached => null;
 
     public override Type? DeclaringType { get; }
 
-    // [MemberNotNull(nameof(_type))]
     public override void Update()
     {
         object? value;
@@ -78,8 +80,8 @@ internal class ClrPropertyViewModel : PropertyViewModel
             value = e.GetBaseException();
         }
 
-        RaiseAndSetIfChanged(ref _value, value, nameof(Value));
-        RaiseAndSetIfChanged(ref _assignedType, valueType ?? Property.PropertyType, nameof(AssignedType));
+        SetProperty(ref _value, value, nameof(Value));
+        SetProperty(ref _assignedType, valueType ?? Property.PropertyType, nameof(AssignedType));
         RaisePropertyChanged(nameof(Type));
     }
 

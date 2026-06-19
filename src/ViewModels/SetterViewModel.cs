@@ -4,10 +4,7 @@ namespace ClassicDiagnostics.Avalonia.ViewModels;
 
 internal class SetterViewModel : ViewModelBase
 {
-
     private readonly IClipboard? _clipboard;
-    private bool _isActive;
-    private bool _isVisible;
 
     public SetterViewModel(AvaloniaProperty property, object? value, IClipboard? clipboard)
     {
@@ -28,14 +25,14 @@ internal class SetterViewModel : ViewModelBase
 
     public bool IsActive
     {
-        get => _isActive;
-        set => RaiseAndSetIfChanged(ref _isActive, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool IsVisible
     {
-        get => _isVisible;
-        set => RaiseAndSetIfChanged(ref _isVisible, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public virtual void CopyValue()
@@ -57,6 +54,16 @@ internal class SetterViewModel : ViewModelBase
 
     protected void CopyToClipboard(string value)
     {
-        _clipboard?.SetTextAsync(value);
+        CopyToClipboardAsync(value).Detach($"Failed to copy value '{value}' to clipboard.");
+    }
+
+    private async Task CopyToClipboardAsync(string value)
+    {
+        if (_clipboard is null)
+        {
+            return;
+        }
+
+        await _clipboard.SetTextAsync(value);
     }
 }

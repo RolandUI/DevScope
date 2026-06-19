@@ -4,7 +4,7 @@ using ClassicDiagnostics.Avalonia.Models;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 
-internal class EventsPageViewModel : ViewModelBase
+internal class EventsPageViewModel : ViewModelBase, IDisposable
 {
     private readonly static HashSet<RoutedEvent> s_defaultEvents = new()
     {
@@ -15,9 +15,6 @@ internal class EventsPageViewModel : ViewModelBase
         InputElement.PointerReleasedEvent,
         InputElement.PointerPressedEvent,
     };
-
-    private FiredEvent? _selectedEvent;
-    private EventTreeNodeBase? _selectedNode;
 
     public EventsPageViewModel(MainViewModel mainViewModel)
     {
@@ -30,7 +27,7 @@ internal class EventsPageViewModel : ViewModelBase
             .ToArray();
 
         EventsFilter = new FilterViewModel();
-        EventsFilter.RefreshFilter += (s, e) => UpdateEventFilters();
+        EventsFilter.RefreshFilter += OnEventsFilterRefreshFilter;
 
         EnableDefault();
     }
@@ -43,14 +40,14 @@ internal class EventsPageViewModel : ViewModelBase
 
     public FiredEvent? SelectedEvent
     {
-        get => _selectedEvent;
-        set => RaiseAndSetIfChanged(ref _selectedEvent, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public EventTreeNodeBase? SelectedNode
     {
-        get => _selectedNode;
-        set => RaiseAndSetIfChanged(ref _selectedNode, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public FilterViewModel EventsFilter { get; }
@@ -118,6 +115,16 @@ internal class EventsPageViewModel : ViewModelBase
         }
     }
 
+    public void Dispose()
+    {
+        EventsFilter.RefreshFilter -= OnEventsFilterRefreshFilter;
+
+        foreach (var node in Nodes)
+        {
+            node.Dispose();
+        }
+    }
+
     private void EvaluateNodeEnabled(Func<EventTreeNode, bool> eval)
     {
         void ProcessNode(EventTreeNodeBase node)
@@ -166,5 +173,10 @@ internal class EventsPageViewModel : ViewModelBase
 
             return node.IsVisible;
         }
+    }
+
+    private void OnEventsFilterRefreshFilter(object? sender, EventArgs e)
+    {
+        UpdateEventFilters();
     }
 }

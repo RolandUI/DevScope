@@ -13,6 +13,7 @@ internal partial class EventsPageView : UserControl
 {
     private readonly ListBox _events;
     private IDisposable? _adorner;
+    private EventsPageViewModel? _recordedEventsOwner;
 
     public EventsPageView()
     {
@@ -45,10 +46,31 @@ internal partial class EventsPageView : UserControl
     {
         base.OnDataContextChanged(e);
 
+        if (_recordedEventsOwner is not null)
+        {
+            _recordedEventsOwner.RecordedEvents.CollectionChanged -= OnRecordedEventsChanged;
+            _recordedEventsOwner = null;
+        }
+
         if (DataContext is EventsPageViewModel vm)
         {
             vm.RecordedEvents.CollectionChanged += OnRecordedEventsChanged;
+            _recordedEventsOwner = vm;
         }
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+
+        if (_recordedEventsOwner is not null)
+        {
+            _recordedEventsOwner.RecordedEvents.CollectionChanged -= OnRecordedEventsChanged;
+            _recordedEventsOwner = null;
+        }
+
+        _adorner?.Dispose();
+        _adorner = null;
     }
 
     private void OnRecordedEventsChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -85,5 +107,6 @@ internal partial class EventsPageView : UserControl
     private void ListBoxItem_PointerExited(object? sender, PointerEventArgs e)
     {
         _adorner?.Dispose();
+        _adorner = null;
     }
 }

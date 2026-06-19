@@ -6,23 +6,14 @@ namespace ClassicDiagnostics.Avalonia.ViewModels;
 internal class ControlLayoutViewModel : ViewModelBase
 {
     private readonly Visual _control;
-    private Thickness _borderThickness;
-    private double _height;
-    private string? _heightConstraint;
-    private HorizontalAlignment _horizontalAlignment;
-    private Thickness _marginThickness;
-    private Thickness _paddingThickness;
     private bool _updatingFromControl;
-    private VerticalAlignment _verticalAlignment;
-    private double _width;
-    private string? _widthConstraint;
 
     public ControlLayoutViewModel(Visual control)
     {
         _control = control;
 
-        HasPadding = AvaloniaPropertyRegistry.Instance.IsRegistered(control, Decorator.PaddingProperty);
-        HasBorder = AvaloniaPropertyRegistry.Instance.IsRegistered(control, Border.BorderThicknessProperty);
+        HasPadding = AvaloniaPrivateApi.Current.IsPropertyRegistered(control, Decorator.PaddingProperty);
+        HasBorder = AvaloniaPrivateApi.Current.IsPropertyRegistered(control, Border.BorderThicknessProperty);
 
         if (control is AvaloniaObject ao)
         {
@@ -56,56 +47,56 @@ internal class ControlLayoutViewModel : ViewModelBase
 
     public Thickness MarginThickness
     {
-        get => _marginThickness;
-        set => RaiseAndSetIfChanged(ref _marginThickness, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public Thickness BorderThickness
     {
-        get => _borderThickness;
-        set => RaiseAndSetIfChanged(ref _borderThickness, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public Thickness PaddingThickness
     {
-        get => _paddingThickness;
-        set => RaiseAndSetIfChanged(ref _paddingThickness, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public double Width
     {
-        get => _width;
-        private set => RaiseAndSetIfChanged(ref _width, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public double Height
     {
-        get => _height;
-        private set => RaiseAndSetIfChanged(ref _height, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public string? WidthConstraint
     {
-        get => _widthConstraint;
-        private set => RaiseAndSetIfChanged(ref _widthConstraint, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public string? HeightConstraint
     {
-        get => _heightConstraint;
-        private set => RaiseAndSetIfChanged(ref _heightConstraint, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public HorizontalAlignment HorizontalAlignment
     {
-        get => _horizontalAlignment;
-        set => RaiseAndSetIfChanged(ref _horizontalAlignment, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public VerticalAlignment VerticalAlignment
     {
-        get => _verticalAlignment;
-        set => RaiseAndSetIfChanged(ref _verticalAlignment, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool HasPadding { get; }

@@ -8,28 +8,26 @@ internal class FilterViewModel : ViewModelBase, INotifyDataErrorInfo
 {
     private readonly Dictionary<string, string> _errors = new();
     private Regex? _filterRegex;
-    private string _filterString = string.Empty;
-    private bool _useRegexFilter, _useCaseSensitiveFilter, _useWholeWordFilter;
 
     public string FilterString
     {
-        get => _filterString;
+        get;
         set
         {
-            if (RaiseAndSetIfChanged(ref _filterString, value))
+            if (SetProperty(ref field, value))
             {
                 UpdateFilterRegex();
                 RefreshFilter?.Invoke(this, EventArgs.Empty);
             }
         }
-    }
+    } = string.Empty;
 
     public bool UseRegexFilter
     {
-        get => _useRegexFilter;
+        get;
         set
         {
-            if (RaiseAndSetIfChanged(ref _useRegexFilter, value))
+            if (SetProperty(ref field, value))
             {
                 UpdateFilterRegex();
                 RefreshFilter?.Invoke(this, EventArgs.Empty);
@@ -39,10 +37,10 @@ internal class FilterViewModel : ViewModelBase, INotifyDataErrorInfo
 
     public bool UseCaseSensitiveFilter
     {
-        get => _useCaseSensitiveFilter;
+        get;
         set
         {
-            if (RaiseAndSetIfChanged(ref _useCaseSensitiveFilter, value))
+            if (SetProperty(ref field, value))
             {
                 UpdateFilterRegex();
                 RefreshFilter?.Invoke(this, EventArgs.Empty);
@@ -52,10 +50,10 @@ internal class FilterViewModel : ViewModelBase, INotifyDataErrorInfo
 
     public bool UseWholeWordFilter
     {
-        get => _useWholeWordFilter;
+        get;
         set
         {
-            if (RaiseAndSetIfChanged(ref _useWholeWordFilter, value))
+            if (SetProperty(ref field, value))
             {
                 UpdateFilterRegex();
                 RefreshFilter?.Invoke(this, EventArgs.Empty);

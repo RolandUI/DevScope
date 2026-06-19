@@ -52,7 +52,7 @@ internal abstract class TreeNode : ViewModelBase, IDisposable
     public string Classes
     {
         get => _classes;
-        private set => RaiseAndSetIfChanged(ref _classes, value);
+        private set => SetProperty(ref _classes, value);
     }
 
     public string? ElementName
@@ -68,7 +68,7 @@ internal abstract class TreeNode : ViewModelBase, IDisposable
     public bool IsExpanded
     {
         get => _isExpanded;
-        set => RaiseAndSetIfChanged(ref _isExpanded, value);
+        set => SetProperty(ref _isExpanded, value);
     }
 
     public TreeNode? Parent

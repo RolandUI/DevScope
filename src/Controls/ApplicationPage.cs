@@ -6,6 +6,9 @@ namespace ClassicDiagnostics.Avalonia.Controls;
 
 internal class ApplicationPage : TopLevelGroup, ICloseable, IDisposable
 {
+    private readonly EventHandler<Lifetimes.ControlledApplicationLifetimeExitEventArgs>? _controlledExitHandler;
+    private readonly Lifetimes.IControlledApplicationLifetime? _controlledLifetime;
+    private bool _isDisposed;
 
     public readonly static StyledProperty<ThemeVariant?> RequestedThemeVariantProperty =
         ThemeVariantScope.RequestedThemeVariantProperty.AddOwner<ApplicationPage>();
@@ -17,13 +20,12 @@ internal class ApplicationPage : TopLevelGroup, ICloseable, IDisposable
 
         if (this.Instance.ApplicationLifetime is Lifetimes.IControlledApplicationLifetime controller)
         {
-            EventHandler<Lifetimes.ControlledApplicationLifetimeExitEventArgs> eh = default!;
-            eh = (s, e) =>
+            _controlledLifetime = controller;
+            _controlledExitHandler = (s, e) =>
             {
-                controller.Exit -= eh;
                 Closed?.Invoke(s, e);
             };
-            controller.Exit += eh;
+            controller.Exit += _controlledExitHandler;
         }
         RendererRoot = application.ApplicationLifetime switch
         {
@@ -103,9 +105,24 @@ internal class ApplicationPage : TopLevelGroup, ICloseable, IDisposable
 
     public event EventHandler? Closed;
 
-    public void Dispose()
+    public override void Dispose()
     {
+        if (_isDisposed)
+        {
+            return;
+        }
+
         Instance.PropertyChanged -= ApplicationPageOnPropertyChanged;
+
+        // The application outlives this synthetic root; keeping Exit subscribed would keep
+        // the DevTools view model graph alive after the diagnostics window is closed.
+        if (_controlledLifetime is not null && _controlledExitHandler is not null)
+        {
+            _controlledLifetime.Exit -= _controlledExitHandler;
+        }
+
+        base.Dispose();
+        _isDisposed = true;
     }
 
     private void ApplicationPageOnPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)

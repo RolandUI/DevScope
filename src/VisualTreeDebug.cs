@@ -27,9 +27,9 @@ public static class VisualTreeDebug
             builder.Append(" ");
             builder.AppendLine(control.Classes.ToString());
 
-            foreach (var property in AvaloniaPropertyRegistry.Instance.GetRegistered(control))
+            foreach (var property in AvaloniaPrivateApi.Current.GetRegisteredProperties(control))
             {
-                var value = control.GetDiagnostic(property);
+                var value = AvaloniaPrivateApi.Current.GetDiagnosticValue(control, property);
 
                 if (value.Priority != BindingPriority.Unset)
                 {

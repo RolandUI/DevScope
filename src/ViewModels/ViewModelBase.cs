@@ -6,28 +6,13 @@ namespace ClassicDiagnostics.Avalonia.ViewModels;
 
 internal class ViewModelBase : INotifyPropertyChanged
 {
-    private readonly List<string> events = new();
-    private PropertyChangedEventHandler? _propertyChanged;
-
-    public event PropertyChangedEventHandler? PropertyChanged
-    {
-        add
-        {
-            _propertyChanged += value;
-            events.Add("added");
-        }
-        remove
-        {
-            _propertyChanged -= value;
-            events.Add("removed");
-        }
-    }
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
     {
     }
 
-    protected bool RaiseAndSetIfChanged<T>([NotNullIfNotNull("value")] ref T field, T value, [CallerMemberName] string? propertyName = null)
+    protected bool SetProperty<T>([NotNullIfNotNull("value")] ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
         if (!EqualityComparer<T>.Default.Equals(field, value))
         {
@@ -43,6 +28,6 @@ internal class ViewModelBase : INotifyPropertyChanged
     {
         var e = new PropertyChangedEventArgs(propertyName);
         OnPropertyChanged(e);
-        _propertyChanged?.Invoke(this, e);
+        PropertyChanged?.Invoke(this, e);
     }
 }

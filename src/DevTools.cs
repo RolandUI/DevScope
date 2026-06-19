@@ -53,7 +53,7 @@ internal static class DevTools
     {
         var openedDisposable = new SerialDisposableValue();
         var result = new CompositeDisposable(2);
-        result.Add(openedDisposable);
+        openedDisposable.AddTo(result);
 
         // Skip if call on Design Mode
         if (!Design.IsDesignMode)
@@ -67,8 +67,7 @@ internal static class DevTools
 
             if (application.InputManager is not null)
             {
-                result.Add(
-                    application.InputManager.PreProcess.Subscribe(e =>
+                application.InputManager.PreProcess.Subscribe(e =>
                     {
                         var owner = lifeTime.MainWindow;
 
@@ -84,7 +83,8 @@ internal static class DevTools
                                     application);
                             e.Handled = true;
                         }
-                    }));
+                    })
+                    .AddTo(result);
             }
         }
         return result;

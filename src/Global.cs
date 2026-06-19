@@ -7,3 +7,4 @@ global using Avalonia.Input;
 global using Avalonia.Reactive;
 global using Avalonia.Styling;
 global using Avalonia.Utilities;
+global using ClassicDiagnostics.Avalonia.Extensions;

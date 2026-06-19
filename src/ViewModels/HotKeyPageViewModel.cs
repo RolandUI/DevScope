@@ -6,11 +6,10 @@ internal record HotKeyDescription(string Gesture, string BriefDescription, strin
 
 internal class HotKeyPageViewModel : ViewModelBase
 {
-    private ObservableCollection<HotKeyDescription>? _hotKeyDescriptions;
     public ObservableCollection<HotKeyDescription>? HotKeyDescriptions
     {
-        get => _hotKeyDescriptions;
-        private set => RaiseAndSetIfChanged(ref _hotKeyDescriptions, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public void SetOptions(DevToolsOptions options)

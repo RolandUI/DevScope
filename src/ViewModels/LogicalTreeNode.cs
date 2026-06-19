@@ -22,20 +22,12 @@ internal class LogicalTreeNode : TreeNode
 
     public static LogicalTreeNode[] Create(object control)
     {
-        var logical = control as AvaloniaObject;
-        return logical != null ? new[] { new LogicalTreeNode(logical, null) } : Array.Empty<LogicalTreeNode>();
+        return control is AvaloniaObject logical ? [new LogicalTreeNode(logical, null)] : [];
     }
 
-    internal class LogicalTreeNodeCollection : TreeNodeCollection
+    internal class LogicalTreeNodeCollection(TreeNode owner, ILogical control) : TreeNodeCollection(owner)
     {
-        private readonly ILogical _control;
         private IDisposable? _subscription;
-
-        public LogicalTreeNodeCollection(TreeNode owner, ILogical control)
-            : base(owner)
-        {
-            _control = control;
-        }
 
         public override void Dispose()
         {
@@ -45,64 +37,54 @@ internal class LogicalTreeNode : TreeNode
 
         protected override void Initialize(AvaloniaList<TreeNode> nodes)
         {
-            _subscription = _control.LogicalChildren.ForEachItem(
+            _subscription = control.LogicalChildren.ForEachItem(
                 (i, item) => nodes.Insert(i, new LogicalTreeNode((AvaloniaObject)item, Owner)),
                 (i, item) => nodes.RemoveAt(i),
-                () => nodes.Clear());
+                nodes.Clear);
         }
     }
 
-    internal class TopLevelGroupHostLogical : TreeNodeCollection
+    internal class TopLevelGroupHostLogical(TreeNode owner, TopLevelGroup group) : TreeNodeCollection(owner)
     {
-        private readonly TopLevelGroup _group;
         private readonly List<IDisposable> _subscriptions = [];
-
-        public TopLevelGroupHostLogical(TreeNode owner, TopLevelGroup host) : base(owner)
-        {
-            _group = host;
-        }
 
         protected override void Initialize(AvaloniaList<TreeNode> nodes)
         {
-            for (var i = 0; i < _group.Items.Count; i++)
+            foreach (var window in group.Items)
             {
-                var window = _group.Items[i];
-                if (window is MainWindow)
-                {
-                    continue;
-                }
+                if (window is MainWindow) continue;
+
                 nodes.Add(new LogicalTreeNode(window, Owner));
             }
 
             void GroupOnAdded(object? sender, TopLevel e)
             {
-                if (e is MainWindow)
-                {
-                    return;
-                }
+                if (e is MainWindow) return;
 
                 nodes.Add(new LogicalTreeNode(e, Owner));
             }
 
             void GroupOnRemoved(object? sender, TopLevel e)
             {
-                if (e is MainWindow)
-                {
-                    return;
-                }
+                if (e is MainWindow) return;
 
-                nodes.Add(new LogicalTreeNode(e, Owner));
+                var node = nodes.FirstOrDefault(x => ReferenceEquals(x.Visual, e));
+                if (node is not null)
+                {
+                    nodes.Remove(node);
+                    node.Dispose();
+                }
             }
 
-            _group.Added += GroupOnAdded;
-            _group.Removed += GroupOnRemoved;
+            group.Added += GroupOnAdded;
+            group.Removed += GroupOnRemoved;
 
-            _subscriptions.Add(
-                new AnonymousDisposable(() =>
+            Disposable.Create(() =>
                 {
-                    _group.Added -= GroupOnAdded;
-                    _group.Removed -= GroupOnRemoved;
-                }));
+                    group.Added -= GroupOnAdded;
+                    group.Removed -= GroupOnRemoved;
+                })
+                .AddTo(_subscriptions);
         }
 
         public override void Dispose()
@@ -115,19 +97,5 @@ internal class LogicalTreeNode : TreeNode
 
             base.Dispose();
         }
-    }
-}
-
-file sealed class AnonymousDisposable(Action dispose) : IDisposable
-{
-    private bool _isDisposed;
-
-    public void Dispose()
-    {
-        if (_isDisposed)
-            return;
-
-        dispose();
-        _isDisposed = true;
     }
 }

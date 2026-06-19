@@ -29,21 +29,12 @@ internal class VisualTreeNode : TreeNode
 
     public static VisualTreeNode[] Create(object control)
     {
-        return control is AvaloniaObject visual ?
-            new[] { new VisualTreeNode(visual, null) } :
-            Array.Empty<VisualTreeNode>();
+        return control is AvaloniaObject visual ? [new VisualTreeNode(visual, null)] : [];
     }
 
-    internal class VisualTreeNodeCollection : TreeNodeCollection
+    private sealed class VisualTreeNodeCollection(TreeNode owner, Visual control) : TreeNodeCollection(owner)
     {
-        private readonly Visual _control;
         private readonly CompositeDisposable _subscriptions = new(2);
-
-        public VisualTreeNodeCollection(TreeNode owner, Visual control)
-            : base(owner)
-        {
-            _control = control;
-        }
 
         public override void Dispose()
         {
@@ -125,115 +116,93 @@ internal class VisualTreeNode : TreeNode
         {
             _subscriptions.Clear();
 
-            if (GetHostedPopupRootObservable(_control) is { } popupRootObservable)
+            if (GetHostedPopupRootObservable(control) is { } popupRootObservable)
             {
                 VisualTreeNode? childNode = null;
 
-                _subscriptions.Add(
-                    popupRootObservable
-                        .Subscribe(popupRoot =>
+                popupRootObservable
+                    .Subscribe(popupRoot =>
+                    {
+                        if (popupRoot != null)
                         {
-                            if (popupRoot != null)
-                            {
-                                childNode = new VisualTreeNode(
-                                    popupRoot.Value.Root,
-                                    Owner,
-                                    popupRoot.Value.CustomName);
+                            childNode = new VisualTreeNode(
+                                popupRoot.Value.Root,
+                                Owner,
+                                popupRoot.Value.CustomName);
 
-                                nodes.Add(childNode);
-                            }
-                            else if (childNode != null)
-                            {
-                                nodes.Remove(childNode);
-                            }
-                        }));
+                            nodes.Add(childNode);
+                        }
+                        else if (childNode != null)
+                        {
+                            nodes.Remove(childNode);
+                        }
+                    })
+                    .AddTo(_subscriptions);
             }
 
-            _subscriptions.Add(
-                _control.VisualChildren.ForEachItem(
+            control.VisualChildren.ForEachItem(
                     (i, item) => nodes.Insert(i, new VisualTreeNode(item, Owner)),
                     (i, item) => nodes.RemoveAt(i),
-                    () => nodes.Clear()));
+                    nodes.Clear)
+                .AddTo(_subscriptions);
         }
 
-        private struct PopupRoot
-        {
-            public PopupRoot(Control root, string? customName = null)
-            {
-                Root = root;
-                CustomName = customName;
-            }
-
-            public Control Root { get; }
-            public string? CustomName { get; }
-        }
+        private readonly record struct PopupRoot(Control Root, string? CustomName = null);
     }
 
-    internal class ApplicationHostVisuals : TreeNodeCollection
+    private sealed class ApplicationHostVisuals(TreeNode owner, ApplicationPage host) : TreeNodeCollection(owner)
     {
-        private readonly ApplicationPage applicationPage;
-        private CompositeDisposable _subscriptions = new(2);
-
-        public ApplicationHostVisuals(TreeNode owner, ApplicationPage host) :
-            base(owner)
-        {
-            applicationPage = host;
-        }
+        private readonly CompositeDisposable _subscriptions = new(2);
 
         protected override void Initialize(AvaloniaList<TreeNode> nodes)
         {
-            if (applicationPage.ApplicationLifetime is Lifetimes.ISingleViewApplicationLifetime single &&
-                single.MainView is not null)
+            switch (host.ApplicationLifetime)
             {
-                nodes.Add(new VisualTreeNode(single.MainView, Owner));
-            }
-            if (applicationPage.ApplicationLifetime is Lifetimes.IClassicDesktopStyleApplicationLifetime classic)
-            {
-
-                for (var i = 0; i < classic.Windows.Count; i++)
+                case Lifetimes.ISingleViewApplicationLifetime { MainView: not null } single:
+                    nodes.Add(new VisualTreeNode(single.MainView, Owner));
+                    break;
+                case Lifetimes.IClassicDesktopStyleApplicationLifetime classic:
                 {
-                    var window = classic.Windows[i];
-                    if (window is MainWindow)
+                    foreach (var window in classic.Windows)
                     {
-                        continue;
+                        if (window is MainWindow) continue;
+
+                        nodes.Add(new VisualTreeNode(window, Owner));
                     }
-                    nodes.Add(new VisualTreeNode(window, Owner));
-                }
-                _subscriptions = new CompositeDisposable(2)
-                {
+
+                    _subscriptions.Clear();
+
                     Window.WindowOpenedEvent.AddClassHandler(
-                        typeof(Window),
-                        (s, e) =>
-                        {
-                            if (s is MainWindow)
+                            typeof(Window),
+                            (sender, _) =>
                             {
-                                return;
-                            }
-                            nodes.Add(new VisualTreeNode((AvaloniaObject)s!, Owner));
-                        }),
+                                if (sender is MainWindow) return;
+
+                                nodes.Add(new VisualTreeNode((AvaloniaObject)sender!, Owner));
+                            })
+                        .AddTo(_subscriptions);
+
                     Window.WindowClosedEvent.AddClassHandler(
-                        typeof(Window),
-                        (s, e) =>
-                        {
-                            if (s is MainWindow)
+                            typeof(Window),
+                            (sender, _) =>
                             {
-                                return;
-                            }
-                            var item = nodes.FirstOrDefault(node => ReferenceEquals(node.Visual, s));
-                            if (!(item is null))
-                            {
-                                nodes.Remove(item);
-                            }
-                        }),
-                };
+                                if (sender is MainWindow) return;
 
-
+                                var item = nodes.FirstOrDefault(node => ReferenceEquals(node.Visual, sender));
+                                if (item is not null)
+                                {
+                                    nodes.Remove(item);
+                                }
+                            })
+                        .AddTo(_subscriptions);
+                    break;
+                }
             }
         }
 
         public override void Dispose()
         {
-            _subscriptions?.Dispose();
+            _subscriptions.Dispose();
             base.Dispose();
         }
     }

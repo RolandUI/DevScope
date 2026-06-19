@@ -64,17 +64,17 @@ internal abstract class TreeNodeCollection : IAvaloniaReadOnlyList<TreeNode>, IL
     object? IList.this[int index]
     {
         get => this[index];
-        set => throw new NotImplementedException();
+        set => throw CreateReadOnlyException();
     }
 
     int IList.Add(object? value)
     {
-        throw new NotImplementedException();
+        throw CreateReadOnlyException();
     }
 
     void IList.Clear()
     {
-        throw new NotImplementedException();
+        throw CreateReadOnlyException();
     }
 
     bool IList.Contains(object? value)
@@ -89,25 +89,30 @@ internal abstract class TreeNodeCollection : IAvaloniaReadOnlyList<TreeNode>, IL
 
     void IList.Insert(int index, object? value)
     {
-        throw new NotImplementedException();
+        throw CreateReadOnlyException();
     }
 
     void IList.Remove(object? value)
     {
-        throw new NotImplementedException();
+        throw CreateReadOnlyException();
     }
 
     void IList.RemoveAt(int index)
     {
-        throw new NotImplementedException();
+        throw CreateReadOnlyException();
     }
 
     void ICollection.CopyTo(Array array, int index)
     {
-        throw new NotImplementedException();
+        ((ICollection)EnsureInitialized()).CopyTo(array, index);
     }
 
     protected abstract void Initialize(AvaloniaList<TreeNode> nodes);
+
+    private static NotSupportedException CreateReadOnlyException()
+    {
+        return new NotSupportedException("Tree node collections are read-only through IList.");
+    }
 
     private AvaloniaList<TreeNode> EnsureInitialized()
     {

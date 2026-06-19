@@ -30,7 +30,7 @@ internal partial class MainWindow : Window, IStyleHost
             {
                 if (x is RawPointerEventArgs pointerEventArgs)
                 {
-                    _lastPointerPosition = ((PresentationSource)x.Root).PointToScreen(pointerEventArgs.Position);
+                    _lastPointerPosition = ((PresentationSource)x.Root).PointToScreen(pointerEventArgs.Position) ?? default;
                 }
                 else if (x is RawKeyEventArgs keyEventArgs && keyEventArgs.Type == RawKeyEventType.KeyDown)
                 {

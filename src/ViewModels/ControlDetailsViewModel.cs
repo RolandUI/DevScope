@@ -23,16 +23,9 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
     private readonly AvaloniaObject _avaloniaObject;
     private readonly ISet<string> _pinnedProperties;
     private readonly Stack<(string Name, object Entry)> _selectedEntitiesStack = new();
-    private string? _framesStatus;
-    private DataGridCollectionView? _propertiesView;
     private IDictionary<object, PropertyViewModel[]>? _propertyIndex;
     private object? _selectedEntity;
-    private string? _selectedEntityName;
-    private string? _selectedEntityType;
-    private PropertyViewModel? _selectedProperty;
     private bool _showImplementedInterfaces;
-    private bool _showInactiveFrames;
-    private bool _snapshotFrames;
 
     public ControlDetailsViewModel(TreePageViewModel treePage, AvaloniaObject avaloniaObject, ISet<string> pinnedProperties)
     {
@@ -60,11 +53,9 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
                 }
             }
 
-            var styleDiagnostics = styledElement.GetValueStoreDiagnostic();
-
             var clipboard = TopLevel.GetTopLevel(_avaloniaObject as Visual)?.Clipboard;
 
-            foreach (var appliedStyle in styleDiagnostics.AppliedFrames.OrderBy(s => s.Priority))
+            foreach (var appliedStyle in AvaloniaPrivateApi.Current.GetAppliedStyleFrames(styledElement).OrderBy(s => s.Priority))
             {
                 AppliedFrames.Add(new ValueFrameViewModel(styledElement, appliedStyle, clipboard));
             }
@@ -79,8 +70,8 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
 
     public DataGridCollectionView? PropertiesView
     {
-        get => _propertiesView;
-        private set => RaiseAndSetIfChanged(ref _propertiesView, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
 
     public ObservableCollection<ValueFrameViewModel> AppliedFrames { get; }
@@ -90,43 +81,43 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
     public object? SelectedEntity
     {
         get => _selectedEntity;
-        set => RaiseAndSetIfChanged(ref _selectedEntity, value);
+        set => SetProperty(ref _selectedEntity, value);
     }
 
     public string? SelectedEntityName
     {
-        get => _selectedEntityName;
-        set => RaiseAndSetIfChanged(ref _selectedEntityName, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public string? SelectedEntityType
     {
-        get => _selectedEntityType;
-        set => RaiseAndSetIfChanged(ref _selectedEntityType, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public PropertyViewModel? SelectedProperty
     {
-        get => _selectedProperty;
-        set => RaiseAndSetIfChanged(ref _selectedProperty, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool SnapshotFrames
     {
-        get => _snapshotFrames;
-        set => RaiseAndSetIfChanged(ref _snapshotFrames, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool ShowInactiveFrames
     {
-        get => _showInactiveFrames;
-        set => RaiseAndSetIfChanged(ref _showInactiveFrames, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public string? FramesStatus
     {
-        get => _framesStatus;
-        set => RaiseAndSetIfChanged(ref _framesStatus, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public ControlLayoutViewModel? Layout { get; }
@@ -191,8 +182,8 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
     {
         if (o is AvaloniaObject ao)
         {
-            return AvaloniaPropertyRegistry.Instance.GetRegistered(ao)
-                .Union(AvaloniaPropertyRegistry.Instance.GetRegisteredAttached(ao.GetType()))
+            return AvaloniaPrivateApi.Current.GetRegisteredProperties(ao)
+                .Union(AvaloniaPrivateApi.Current.GetRegisteredAttachedProperties(ao.GetType()))
                 .Select(x => new AvaloniaPropertyViewModel(ao, x));
         }
         return Enumerable.Empty<AvaloniaPropertyViewModel>();

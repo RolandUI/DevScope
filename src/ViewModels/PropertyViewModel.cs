@@ -2,7 +2,6 @@
 
 internal abstract class PropertyViewModel : ViewModelBase
 {
-    private bool _isPinned;
 
     public abstract object Key { get; }
     public abstract string Name { get; }
@@ -20,7 +19,11 @@ internal abstract class PropertyViewModel : ViewModelBase
 
     public abstract bool IsReadonly { get; }
 
-    public bool IsPinned { get => _isPinned; set => RaiseAndSetIfChanged(ref _isPinned, value); }
+    public bool IsPinned
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
 
     public string FullName => $"{GetType().Name.Replace("PropertyViewModel", "")}:{DeclaringType?.FullName}.{Name}";
     public abstract void Update();

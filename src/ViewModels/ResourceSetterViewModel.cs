@@ -3,31 +3,23 @@ using Avalonia.Media;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 
-internal class ResourceSetterViewModel : SetterViewModel
+internal class ResourceSetterViewModel(
+    AvaloniaProperty property,
+    object resourceKey,
+    object? resourceValue,
+    bool isDynamic,
+    IClipboard? clipboard
+) : SetterViewModel(property, resourceValue, clipboard)
 {
+    public object Key { get; } = resourceKey;
 
-    public ResourceSetterViewModel(
-        AvaloniaProperty property,
-        object resourceKey,
-        object? resourceValue,
-        bool isDynamic,
-        IClipboard? clipboard) : base(property, resourceValue, clipboard)
-    {
-        Key = resourceKey;
-        Tint = isDynamic ? Brushes.Orange : Brushes.Brown;
-        ValueTypeTooltip = isDynamic ? "Dynamic Resource" : "Static Resource";
-    }
+    public IBrush Tint { get; } = isDynamic ? Brushes.Orange : Brushes.Brown;
 
-    public object Key { get; }
-
-    public IBrush Tint { get; }
-
-    public string ValueTypeTooltip { get; }
+    public string ValueTypeTooltip { get; } = isDynamic ? "Dynamic Resource" : "Static Resource";
 
     public void CopyResourceKey()
     {
-        var textToCopy = Key?.ToString();
-
+        var textToCopy = Key.ToString();
         if (textToCopy is null)
         {
             return;

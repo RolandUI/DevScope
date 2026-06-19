@@ -66,13 +66,13 @@ internal class ValueFrameViewModel : ViewModelBase
     public bool IsActive
     {
         get => _isActive;
-        set => RaiseAndSetIfChanged(ref _isActive, value);
+        set => SetProperty(ref _isActive, value);
     }
 
     public bool IsVisible
     {
         get => _isVisible;
-        set => RaiseAndSetIfChanged(ref _isVisible, value);
+        set => SetProperty(ref _isVisible, value);
     }
 
     public string? Description { get; }
