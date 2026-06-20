@@ -1,5 +1,7 @@
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
+using Avalonia.VisualTree;
 using ClassicDiagnostics.Avalonia.Controls;
 using ClassicDiagnostics.Avalonia.Models;
 using ClassicDiagnostics.Avalonia.ViewModels;
@@ -41,14 +43,14 @@ internal partial class TreePageView : UserControl
 
         _hovered = item;
 
-        var visual = (item.DataContext as TreeNode)?.Visual as Visual;
+        var target = (item.DataContext as TreeNode)?.Visual;
         var shouldVisualizeMarginPadding = (DataContext as TreePageViewModel)?.MainView.ShouldVisualizeMarginPadding;
-        if (visual is null || shouldVisualizeMarginPadding is null)
+        if (target is null || shouldVisualizeMarginPadding is null)
         {
             return;
         }
 
-        _adorner = ControlHighlightAdorner.Add(visual, shouldVisualizeMarginPadding == true);
+        _adorner = AddHighlight(target, shouldVisualizeMarginPadding == true);
     }
 
     private void RemoveAdorner(object? sender, PointerEventArgs e)
@@ -110,5 +112,51 @@ internal partial class TreePageView : UserControl
             }
         }
         return sb.ToString();
+    }
+
+    private IBrush GetHighlightBrush()
+    {
+        return (DataContext as TreePageViewModel)?.MainView.FocusHighlighter ?? Brushes.Red;
+    }
+
+    private IDisposable? AddHighlight(AvaloniaObject target, bool shouldVisualizeMarginPadding)
+    {
+        if (target is TopLevel topLevel)
+        {
+            return AddTopLevelHighlight(topLevel, shouldVisualizeMarginPadding);
+        }
+
+        return target is Visual visual ?
+            ControlHighlightAdorner.Add(visual, shouldVisualizeMarginPadding) :
+            null;
+    }
+
+    private IDisposable? AddTopLevelHighlight(TopLevel topLevel, bool shouldVisualizeMarginPadding)
+    {
+        // TopLevel itself is a presentation root; its adorned bounds are often not the
+        // useful client area. Prefer the hosted content so hovering a Window/TopLevel node
+        // highlights the same object the user actually sees.
+        if (TryGetTopLevelContent(topLevel) is { } content)
+        {
+            var adorner = ControlHighlightAdorner.Add(content, shouldVisualizeMarginPadding);
+            if (adorner is not null)
+            {
+                return adorner;
+            }
+        }
+
+        return ControlHighlightAdorner.Add(topLevel, GetHighlightBrush());
+    }
+
+    private static Visual? TryGetTopLevelContent(TopLevel topLevel)
+    {
+        if (topLevel is ContentControl { Content: Visual content })
+        {
+            return content;
+        }
+
+        return topLevel.GetVisualDescendants()
+            .OfType<Control>()
+            .FirstOrDefault(control => control is not Window);
     }
 }

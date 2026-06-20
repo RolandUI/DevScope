@@ -214,9 +214,9 @@ internal class MainViewModel : ReactiveViewModelBase
         {
             renderer.Diagnostics.DebugOverlays = RendererDebugOverlays.None;
         }
-        if (_root is TopLevelGroup topLevelGroup)
+        if (_root is PresentationRootGroup presentationRootGroup)
         {
-            topLevelGroup.Dispose();
+            presentationRootGroup.Dispose();
         }
 
         base.Dispose(disposing);

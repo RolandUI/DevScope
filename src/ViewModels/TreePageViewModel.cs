@@ -8,7 +8,7 @@ internal class TreePageViewModel : ReactiveViewModelBase
     private readonly ISet<string> _pinnedProperties;
     private ControlDetailsViewModel? _details;
 
-    public TreePageViewModel(MainViewModel mainView, TreeNode[] nodes, ISet<string> pinnedProperties)
+    public TreePageViewModel(MainViewModel mainView, IReadOnlyList<TreeNode> nodes, ISet<string> pinnedProperties)
     {
         MainView = mainView;
         Nodes = nodes;
@@ -30,7 +30,7 @@ internal class TreePageViewModel : ReactiveViewModelBase
 
     public FilterViewModel SettersFilter { get; }
 
-    public TreeNode[] Nodes { get; protected set; }
+    public IReadOnlyList<TreeNode> Nodes { get; protected set; }
 
     public TreeNode? SelectedNode
     {

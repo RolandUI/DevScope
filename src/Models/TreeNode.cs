@@ -1,6 +1,7 @@
 using Avalonia.Collections;
 using Avalonia.Controls.Primitives;
 using Avalonia.Media;
+using ClassicDiagnostics.Avalonia.Controls;
 using ClassicDiagnostics.Avalonia.ViewModels;
 
 namespace ClassicDiagnostics.Avalonia.Models;
@@ -14,7 +15,7 @@ internal abstract class TreeNode : ViewModelBase, IDisposable
     {
         _classes = string.Empty;
         Parent = parent;
-        Type = customTypeName ?? avaloniaObject.GetType().Name;
+        Type = customTypeName ?? GetTypeName(avaloniaObject);
         Visual = avaloniaObject;
         FontWeight = IsRoot ? FontWeight.Bold : FontWeight.Normal;
 
@@ -38,7 +39,7 @@ internal abstract class TreeNode : ViewModelBase, IDisposable
         }
     }
 
-    private bool IsRoot => Visual is TopLevel or ContextMenu or IPopupHost;
+    private bool IsRoot => Parent is null || Visual is TopLevel or ContextMenu or IPopupHost;
 
     public FontWeight FontWeight { get; }
 
@@ -78,6 +79,13 @@ internal abstract class TreeNode : ViewModelBase, IDisposable
     {
         get;
         private set;
+    }
+
+    private static string GetTypeName(AvaloniaObject avaloniaObject)
+    {
+        return avaloniaObject is ApplicationPage applicationPage ?
+            applicationPage.DiagnosticTypeName :
+            avaloniaObject.GetType().Name;
     }
 
     public void Dispose()

@@ -13,14 +13,14 @@ internal class LogicalTreeNode : TreeNode
         Children = avaloniaObject switch
         {
             ILogical logical => new LogicalTreeNodeCollection(this, logical),
-            TopLevelGroup host => new TopLevelGroupHostLogical(this, host),
+            PresentationRootGroup host => new PresentationRootHostLogical(this, host),
             _ => TreeNodeCollection.Empty,
         };
     }
 
     public override TreeNodeCollection Children { get; }
 
-    public static LogicalTreeNode[] Create(object control)
+    public static IReadOnlyList<LogicalTreeNode> Create(object control)
     {
         return control is AvaloniaObject logical ? [new LogicalTreeNode(logical, null)] : [];
     }
@@ -44,24 +44,20 @@ internal class LogicalTreeNode : TreeNode
         }
     }
 
-    internal class TopLevelGroupHostLogical(TreeNode owner, TopLevelGroup group) : TreeNodeCollection(owner)
+    internal class PresentationRootHostLogical(TreeNode owner, PresentationRootGroup group) : TreeNodeCollection(owner)
     {
         private readonly List<IDisposable> _subscriptions = [];
 
         protected override void Initialize(AvaloniaList<TreeNode> nodes)
         {
-            foreach (var window in group.Items)
+            foreach (var root in group.Items)
             {
-                if (window is MainWindow) continue;
-
-                nodes.Add(new LogicalTreeNode(window, Owner));
+                AddRoot(nodes, root);
             }
 
             void GroupOnAdded(object? sender, TopLevel e)
             {
-                if (e is MainWindow) return;
-
-                nodes.Add(new LogicalTreeNode(e, Owner));
+                AddRoot(nodes, e);
             }
 
             void GroupOnRemoved(object? sender, TopLevel e)
@@ -85,6 +81,16 @@ internal class LogicalTreeNode : TreeNode
                     group.Removed -= GroupOnRemoved;
                 })
                 .AddTo(_subscriptions);
+        }
+
+        private void AddRoot(AvaloniaList<TreeNode> nodes, TopLevel root)
+        {
+            if (root is MainWindow)
+            {
+                return;
+            }
+
+            nodes.Add(new LogicalTreeNode(root, Owner));
         }
 
         public override void Dispose()

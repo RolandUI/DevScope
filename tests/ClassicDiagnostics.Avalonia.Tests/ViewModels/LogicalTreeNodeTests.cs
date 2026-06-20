@@ -1,14 +1,15 @@
 using System.Collections.ObjectModel;
+using Avalonia;
 using Avalonia.Controls;
 using ClassicDiagnostics.Avalonia.Controls;
-using ClassicDiagnostics.Avalonia.ViewModels;
+using ClassicDiagnostics.Avalonia.Models;
 
 namespace ClassicDiagnostics.Avalonia.Tests.ViewModels;
 
 internal sealed class LogicalTreeNodeTests
 {
     [Test]
-    public void TopLevelGroupLogicalChildrenTrackWindowCollectionChanges()
+    public void PresentationRootGroupLogicalChildrenTrackRootCollectionChanges()
     {
         AvaloniaTestFixture.RunOnUIThread(() =>
         {
@@ -20,8 +21,8 @@ internal sealed class LogicalTreeNodeTests
                 firstWindow,
                 secondWindow,
             };
-            var group = new TestTopLevelGroup(windows);
-            var host = new TopLevelGroup(group);
+            var source = new TestRootSource(windows);
+            var host = new PresentationRootGroup(source);
             var root = LogicalTreeNode.Create(host).Single();
 
             try
@@ -56,7 +57,7 @@ internal sealed class LogicalTreeNodeTests
         });
     }
 
-    private sealed class TestTopLevelGroup(ObservableCollection<TopLevel> windows) : IDevToolsTopLevelGroup
+    private sealed class TestRootSource(ObservableCollection<TopLevel> windows) : IDevToolsRootSource
     {
         public IReadOnlyList<TopLevel> Items => windows;
     }

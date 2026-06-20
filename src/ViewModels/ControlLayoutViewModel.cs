@@ -12,8 +12,8 @@ internal class ControlLayoutViewModel : ViewModelBase
     {
         _control = control;
 
-        HasPadding = AvaloniaPrivateApi.Current.IsPropertyRegistered(control, Decorator.PaddingProperty);
-        HasBorder = AvaloniaPrivateApi.Current.IsPropertyRegistered(control, Border.BorderThicknessProperty);
+        HasPadding = AvaloniaPropertyRegistry.Instance.IsRegistered(control, Decorator.PaddingProperty);
+        HasBorder = AvaloniaPropertyRegistry.Instance.IsRegistered(control, Border.BorderThicknessProperty);
 
         if (control is AvaloniaObject ao)
         {

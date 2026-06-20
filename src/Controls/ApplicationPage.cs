@@ -1,10 +1,11 @@
 ﻿using Avalonia.Controls.Templates;
 using Avalonia.Rendering;
+using ClassicDiagnostics.Avalonia.Views;
 using Lifetimes = Avalonia.Controls.ApplicationLifetimes;
 
 namespace ClassicDiagnostics.Avalonia.Controls;
 
-internal class ApplicationPage : TopLevelGroup, ICloseable
+internal class ApplicationPage : PresentationRootGroup, ICloseable
 {
     private readonly EventHandler<Lifetimes.ControlledApplicationLifetimeExitEventArgs>? _controlledExitHandler;
     private readonly Lifetimes.IControlledApplicationLifetime? _controlledLifetime;
@@ -13,8 +14,8 @@ internal class ApplicationPage : TopLevelGroup, ICloseable
     public readonly static StyledProperty<ThemeVariant?> RequestedThemeVariantProperty =
         ThemeVariantScope.RequestedThemeVariantProperty.AddOwner<ApplicationPage>();
 
-    public ApplicationPage(ClassicDesktopStyleApplicationLifetimeTopLevelGroup group, Application application)
-        : base(group)
+    public ApplicationPage(IDevToolsRootSource source, Application application)
+        : base(source)
     {
         Instance = application;
 
@@ -27,18 +28,15 @@ internal class ApplicationPage : TopLevelGroup, ICloseable
             };
             controller.Exit += _controlledExitHandler;
         }
-        RendererRoot = application.ApplicationLifetime switch
-        {
-            Lifetimes.IClassicDesktopStyleApplicationLifetime classic => classic.MainWindow?.Renderer,
-            // Lifetimes.ISingleViewApplicationLifetime single => single.MainView?.VisualRoot?.Renderer,
-            _ => null,
-        };
+        RendererRoot = GetRendererRootFromSource(source);
 
         SetCurrentValue(RequestedThemeVariantProperty, application.RequestedThemeVariant);
         Instance.PropertyChanged += ApplicationPageOnPropertyChanged;
     }
 
     internal Application Instance { get; }
+
+    internal string DiagnosticTypeName => Instance.GetType().Name;
 
     /// <summary>
     ///     Defines the <see cref="DataContext" /> property.
@@ -131,6 +129,11 @@ internal class ApplicationPage : TopLevelGroup, ICloseable
         {
             SetCurrentValue(RequestedThemeVariantProperty, e.GetNewValue<ThemeVariant>());
         }
+    }
+
+    private static IRenderer? GetRendererRootFromSource(IDevToolsRootSource source)
+    {
+        return source.Items.FirstOrDefault(root => root is not MainWindow)?.Renderer;
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)

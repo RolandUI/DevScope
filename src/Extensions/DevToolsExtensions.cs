@@ -1,85 +1,30 @@
-﻿// ReSharper disable once CheckNamespace
-namespace ClassicDiagnostics.Avalonia;
+﻿using Avalonia.Controls.Primitives;
+using ClassicDiagnostics.Avalonia.Views;
 
-/// <summary>
-///     Extension methods for attaching DevTools..
-/// </summary>
-public static class DevToolsExtensions
+namespace ClassicDiagnostics.Avalonia.Extensions;
+
+internal static class DevToolsExtensions
 {
-    /// <param name="root">The window to attach DevTools to.</param>
-    extension(TopLevel root)
+    /// <summary>
+    /// Determines whether the specified visual belongs to the DevTools window.
+    /// </summary>
+    /// <param name="visual"></param>
+    /// <returns></returns>
+    public static bool DoesBelongToDevTool(this Visual visual)
     {
-        /// <summary>
-        ///     Attaches DevTools to a window, to be opened with the F12 key.
-        /// </summary>
-        public void AttachDevTools()
+        var topLevel = TopLevel.GetTopLevel(visual);
+        while (topLevel is not null && topLevel is not MainWindow)
         {
-            DevTools.Attach(root, new DevToolsOptions());
+            if (topLevel is PopupRoot popupRoot)
+            {
+                topLevel = popupRoot.ParentTopLevel;
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        /// <summary>
-        ///     Attaches DevTools to a window, to be opened with the specified key gesture.
-        /// </summary>
-        /// <param name="gesture">The key gesture to open DevTools.</param>
-        public void AttachDevTools(KeyGesture gesture)
-        {
-            DevTools.Attach(root, gesture);
-        }
-
-        /// <summary>
-        ///     Attaches DevTools to a window, to be opened with the specified options.
-        /// </summary>
-        /// <param name="options">Additional settings of DevTools.</param>
-        public void AttachDevTools(DevToolsOptions options)
-        {
-            DevTools.Attach(root, options);
-        }
-    }
-
-    /// <param name="application">The Application to attach DevTools to.</param>
-    extension(Application application)
-    {
-        /// <summary>
-        ///     Attaches DevTools to a Application, to be opened with the specified options.
-        /// </summary>
-        public void AttachDevTools()
-        {
-            DevTools.Attach(application, new DevToolsOptions());
-        }
-
-        /// <summary>
-        ///     Attaches DevTools to a Application, to be opened with the specified options.
-        /// </summary>
-        /// <param name="options">Additional settings of DevTools.</param>
-        /// <remarks>
-        ///     Attach DevTools should only be called after application initialization is complete. A good point is
-        ///     <see cref="Application.OnFrameworkInitializationCompleted" />
-        /// </remarks>
-        /// <example>
-        ///     <code>
-        /// public class App : Application
-        /// {
-        ///    public override void OnFrameworkInitializationCompleted()
-        ///    {
-        ///       if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopLifetime)
-        ///       {
-        ///          desktopLifetime.MainWindow = new MainWindow();
-        ///       }
-        ///       else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewLifetime)
-        ///          singleViewLifetime.MainView = new MainView();
-        ///
-        ///       base.OnFrameworkInitializationCompleted();
-        ///       this.AttachDevTools(new ClassicDiagnostics.Avalonia.DevToolsOptions()
-        ///           {
-        ///              StartupScreenIndex = 1,
-        ///           });
-        ///    }
-        /// }
-        /// </code>
-        /// </example>
-        public void AttachDevTools(DevToolsOptions options)
-        {
-            DevTools.Attach(application, options);
-        }
+        return true;
     }
 }

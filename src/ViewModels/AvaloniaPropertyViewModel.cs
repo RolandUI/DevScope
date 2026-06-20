@@ -89,11 +89,10 @@ internal sealed class AvaloniaPropertyViewModel : PropertyViewModel
 
             try
             {
-                var diag = AvaloniaPrivateApi.Current.GetDiagnosticValue(_target, Property);
-
-                value = diag.Value;
+                var diagnostic = _target.GetDiagnostic(Property);
+                value = diagnostic.Value;
                 valueType = value?.GetType();
-                priority = diag.Priority;
+                priority = diagnostic.Priority;
             }
             catch (Exception e)
             {

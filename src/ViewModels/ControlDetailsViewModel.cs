@@ -176,13 +176,13 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
         }
     }
 
-    private static IEnumerable<PropertyViewModel> GetAvaloniaProperties(object o)
+    private static IEnumerable<PropertyViewModel> GetAvaloniaProperties(object obj)
     {
-        if (o is AvaloniaObject ao)
+        if (obj is AvaloniaObject avaloniaObject)
         {
-            return AvaloniaPrivateApi.Current.GetRegisteredProperties(ao)
-                .Union(AvaloniaPrivateApi.Current.GetRegisteredAttachedProperties(ao.GetType()))
-                .Select(x => new AvaloniaPropertyViewModel(ao, x));
+            return AvaloniaPropertyRegistry.Instance.GetRegistered(avaloniaObject)
+                .Union(AvaloniaPropertyRegistry.Instance.GetRegisteredAttached(avaloniaObject.GetType()))
+                .Select(x => new AvaloniaPropertyViewModel(avaloniaObject, x));
         }
 
         return [];
@@ -371,7 +371,7 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
         }
     }
 
-    protected void NavigateToProperty(object o, string? entityName)
+    protected void NavigateToProperty(object obj, string? entityName)
     {
         var oldSelectedEntity = SelectedEntity;
 
@@ -386,12 +386,12 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
                 break;
         }
 
-        SelectedEntity = o;
+        SelectedEntity = obj;
         SelectedEntityName = entityName;
-        SelectedEntityType = o.ToString();
+        SelectedEntityType = obj.ToString();
 
-        var properties = GetAvaloniaProperties(o)
-            .Concat(GetClrProperties(o, _showImplementedInterfaces))
+        var properties = GetAvaloniaProperties(obj)
+            .Concat(GetClrProperties(obj, _showImplementedInterfaces))
             .Do(p =>
             {
                 p.IsPinned = _pinnedProperties.Contains(p.FullName);
@@ -408,7 +408,7 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
         view.Filter = FilterProperty;
         PropertiesView = view;
 
-        switch (o)
+        switch (obj)
         {
             case AvaloniaObject avaloniaObject:
                 avaloniaObject.PropertyChanged += ControlPropertyChanged;

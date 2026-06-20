@@ -1,74 +1,49 @@
-﻿using Avalonia.Controls.Primitives;
-using Avalonia.Interactivity;
-using ClassicDiagnostics.Avalonia.Hosting;
-using ClassicDiagnostics.Avalonia.Views;
+﻿using ClassicDiagnostics.Avalonia.Hosting;
 using Application = Avalonia.Application;
 
 namespace ClassicDiagnostics.Avalonia;
 
-internal static class DevTools
+public static class DevTools
 {
-    private readonly static DevToolsWindowManager WindowManager = new();
-
-    public static IDisposable Attach(TopLevel root, KeyGesture gesture)
-    {
-        return Attach(
-            root,
-            new DevToolsOptions
-            {
-                Gesture = gesture,
-            });
-    }
-
-    public static IDisposable Attach(TopLevel root, DevToolsOptions options)
-    {
-        void PreviewKeyDown(object? sender, KeyEventArgs e)
-        {
-            if (options.Gesture.Matches(e))
-            {
-                Open(root, options);
-            }
-        }
-
-        return (root ?? throw new ArgumentNullException(nameof(root))).AddDisposableHandler(
-            InputElement.KeyDownEvent,
-            PreviewKeyDown,
-            RoutingStrategies.Tunnel);
-    }
-
-    public static IDisposable Open(TopLevel root, DevToolsOptions options)
-    {
-        return WindowManager.Open(root, options);
-    }
-
-    internal static IDisposable Open(IDevToolsTopLevelGroup group, DevToolsOptions options)
-    {
-        return WindowManager.Open(group, options);
-    }
-
     internal static IDisposable Attach(Application application, DevToolsOptions options)
     {
         // Keep design-mode attachment inert just like the legacy inline implementation.
-        return Design.IsDesignMode ?
-            Disposable.Empty :
-            new DevToolsApplicationSession(application, options, WindowManager);
+        return Design.IsDesignMode ? Disposable.Empty : new DevToolsApplicationSession(application, options);
     }
 
-    internal static bool DoesBelongToDevTool(this Visual v)
+    /// <summary>
+    ///     Attaches DevTools to a Application, to be opened with the specified options.
+    /// </summary>
+    /// <param name="application"></param>
+    /// <param name="options">Additional settings of DevTools.</param>
+    /// <remarks>
+    ///     Attach DevTools should only be called after application initialization is complete. A good point is
+    ///     <see cref="Application.OnFrameworkInitializationCompleted" />
+    /// </remarks>
+    /// <example>
+    ///     <code>
+    /// public class App : Application
+    /// {
+    ///    public override void OnFrameworkInitializationCompleted()
+    ///    {
+    ///       if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopLifetime)
+    ///       {
+    ///          desktopLifetime.MainWindow = new ShellWindow();
+    ///       }
+    ///       else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewLifetime)
+    ///          singleViewLifetime.MainView = new MainView();
+    ///
+    ///       base.OnFrameworkInitializationCompleted();
+    ///       this.AttachDevTools(new ClassicDiagnostics.Avalonia.DevToolsOptions()
+    ///           {
+    ///              StartupScreenIndex = 1,
+    ///           });
+    ///    }
+    /// }
+    /// </code>
+    /// </example>
+    public static void AttachDevTools(this Application application, DevToolsOptions? options = null)
     {
-        var topLevel = TopLevel.GetTopLevel(v);
-
-        while (topLevel is not null && topLevel is not MainWindow)
-        {
-            if (topLevel is PopupRoot popupRoot)
-            {
-                topLevel = popupRoot.ParentTopLevel;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        return true;
+        Attach(application, options ?? new DevToolsOptions());
     }
 }

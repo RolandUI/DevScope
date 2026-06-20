@@ -1,4 +1,3 @@
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input.Raw;
 using Application = Avalonia.Application;
 
@@ -7,30 +6,16 @@ namespace ClassicDiagnostics.Avalonia.Hosting;
 internal sealed class DevToolsApplicationSession : IDisposable
 {
     private readonly Application _application;
-    private readonly IClassicDesktopStyleApplicationLifetime _lifetime;
     private readonly DevToolsOptions _options;
-    private readonly DevToolsWindowManager _windowManager;
-    private readonly SerialDisposableValue _openedWindow = new();
+    private readonly IDevToolsRootSource _rootSource;
     private readonly IDisposable? _preProcessSubscription;
     private bool _isDisposed;
 
-    public DevToolsApplicationSession(
-        Application application,
-        DevToolsOptions options,
-        DevToolsWindowManager windowManager)
+    public DevToolsApplicationSession(Application application, DevToolsOptions options)
     {
         _application = application;
         _options = options;
-        _windowManager = windowManager;
-
-        if (_application.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime lifetime)
-        {
-            throw new ArgumentNullException(
-                nameof(application),
-                "DevTools can only attach to applications that support IClassicDesktopStyleApplicationLifetime.");
-        }
-
-        _lifetime = lifetime;
+        _rootSource = DevToolsRootSources.Create(_application);
 
         // The input manager belongs to the application lifetime. This session owns the
         // subscription so AttachDevTools() callers can detach without leaving F12 handlers alive.
@@ -45,7 +30,6 @@ internal sealed class DevToolsApplicationSession : IDisposable
         }
 
         _preProcessSubscription?.Dispose();
-        _openedWindow.Dispose();
         _isDisposed = true;
     }
 
@@ -58,39 +42,7 @@ internal sealed class DevToolsApplicationSession : IDisposable
             return;
         }
 
-        var owner = _lifetime.MainWindow;
-        _openedWindow.Disposable = _windowManager.Open(
-            new ClassicDesktopStyleApplicationLifetimeTopLevelGroup(_lifetime),
-            _options,
-            owner,
-            _application);
+        DevToolsWindowHost.ShowOrActivate(_rootSource, _options, _application);
         e.Handled = true;
-    }
-    private sealed class SerialDisposableValue : IDisposable
-    {
-        private readonly object _sync = new();
-        private IDisposable? _disposable;
-
-        public IDisposable? Disposable
-        {
-            get => _disposable;
-            set
-            {
-                lock (_sync)
-                {
-                    _disposable?.Dispose();
-                    _disposable = value;
-                }
-            }
-        }
-
-        public void Dispose()
-        {
-            lock (_sync)
-            {
-                _disposable?.Dispose();
-                _disposable = null;
-            }
-        }
     }
 }

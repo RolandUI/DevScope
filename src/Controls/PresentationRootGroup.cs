@@ -1,18 +1,18 @@
-﻿using System.Collections.Specialized;
+using System.Collections.Specialized;
 
 namespace ClassicDiagnostics.Avalonia.Controls;
 
-internal class TopLevelGroup : AvaloniaObject, IDisposable
+internal class PresentationRootGroup : AvaloniaObject, IDisposable
 {
     private readonly NotifyCollectionChangedEventHandler? _collectionChangedHandler;
     private readonly INotifyCollectionChanged? _collectionChangedSource;
     private bool _isDisposed;
 
-    public TopLevelGroup(IDevToolsTopLevelGroup group)
+    public PresentationRootGroup(IDevToolsRootSource source)
     {
-        Group = group;
+        Source = source;
 
-        if (Group.Items is INotifyCollectionChanged notifyCollectionChanged)
+        if (Source.Items is INotifyCollectionChanged notifyCollectionChanged)
         {
             _collectionChangedSource = notifyCollectionChanged;
             _collectionChangedHandler = OnCollectionChanged;
@@ -20,9 +20,9 @@ internal class TopLevelGroup : AvaloniaObject, IDisposable
         }
     }
 
-    public IDevToolsTopLevelGroup Group { get; }
+    public IDevToolsRootSource Source { get; }
 
-    public IReadOnlyList<TopLevel> Items => Group.Items;
+    public IReadOnlyList<TopLevel> Items => Source.Items;
     public event EventHandler<TopLevel>? Added;
     public event EventHandler<TopLevel>? Removed;
 
@@ -33,8 +33,8 @@ internal class TopLevelGroup : AvaloniaObject, IDisposable
             return;
         }
 
-        // The application lifetime owns this collection, so a live subscription would keep
-        // the transient DevTools root reachable after its window is closed.
+        // Presentation roots are owned by the host application lifetime. The DevTools host
+        // only borrows their collection, so the subscription must die with this synthetic root.
         if (_collectionChangedSource is not null && _collectionChangedHandler is not null)
         {
             _collectionChangedSource.CollectionChanged -= _collectionChangedHandler;
@@ -47,7 +47,7 @@ internal class TopLevelGroup : AvaloniaObject, IDisposable
     {
         if (args.OldItems is not null)
         {
-            foreach (TopLevel oldItem in args.OldItems)
+            foreach (var oldItem in args.OldItems.OfType<TopLevel>())
             {
                 Removed?.Invoke(this, oldItem);
             }
@@ -55,7 +55,7 @@ internal class TopLevelGroup : AvaloniaObject, IDisposable
 
         if (args.NewItems is not null)
         {
-            foreach (TopLevel newItem in args.NewItems)
+            foreach (var newItem in args.NewItems.OfType<TopLevel>())
             {
                 Added?.Invoke(this, newItem);
             }

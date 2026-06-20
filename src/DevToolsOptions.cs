@@ -13,10 +13,13 @@ public class DevToolsOptions
     public KeyGesture Gesture { get; set; } = new(Key.F12);
 
     /// <summary>
-    ///     Gets or sets a value indicating whether DevTools should be displayed as a child window
-    ///     of the window being inspected. The default value is true.
+    ///     Gets or sets the legacy owner-window display preference.
     /// </summary>
-    /// <remarks>This setting is ignored if DevTools is attached to <see cref="Application" /></remarks>
+    /// <remarks>
+    ///     DevTools now uses one global ownerless diagnostics window, so this option is kept only
+    ///     for source compatibility with older setup code.
+    /// </remarks>
+    [Obsolete("DevTools now uses one global ownerless diagnostics window; this option is ignored.")]
     public bool ShowAsChildWindow { get; set; } = true;
 
     /// <summary>

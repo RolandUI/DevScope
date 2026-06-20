@@ -3,7 +3,6 @@ using Avalonia.Controls.Diagnostics;
 using Avalonia.Controls.Primitives;
 using ClassicDiagnostics.Avalonia.Controls;
 using ClassicDiagnostics.Avalonia.Views;
-using Lifetimes = Avalonia.Controls.ApplicationLifetimes;
 
 namespace ClassicDiagnostics.Avalonia.Models;
 
@@ -15,7 +14,7 @@ internal class VisualTreeNode : TreeNode
         Children = avaloniaObject switch
         {
             Visual visual => new VisualTreeNodeCollection(this, visual),
-            ApplicationPage host => new ApplicationHostVisuals(this, host),
+            PresentationRootGroup host => new PresentationRootHostVisuals(this, host),
             _ => TreeNodeCollection.Empty,
         };
 
@@ -27,7 +26,7 @@ internal class VisualTreeNode : TreeNode
 
     public override TreeNodeCollection Children { get; }
 
-    public static VisualTreeNode[] Create(object control)
+    public static IReadOnlyList<VisualTreeNode> Create(object control)
     {
         return control is AvaloniaObject visual ? [new VisualTreeNode(visual, null)] : [];
     }
@@ -150,54 +149,55 @@ internal class VisualTreeNode : TreeNode
         private readonly record struct PopupRoot(Control Root, string? CustomName = null);
     }
 
-    private sealed class ApplicationHostVisuals(TreeNode owner, ApplicationPage host) : TreeNodeCollection(owner)
+    private sealed class PresentationRootHostVisuals(TreeNode owner, PresentationRootGroup host) : TreeNodeCollection(owner)
     {
         private readonly CompositeDisposable _subscriptions = new(2);
 
         protected override void Initialize(AvaloniaList<TreeNode> nodes)
         {
-            switch (host.ApplicationLifetime)
+            _subscriptions.Clear();
+
+            foreach (var root in host.Items)
             {
-                case Lifetimes.ISingleViewApplicationLifetime { MainView: not null } single:
-                    nodes.Add(new VisualTreeNode(single.MainView, Owner));
-                    break;
-                case Lifetimes.IClassicDesktopStyleApplicationLifetime classic:
+                AddRoot(nodes, root);
+            }
+
+            void GroupOnAdded(object? sender, TopLevel e)
+            {
+                AddRoot(nodes, e);
+            }
+
+            void GroupOnRemoved(object? sender, TopLevel e)
+            {
+                if (e is MainWindow) return;
+
+                var item = nodes.FirstOrDefault(node => ReferenceEquals(node.Visual, e));
+                if (item is not null)
                 {
-                    foreach (var window in classic.Windows)
-                    {
-                        if (window is MainWindow) continue;
-
-                        nodes.Add(new VisualTreeNode(window, Owner));
-                    }
-
-                    _subscriptions.Clear();
-
-                    Window.WindowOpenedEvent.AddClassHandler(
-                            typeof(Window),
-                            (sender, _) =>
-                            {
-                                if (sender is MainWindow) return;
-
-                                nodes.Add(new VisualTreeNode((AvaloniaObject)sender!, Owner));
-                            })
-                        .AddTo(_subscriptions);
-
-                    Window.WindowClosedEvent.AddClassHandler(
-                            typeof(Window),
-                            (sender, _) =>
-                            {
-                                if (sender is MainWindow) return;
-
-                                var item = nodes.FirstOrDefault(node => ReferenceEquals(node.Visual, sender));
-                                if (item is not null)
-                                {
-                                    nodes.Remove(item);
-                                }
-                            })
-                        .AddTo(_subscriptions);
-                    break;
+                    nodes.Remove(item);
+                    item.Dispose();
                 }
             }
+
+            host.Added += GroupOnAdded;
+            host.Removed += GroupOnRemoved;
+
+            Disposable.Create(() =>
+                {
+                    host.Added -= GroupOnAdded;
+                    host.Removed -= GroupOnRemoved;
+                })
+                .AddTo(_subscriptions);
+        }
+
+        private void AddRoot(AvaloniaList<TreeNode> nodes, TopLevel root)
+        {
+            if (root is MainWindow)
+            {
+                return;
+            }
+
+            nodes.Add(new VisualTreeNode(root, Owner));
         }
 
         public override void Dispose()
