@@ -15,10 +15,7 @@ public sealed class FilePickerHandler : BaseRenderToStreamHandler
     /// <summary>
     ///     Instance FilePickerHandler
     /// </summary>
-    public FilePickerHandler() : this(null)
-    {
-
-    }
+    public FilePickerHandler() : this(null) { }
 
     /// <summary>
     ///     Instance FilePickerHandler with specificated parameter

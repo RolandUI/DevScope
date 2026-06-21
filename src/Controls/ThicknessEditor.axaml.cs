@@ -1,3 +1,5 @@
+using System.Globalization;
+using Avalonia.Controls.Primitives;
 using Avalonia.Media;
 
 namespace ClassicDiagnostics.Avalonia.Controls;
@@ -31,6 +33,7 @@ internal class ThicknessEditor : ContentControl
         AvaloniaProperty.Register<ThicknessEditor, IBrush>(nameof(Highlight));
 
     private bool _isUpdatingThickness;
+    private readonly CompositeDisposable _templateSubscriptions = new();
 
     public Thickness Thickness
     {
@@ -80,6 +83,18 @@ internal class ThicknessEditor : ContentControl
         set => SetValue(HighlightProperty, value);
     }
 
+    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    {
+        base.OnApplyTemplate(e);
+
+        _templateSubscriptions.Clear();
+
+        BindSideEditor(e, "PART_Left", LeftProperty);
+        BindSideEditor(e, "PART_Top", TopProperty);
+        BindSideEditor(e, "PART_Right", RightProperty);
+        BindSideEditor(e, "PART_Bottom", BottomProperty);
+    }
+
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
@@ -105,6 +120,35 @@ internal class ThicknessEditor : ContentControl
         else if (!_isUpdatingThickness && change.Property.Name is nameof(Left) or nameof(Top) or nameof(Right) or nameof(Bottom))
         {
             SetCurrentValue(ThicknessProperty, new Thickness(Left, Top, Right, Bottom));
+        }
+    }
+
+    private void BindSideEditor(
+        TemplateAppliedEventArgs template,
+        string partName,
+        StyledProperty<double> property)
+    {
+        if (template.NameScope.Find<CommitTextBox>(partName) is not { } editor)
+        {
+            return;
+        }
+
+        editor.CommitRequested += CommitRequested;
+        Disposable.Create(() => editor.CommitRequested -= CommitRequested)
+            .DisposeWith(_templateSubscriptions);
+
+        return;
+
+        void CommitRequested(object? sender, CommitTextBoxCommitEventArgs e)
+        {
+            if (double.TryParse(e.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value))
+            {
+                SetCurrentValue(property, value);
+                return;
+            }
+
+            e.Cancel = true;
+            DataValidationErrors.SetError(editor, new FormatException("Value must be a number."));
         }
     }
 }

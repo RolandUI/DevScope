@@ -2,12 +2,14 @@
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 
-namespace ClassicDiagnostics.Avalonia.Converters;
+namespace ClassicDiagnostics.Avalonia.ValueConverters;
 
 internal class BrushSelectorConverter : AvaloniaObject, IValueConverter
 {
     public readonly static DirectProperty<BrushSelectorConverter, IBrush?> BrushProperty =
         AvaloniaProperty.RegisterDirect<BrushSelectorConverter, IBrush?>(nameof(Brush), o => o.Brush, (o, v) => o.Brush = v);
+
+    public static BrushSelectorConverter Shared { get; } = new();
 
     public IBrush? Brush { get; set; }
 

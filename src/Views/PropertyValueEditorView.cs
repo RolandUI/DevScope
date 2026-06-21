@@ -1,20 +1,22 @@
-﻿using System.ComponentModel;
 using System.Globalization;
-using System.Reflection;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Data.Converters;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml.Converters;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 using ClassicDiagnostics.Avalonia.Controls;
+using ClassicDiagnostics.Avalonia.Properties;
 using ClassicDiagnostics.Avalonia.ViewModels;
 using Path = Avalonia.Controls.Shapes.Path;
 
 namespace ClassicDiagnostics.Avalonia.Views;
 
-internal class PropertyValueEditorView : UserControl
+internal class PropertyValueEditorView : ReactiveUserControl<PropertyViewModel>
 {
+    private PropertyViewModel? Property => ViewModel;
+
     private readonly static Geometry ImageIcon = Geometry.Parse(
         "M12.25 6C8.79822 6 6 8.79822 6 12.25V35.75C6 37.1059 6.43174 38.3609 7.16525 39.3851L21.5252 25.0251C22.8921 23.6583 25.1081 23.6583 26.475 25.0251L40.8348 39.385C41.5683 38.3608 42 37.1058 42 35.75V12.25C42 8.79822 39.2018 6 35.75 6H12.25ZM34.5 17.5C34.5 19.7091 32.7091 21.5 30.5 21.5C28.2909 21.5 26.5 19.7091 26.5 17.5C26.5 15.2909 28.2909 13.5 30.5 13.5C32.7091 13.5 34.5 15.2909 34.5 17.5ZM39.0024 41.0881L24.7072 26.7929C24.3167 26.4024 23.6835 26.4024 23.293 26.7929L8.99769 41.0882C9.94516 41.6667 11.0587 42 12.25 42H35.75C36.9414 42 38.0549 41.6666 39.0024 41.0881Z");
 
@@ -24,7 +26,6 @@ internal class PropertyValueEditorView : UserControl
     private readonly static ColorToBrushConverter Color2Brush = new();
 
     private readonly CompositeDisposable _cleanup = new();
-    private PropertyViewModel? Property => (PropertyViewModel?)DataContext;
 
     protected override void OnDataContextChanged(EventArgs e)
     {
@@ -40,36 +41,68 @@ internal class PropertyValueEditorView : UserControl
         _cleanup.Clear();
     }
 
-    private static bool ImplementsInterface<TInterface>(Type type)
-    {
-        var interfaceType = typeof(TInterface);
-        return type == interfaceType || interfaceType.IsAssignableFrom(type);
-    }
-
     private Control? UpdateControl()
     {
         _cleanup.Clear();
 
-        if (Property?.PropertyType is not { } propertyType)
+        if (Property is not { } property)
+        {
             return null;
+        }
 
-        if (propertyType == typeof(bool))
-            return CreateControl<CheckBox>(ToggleButton.IsCheckedProperty);
+        var descriptor = PropertyEditorFactory.Default.Create(property);
+        var propertyType = descriptor.PropertyType;
 
-        //TODO: Infinity, NaN not working with NumericUpDown
-        if (IsValidNumeric(propertyType))
-            return CreateControl<NumericUpDown>(
-                NumericUpDown.ValueProperty,
-                new ValueToDecimalConverter(),
-                n =>
-                {
-                    n.Increment = 1;
-                    n.NumberFormat = new NumberFormatInfo { NumberDecimalDigits = 0 };
-                    n.ParsingNumberStyle = NumberStyles.Integer;
-                },
-                NumericUpDown.IsReadOnlyProperty);
+        switch (descriptor.Kind)
+        {
+            case PropertyEditorKind.Boolean:
+                return CreateControl<CheckBox>(ToggleButton.IsCheckedProperty);
 
-        if (propertyType == typeof(Color))
+            case PropertyEditorKind.Numeric:
+                return CreateControl<NumericUpDown>(
+                    NumericUpDown.ValueProperty,
+                    new ValueToDecimalConverter(),
+                    n =>
+                    {
+                        n.Increment = 1;
+                        n.NumberFormat = new NumberFormatInfo { NumberDecimalDigits = 0 };
+                        n.ParsingNumberStyle = NumberStyles.Integer;
+                    },
+                    NumericUpDown.IsReadOnlyProperty);
+
+            case PropertyEditorKind.Color:
+                return CreateColorEditor();
+
+            case PropertyEditorKind.Brush:
+                return CreateControl<BrushEditor>(BrushEditor.BrushProperty);
+
+            case PropertyEditorKind.Image:
+            case PropertyEditorKind.Geometry:
+                return CreatePreviewEditor(descriptor.Kind);
+
+            case PropertyEditorKind.Enum:
+                return CreateControl<ComboBox>(
+                    SelectingItemsControl.SelectedItemProperty,
+                    init: c =>
+                    {
+                        c.ItemsSource = Enum.GetValues(propertyType);
+                    });
+
+            case PropertyEditorKind.FlagsEnum:
+                return CreateFlagsEnumEditor(descriptor);
+
+            case PropertyEditorKind.Text:
+            case PropertyEditorKind.ReadOnlyText:
+                return CreateTextEditor(descriptor);
+
+            case PropertyEditorKind.ComplexObject:
+                return CreateNavigateButton(descriptor);
+
+            default:
+                return null;
+        }
+
+        Control CreateColorEditor()
         {
             var el = new Ellipse { Width = 12, Height = 12, VerticalAlignment = VerticalAlignment.Center };
 
@@ -117,14 +150,9 @@ internal class PropertyValueEditorView : UserControl
             return sp;
         }
 
-        if (ImplementsInterface<IBrush>(propertyType))
-            return CreateControl<BrushEditor>(BrushEditor.BrushProperty);
-
-        var isImage = ImplementsInterface<IImage>(propertyType);
-        var isGeometry = propertyType == typeof(Geometry);
-
-        if (isImage || isGeometry)
+        Control CreatePreviewEditor(PropertyEditorKind kind)
         {
+            var isImage = kind == PropertyEditorKind.Image;
             var valueObservable = Property.GetObservable(x => x.Value);
             var tbl = new TextBlock { VerticalAlignment = VerticalAlignment.Center };
 
@@ -188,47 +216,168 @@ internal class PropertyValueEditorView : UserControl
             return sp;
         }
 
-        if (propertyType.IsEnum)
-            return CreateControl<ComboBox>(
-                SelectingItemsControl.SelectedItemProperty,
-                init: c =>
-                {
-                    c.ItemsSource = Enum.GetValues(propertyType);
-                });
-
-        var tb = CreateControl<CommitTextBox>(
-            CommitTextBox.CommittedTextProperty,
-            new TextToValueConverter(),
-            t =>
-            {
-                t.PlaceholderText = "(null)";
-            },
-            TextBox.IsReadOnlyProperty);
-
-        tb.IsReadOnly |= propertyType == typeof(object) ||
-            !StringConversionHelper.CanConvertFromString(propertyType);
-
-        if (!tb.IsReadOnly)
+        CommitTextBox CreateTextEditor(PropertyEditorDescriptor textDescriptor)
         {
-            tb.GetObservable(TextBox.TextProperty).Subscribe(t =>
-            {
-                try
+            var tb = CreateControl<CommitTextBox>(
+                CommitTextBox.CommittedTextProperty,
+                new TextToValueConverter(),
+                t =>
                 {
-                    if (t != null)
-                    {
-                        StringConversionHelper.FromString(t, propertyType);
-                    }
+                    t.PlaceholderText = "(null)";
+                },
+                TextBox.IsReadOnlyProperty);
 
-                    DataValidationErrors.ClearErrors(tb);
-                }
-                catch (Exception ex)
+            tb.IsReadOnly |= !textDescriptor.CanEdit;
+
+            if (!tb.IsReadOnly)
+            {
+                tb.GetObservable(TextBox.TextProperty).Subscribe(t =>
                 {
-                    DataValidationErrors.SetError(tb, ex.GetBaseException());
-                }
-            }).DisposeWith(_cleanup);
+                    try
+                    {
+                        if (t != null)
+                        {
+                            PropertyStringConversion.FromString(t, propertyType);
+                        }
+
+                        DataValidationErrors.ClearErrors(tb);
+                    }
+                    catch (Exception ex)
+                    {
+                        DataValidationErrors.SetError(tb, ex.GetBaseException());
+                    }
+                }).DisposeWith(_cleanup);
+            }
+
+            return tb;
         }
 
-        return tb;
+        Control CreateNavigateButton(PropertyEditorDescriptor valueDescriptor)
+        {
+            var text = new TextBlock
+            {
+                TextTrimming = TextTrimming.PrefixCharacterEllipsis,
+            };
+
+            text.Bind(
+                    TextBlock.TextProperty,
+                    new Binding(nameof(Property.Value))
+                    {
+                        Source = Property,
+                        Converter = new TextToValueConverter(),
+                    })
+                .DisposeWith(_cleanup);
+
+            var button = new Button
+            {
+                Content = text,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                IsEnabled = valueDescriptor.CanNavigate,
+                HorizontalContentAlignment = HorizontalAlignment.Stretch,
+            };
+
+            button.Bind(
+                    ToolTip.TipProperty,
+                    new Binding(nameof(Property.Value))
+                    {
+                        Source = Property,
+                        Converter = new TextToValueConverter(),
+                    })
+                .DisposeWith(_cleanup);
+
+            button.Click += (_, _) =>
+            {
+                var details = this.FindAncestorOfType<ControlPropertiesView>()?.ViewModel ??
+                    this.FindAncestorOfType<ControlDetailsView>()?.ViewModel;
+
+                if (details is null)
+                {
+                    return;
+                }
+
+                details.SelectedProperty = property;
+                details.NavigateToSelectedProperty();
+            };
+
+            return button;
+        }
+
+        Control CreateFlagsEnumEditor(PropertyEditorDescriptor flagsDescriptor)
+        {
+            var model = new FlagsEnumEditorModel(flagsDescriptor.PropertyType);
+            var checkBoxes = new List<CheckBox>();
+            var isRefreshing = false;
+            var button = new Button
+            {
+                IsEnabled = flagsDescriptor.CanEdit,
+            };
+
+            button.Bind(
+                    ContentControl.ContentProperty,
+                    new Binding(nameof(Property.Value)) { Source = Property })
+                .DisposeWith(_cleanup);
+
+            var optionsPanel = new StackPanel
+            {
+                Margin = new Thickness(4),
+                Spacing = 2,
+            };
+
+            foreach (var option in model.Options)
+            {
+                var checkBox = new CheckBox
+                {
+                    Content = option.Name,
+                    IsChecked = model.IsSelected(property.Value, option),
+                };
+
+                checkBox.PropertyChanged += OptionChanged;
+                checkBoxes.Add(checkBox);
+                optionsPanel.Children.Add(checkBox);
+
+                void OptionChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+                {
+                    if (isRefreshing || e.Property != ToggleButton.IsCheckedProperty)
+                    {
+                        return;
+                    }
+
+                    property.Value = model.Toggle(property.Value, option, checkBox.IsChecked == true);
+                    RefreshOptions();
+                }
+            }
+
+            var clearButton = new Button
+            {
+                Content = "Clear",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+            };
+
+            clearButton.Click += (_, _) =>
+            {
+                property.Value = model.Clear();
+                RefreshOptions();
+            };
+
+            optionsPanel.Children.Add(clearButton);
+            FlyoutBase.SetAttachedFlyout(button, new Flyout { Content = optionsPanel });
+
+            button.Click += (_, _) => FlyoutBase.ShowAttachedFlyout(button);
+
+            return button;
+
+            void RefreshOptions()
+            {
+                isRefreshing = true;
+
+                for (var i = 0; i < model.Options.Count; i++)
+                {
+                    checkBoxes[i].IsChecked = model.IsSelected(property.Value, model.Options[i]);
+                }
+
+                isRefreshing = false;
+            }
+        }
 
         TControl CreateControl<TControl>(
             AvaloniaProperty valueProperty,
@@ -263,43 +412,6 @@ internal class PropertyValueEditorView : UserControl
 
             return control;
         }
-
-        static bool IsValidNumeric(Type? type)
-        {
-            if (type == null || type.IsEnum)
-            {
-                return false;
-            }
-            var typeCode = Type.GetTypeCode(type);
-            if (typeCode == TypeCode.Object)
-            {
-                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-                {
-                    typeCode = Type.GetTypeCode(Nullable.GetUnderlyingType(type));
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            switch (typeCode)
-            {
-                case TypeCode.Byte:
-                case TypeCode.Int16:
-                case TypeCode.Int32:
-                case TypeCode.Int64:
-                case TypeCode.SByte:
-                case TypeCode.Single:
-                case TypeCode.UInt16:
-                case TypeCode.UInt32:
-                case TypeCode.UInt64:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-
     }
 
     private class ValueConverter : IValueConverter
@@ -330,88 +442,16 @@ internal class PropertyValueEditorView : UserControl
         }
     }
 
-    private static class StringConversionHelper
-    {
-        private const BindingFlags PublicStatic = BindingFlags.Public | BindingFlags.Static;
-        private readonly static Type[] StringParameter = { typeof(string) };
-        private readonly static Type[] StringFormatProviderParameters = { typeof(string), typeof(IFormatProvider) };
-
-        public static bool CanConvertFromString(Type type)
-        {
-            var converter = TypeDescriptor.GetConverter(type);
-
-            if (converter.CanConvertFrom(typeof(string)))
-                return true;
-
-            return GetParseMethod(type, out _) != null;
-        }
-
-        public static string? ToString(object o)
-        {
-            var converter = TypeDescriptor.GetConverter(o);
-
-            //CollectionConverter does not deliver any important information. It just displays "(Collection)".
-            if (!converter.CanConvertTo(typeof(string)) ||
-                converter.GetType() == typeof(CollectionConverter))
-                return o.ToString();
-
-            return converter.ConvertToInvariantString(o);
-        }
-
-        public static object? FromString(string str, Type type)
-        {
-            var converter = TypeDescriptor.GetConverter(type);
-
-            return converter.CanConvertFrom(typeof(string)) ?
-                converter.ConvertFrom(null, CultureInfo.InvariantCulture, str) :
-                InvokeParse(str, type);
-        }
-
-        private static object? InvokeParse(string s, Type targetType)
-        {
-            var m = GetParseMethod(targetType, out var hasFormat);
-
-            if (m == null)
-                throw new InvalidOperationException();
-
-            return m.Invoke(
-                null,
-                hasFormat ?
-                    new object[] { s, CultureInfo.InvariantCulture } :
-                    new object[] { s });
-        }
-
-        private static MethodInfo? GetParseMethod(Type type, out bool hasFormat)
-        {
-            var m = type.GetMethod("Parse", PublicStatic, null, StringFormatProviderParameters, null);
-
-            if (m != null)
-            {
-                hasFormat = true;
-
-                return m;
-            }
-
-            hasFormat = false;
-
-            return type.GetMethod("Parse", PublicStatic, null, StringParameter, null);
-        }
-    }
-
     private sealed class ValueToDecimalConverter : ValueConverter
     {
-        protected override object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        protected override object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            return System.Convert.ToDecimal(value);
+            return PropertyNumericConversion.ToDecimal(value);
         }
 
-        protected override object? ConvertBack(
-            object? value,
-            Type targetType,
-            object? parameter,
-            CultureInfo culture)
+        protected override object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            return System.Convert.ChangeType(value, targetType);
+            return PropertyNumericConversion.FromDecimal(value, targetType);
         }
     }
 
@@ -419,21 +459,17 @@ internal class PropertyValueEditorView : UserControl
     {
         protected override object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            return value is null ? null : StringConversionHelper.ToString(value);
+            return value is null ? null : PropertyStringConversion.ToString(value);
         }
 
-        protected override object? ConvertBack(
-            object? value,
-            Type targetType,
-            object? parameter,
-            CultureInfo culture)
+        protected override object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is not string s)
                 return null;
 
             try
             {
-                return StringConversionHelper.FromString(s, targetType);
+                return PropertyStringConversion.FromString(s, targetType);
             }
             catch
             {

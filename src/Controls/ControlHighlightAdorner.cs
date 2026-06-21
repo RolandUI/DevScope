@@ -16,11 +16,11 @@ internal class ControlHighlightAdorner : Control
             ClipToBounds = false,
             Children =
             {
-                //Padding frame
+                // Padding frame
                 new Border { BorderBrush = new SolidColorBrush(Colors.Green, 0.5) },
-                //Content frame
+                // Content frame
                 new Border { Background = new SolidColorBrush(Color.FromRgb(160, 197, 232), 0.5) },
-                //Margin frame
+                // Margin frame
                 new Border { BorderBrush = new SolidColorBrush(Colors.Yellow, 0.5) },
             },
         };

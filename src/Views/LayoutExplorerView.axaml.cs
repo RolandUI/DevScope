@@ -1,37 +1,15 @@
 ﻿using Avalonia.Controls.Shapes;
 using Avalonia.Markup.Xaml;
-using ClassicDiagnostics.Avalonia.Controls;
 
 namespace ClassicDiagnostics.Avalonia.Views;
 
 internal partial class LayoutExplorerView : UserControl
 {
-    private readonly ThicknessEditor _borderArea;
-    private readonly Border _contentArea;
-    private readonly Border _horizontalSize;
-    private readonly Rectangle _horizontalSizeBegin;
-    private readonly Rectangle _horizontalSizeEnd;
-    private readonly Grid _layoutRoot;
-    private readonly ThicknessEditor _paddingArea;
-    private readonly Border _verticalSize;
-    private readonly Rectangle _verticalSizeBegin;
-    private readonly Rectangle _verticalSizeEnd;
     private readonly CompositeDisposable _boundsSubscriptions = new();
 
     public LayoutExplorerView()
     {
         InitializeComponent();
-
-        _borderArea = this.GetControl<ThicknessEditor>("BorderArea");
-        _paddingArea = this.GetControl<ThicknessEditor>("PaddingArea");
-        _horizontalSizeBegin = this.GetControl<Rectangle>("HorizontalSizeBegin");
-        _horizontalSizeEnd = this.GetControl<Rectangle>("HorizontalSizeEnd");
-        _verticalSizeBegin = this.GetControl<Rectangle>("VerticalSizeBegin");
-        _verticalSizeEnd = this.GetControl<Rectangle>("VerticalSizeEnd");
-        _horizontalSize = this.GetControl<Border>("HorizontalSize");
-        _verticalSize = this.GetControl<Border>("VerticalSize");
-        _contentArea = this.GetControl<Border>("ContentArea");
-        _layoutRoot = this.GetControl<Grid>("LayoutRoot");
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -54,7 +32,7 @@ internal partial class LayoutExplorerView : UserControl
     {
         _boundsSubscriptions.Clear();
 
-        Visual? visual = _contentArea;
+        Visual? visual = ContentArea;
         while (visual != null && !ReferenceEquals(visual, this))
         {
             visual.GetPropertyChangedObservable(BoundsProperty)
@@ -86,41 +64,76 @@ internal partial class LayoutExplorerView : UserControl
             {
                 // Horizontal guideline
                 {
-                    var sizeArea = TranslateToRoot(
-                        GetPseudoTransformedBounds(_horizontalSize).BottomLeft,
-                        _horizontalSize);
+                    if (!TryTranslateToRoot(
+                        GetPseudoTransformedBounds(HorizontalSize).BottomLeft,
+                        HorizontalSize,
+                        out var sizeArea))
+                    {
+                        return;
+                    }
 
-                    var start = TranslateToRoot(bounds.BottomLeft, area);
-                    SetPosition(_horizontalSizeBegin, start);
+                    if (!TryTranslateToRoot(bounds.BottomLeft, area, out var start))
+                    {
+                        return;
+                    }
+                    SetPosition(HorizontalSizeBegin, start);
 
-                    var end = TranslateToRoot(bounds.BottomRight, area);
-                    SetPosition(_horizontalSizeEnd, end.WithX(end.X - 1));
+                    if (!TryTranslateToRoot(bounds.BottomRight, area, out var end))
+                    {
+                        return;
+                    }
+                    SetPosition(HorizontalSizeEnd, end.WithX(end.X - 1));
 
-                    var height = sizeArea.Y - start.Y + 2;
-                    _horizontalSizeBegin.Height = height;
-                    _horizontalSizeEnd.Height = height;
+                    var height = ClampLayoutSize(sizeArea.Y - start.Y + 2);
+                    HorizontalSizeBegin.Height = height;
+                    HorizontalSizeEnd.Height = height;
                 }
 
                 // Vertical guideline
                 {
-                    var sizeArea = TranslateToRoot(GetPseudoTransformedBounds(_verticalSize).TopRight, _verticalSize);
+                    if (!TryTranslateToRoot(
+                        GetPseudoTransformedBounds(VerticalSize).TopRight,
+                        VerticalSize,
+                        out var sizeArea))
+                    {
+                        return;
+                    }
 
-                    var start = TranslateToRoot(bounds.TopRight, area);
-                    SetPosition(_verticalSizeBegin, start);
+                    if (!TryTranslateToRoot(bounds.TopRight, area, out var start))
+                    {
+                        return;
+                    }
+                    SetPosition(VerticalSizeBegin, start);
 
-                    var end = TranslateToRoot(bounds.BottomRight, area);
-                    SetPosition(_verticalSizeEnd, end.WithY(end.Y - 1));
+                    if (!TryTranslateToRoot(bounds.BottomRight, area, out var end))
+                    {
+                        return;
+                    }
+                    SetPosition(VerticalSizeEnd, end.WithY(end.Y - 1));
 
-                    var width = sizeArea.X - start.X + 2;
-                    _verticalSizeBegin.Width = width;
-                    _verticalSizeEnd.Width = width;
+                    var width = ClampLayoutSize(sizeArea.X - start.X + 2);
+                    VerticalSizeBegin.Width = width;
+                    VerticalSizeEnd.Width = width;
                 }
             }
         }
 
-        Point TranslateToRoot(Point point, Visual from)
+        bool TryTranslateToRoot(Point point, Visual from, out Point translated)
         {
-            return from.TranslatePoint(point, _layoutRoot) ?? default;
+            translated = default;
+
+            if (from.TranslatePoint(point, LayoutRoot) is not { } result)
+            {
+                return false;
+            }
+
+            if (!double.IsFinite(result.X) || !double.IsFinite(result.Y))
+            {
+                return false;
+            }
+
+            translated = result;
+            return true;
         }
 
         static void SetPosition(Rectangle rect, Point start)
@@ -129,17 +142,22 @@ internal partial class LayoutExplorerView : UserControl
             Canvas.SetTop(rect, start.Y);
         }
 
-        if (_borderArea.IsPresent)
+        if (BorderArea.IsPresent)
         {
-            UpdateGuidelines(_borderArea);
+            UpdateGuidelines(BorderArea);
         }
-        else if (_paddingArea.IsPresent)
+        else if (PaddingArea.IsPresent)
         {
-            UpdateGuidelines(_paddingArea);
+            UpdateGuidelines(PaddingArea);
         }
         else
         {
-            UpdateGuidelines(_contentArea);
+            UpdateGuidelines(ContentArea);
         }
+    }
+
+    private static double ClampLayoutSize(double value)
+    {
+        return double.IsFinite(value) && value > 0 ? value : 0;
     }
 }

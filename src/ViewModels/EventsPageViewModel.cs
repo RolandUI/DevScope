@@ -27,8 +27,8 @@ internal class EventsPageViewModel : ReactiveViewModelBase
             .ToList();
 
         EventsFilter = new FilterViewModel();
-        EventsFilter.RefreshFilter += OnEventsFilterRefreshFilter;
-        Disposable.Create(() => EventsFilter.RefreshFilter -= OnEventsFilterRefreshFilter)
+        EventsFilter.RefreshFilter += HandleEventsFilterRefreshFilter;
+        Disposable.Create(() => EventsFilter.RefreshFilter -= HandleEventsFilterRefreshFilter)
             .AddTo(LifetimeDisposables);
 
         EnableDefault();
@@ -162,7 +162,7 @@ internal class EventsPageViewModel : ReactiveViewModelBase
         }
     }
 
-    private void OnEventsFilterRefreshFilter(object? sender, EventArgs e)
+    private void HandleEventsFilterRefreshFilter(object? sender, EventArgs e)
     {
         UpdateEventFilters();
     }

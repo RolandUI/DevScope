@@ -20,6 +20,8 @@ internal sealed class CommitTextBox : TextBox
         set => SetAndRaise(CommittedTextProperty, ref field, value);
     }
 
+    public event EventHandler<CommitTextBoxCommitEventArgs>? CommitRequested;
+
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
@@ -37,19 +39,12 @@ internal sealed class CommitTextBox : TextBox
         switch (e.Key)
         {
             case Key.Enter:
-
                 TryCommit();
-
                 e.Handled = true;
-
                 break;
-
             case Key.Escape:
-
                 Cancel();
-
                 e.Handled = true;
-
                 break;
         }
     }
@@ -69,7 +64,10 @@ internal sealed class CommitTextBox : TextBox
 
     private void TryCommit()
     {
-        if (!DataValidationErrors.GetHasErrors(this))
+        var args = new CommitTextBoxCommitEventArgs(Text);
+        CommitRequested?.Invoke(this, args);
+
+        if (!args.Cancel && !DataValidationErrors.GetHasErrors(this))
         {
             CommittedText = Text;
         }
@@ -79,4 +77,11 @@ internal sealed class CommitTextBox : TextBox
             DataValidationErrors.ClearErrors(this);
         }
     }
+}
+
+internal sealed class CommitTextBoxCommitEventArgs(string? text) : EventArgs
+{
+    public string? Text { get; } = text;
+
+    public bool Cancel { get; set; }
 }

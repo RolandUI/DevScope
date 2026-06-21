@@ -101,7 +101,7 @@ internal class FilterViewModel : ViewModelBase, INotifyDataErrorInfo
             }
             if (UseWholeWordFilter)
             {
-                pattern = $"\\b(?:{pattern})\\b";
+                pattern = $@"\b(?:{pattern})\b";
             }
 
             _filterRegex = new Regex(pattern, options);

@@ -31,4 +31,10 @@
     <IgnoresAccessChecksTo Include="Avalonia.Controls"/>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Views\ControlStylesView.axaml.cs">
+      <DependentUpon>ControlStylesView.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>

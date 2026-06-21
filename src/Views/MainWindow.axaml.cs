@@ -16,6 +16,8 @@ internal partial class MainWindow : Window, IStyleHost
     private PixelPoint _lastPointerPosition;
     private AvaloniaObject? _root;
 
+    private MainViewModel? ViewModel { get; set; }
+
     public MainWindow()
     {
         InitializeComponent();
@@ -28,23 +30,24 @@ internal partial class MainWindow : Window, IStyleHost
         _inputSubscription = InputManager.Instance?.Process
             .Subscribe(x =>
             {
-                if (x is RawPointerEventArgs pointerEventArgs)
+                switch (x)
                 {
-                    _lastPointerPosition = ((PresentationSource)x.Root).PointToScreen(pointerEventArgs.Position) ?? default;
-                }
-                else if (x is RawKeyEventArgs { Type: RawKeyEventType.KeyDown } keyEventArgs)
-                {
-                    RawKeyDown(keyEventArgs);
+                    case RawPointerEventArgs pointerEventArgs:
+                        _lastPointerPosition = ((PresentationSource)x.Root).PointToScreen(pointerEventArgs.Position) ?? default;
+                        break;
+                    case RawKeyEventArgs { Type: RawKeyEventType.KeyDown } keyEventArgs:
+                        RawKeyDown(keyEventArgs);
+                        break;
                 }
             });
 
-        _frozenPopupStates = new HashSet<Popup>();
+        _frozenPopupStates = [];
 
-        EventHandler? lh = default;
-        lh = (s, e) =>
+        EventHandler? handleWindowOpened = null;
+        handleWindowOpened = delegate
         {
-            Opened -= lh;
-            if ((DataContext as MainViewModel)?.StartupScreenIndex is { } index)
+            Opened -= handleWindowOpened;
+            if (ViewModel?.StartupScreenIndex is { } index)
             {
                 var screens = Screens;
                 if (index > -1 && index < screens.ScreenCount)
@@ -55,7 +58,7 @@ internal partial class MainWindow : Window, IStyleHost
                 }
             }
         };
-        Opened += lh;
+        Opened += handleWindowOpened;
     }
 
     public AvaloniaObject? Root
@@ -67,18 +70,20 @@ internal partial class MainWindow : Window, IStyleHost
             {
                 if (_root is ICloseable oldClosable)
                 {
-                    oldClosable.Closed -= RootClosed;
+                    oldClosable.Closed -= HandleRootClosed;
                 }
 
                 _root = value;
 
                 if (_root is ICloseable newClosable)
                 {
-                    newClosable.Closed += RootClosed;
-                    DataContext = new MainViewModel(_root);
+                    newClosable.Closed += HandleRootClosed;
+                    ViewModel = new MainViewModel(_root);
+                    DataContext = ViewModel;
                 }
                 else
                 {
+                    ViewModel = null;
                     DataContext = null;
                 }
             }
@@ -94,18 +99,19 @@ internal partial class MainWindow : Window, IStyleHost
 
         foreach (var state in _frozenPopupStates)
         {
-            state.Closing -= PopupOnClosing;
+            state.Closing -= HandlePopupClosing;
         }
 
         _frozenPopupStates.Clear();
 
         if (_root is ICloseable cloneable)
         {
-            cloneable.Closed -= RootClosed;
+            cloneable.Closed -= HandleRootClosed;
             _root = null;
         }
 
-        ((MainViewModel?)DataContext)?.Dispose();
+        ViewModel?.Dispose();
+        ViewModel = null;
     }
 
     private void InitializeComponent()
@@ -126,7 +132,7 @@ internal partial class MainWindow : Window, IStyleHost
                         return false;
                     }
 
-                    return !(x is IInputElement ie) || ie.IsHitTestVisible;
+                    return x is not IInputElement inputElement || inputElement.IsHitTestVisible;
                 })
             .FirstOrDefault();
     }
@@ -146,7 +152,7 @@ internal partial class MainWindow : Window, IStyleHost
 
         foreach (var control in root.GetVisualDescendants().OfType<Control>())
         {
-            if (control is Popup p && p.Host is PopupRoot popupRoot)
+            if (control is Popup popup && popup.Host is PopupRoot popupRoot)
             {
                 popupRoots.Add(popupRoot);
             }
@@ -163,39 +169,36 @@ internal partial class MainWindow : Window, IStyleHost
 
     private void RawKeyDown(RawKeyEventArgs e)
     {
-        if (_hotKeys is null ||
-            DataContext is not MainViewModel vm ||
-            vm.PointerOverRoot is not TopLevel root)
+        if (_hotKeys is null || ViewModel is not { PointerOverRoot: TopLevel root } mainViewModel)
         {
             return;
         }
 
-        if (root is PopupRoot pr && pr.ParentTopLevel != null)
+        if (root is PopupRoot popupRoot)
         {
-            root = pr.ParentTopLevel;
+            root = popupRoot.ParentTopLevel;
         }
 
         var modifiers = MergeModifiers(e.Key, e.Modifiers.ToKeyModifiers());
-
         if (IsMatched(_hotKeys.ValueFramesFreeze, e.Key, modifiers))
         {
-            FreezeValueFrames(vm);
+            FreezeValueFrames(mainViewModel);
         }
         else if (IsMatched(_hotKeys.ValueFramesUnfreeze, e.Key, modifiers))
         {
-            UnfreezeValueFrames(vm);
+            UnfreezeValueFrames(mainViewModel);
         }
         else if (IsMatched(_hotKeys.TogglePopupFreeze, e.Key, modifiers))
         {
-            ToggleFreezePopups(root, vm);
+            ToggleFreezePopups(root, mainViewModel);
         }
         else if (IsMatched(_hotKeys.ScreenshotSelectedControl, e.Key, modifiers))
         {
-            ScreenshotSelectedControl(vm);
+            ScreenshotSelectedControl(mainViewModel);
         }
         else if (IsMatched(_hotKeys.InspectHoveredControl, e.Key, modifiers))
         {
-            InspectHoveredControl(root, vm);
+            InspectHoveredControl(root, mainViewModel);
         }
 
         static bool IsMatched(KeyGesture gesture, Key key, KeyModifiers modifiers)
@@ -217,44 +220,44 @@ internal partial class MainWindow : Window, IStyleHost
         }
     }
 
-    private void FreezeValueFrames(MainViewModel vm)
+    private static void FreezeValueFrames(MainViewModel mainViewModel)
     {
-        vm.EnableSnapshotStyles(true);
+        mainViewModel.EnableSnapshotStyles(true);
     }
 
-    private void UnfreezeValueFrames(MainViewModel vm)
+    private static void UnfreezeValueFrames(MainViewModel mainViewModel)
     {
-        vm.EnableSnapshotStyles(false);
+        mainViewModel.EnableSnapshotStyles(false);
     }
 
-    private void ToggleFreezePopups(TopLevel root, MainViewModel vm)
+    private void ToggleFreezePopups(TopLevel root, MainViewModel mainViewModel)
     {
-        vm.FreezePopups = !vm.FreezePopups;
+        mainViewModel.FreezePopups = !mainViewModel.FreezePopups;
 
         foreach (var popupRoot in GetPopupRoots(root))
         {
             if (popupRoot.Parent is Popup popup)
             {
-                if (vm.FreezePopups)
+                if (mainViewModel.FreezePopups)
                 {
-                    popup.Closing += PopupOnClosing;
+                    popup.Closing += HandlePopupClosing;
                     _frozenPopupStates.Add(popup);
                 }
                 else
                 {
-                    popup.Closing -= PopupOnClosing;
+                    popup.Closing -= HandlePopupClosing;
                     _frozenPopupStates.Remove(popup);
                 }
             }
         }
     }
 
-    private void ScreenshotSelectedControl(MainViewModel vm)
+    private static void ScreenshotSelectedControl(MainViewModel mainViewModel)
     {
-        vm.Shot(null);
+        mainViewModel.Shot(null);
     }
 
-    private void InspectHoveredControl(TopLevel root, MainViewModel vm)
+    private void InspectHoveredControl(TopLevel root, MainViewModel mainViewModel)
     {
         Control? control = null;
 
@@ -272,20 +275,19 @@ internal partial class MainWindow : Window, IStyleHost
 
         if (control != null)
         {
-            vm.SelectControl(control);
+            mainViewModel.SelectControl(control);
         }
     }
 
-    private void PopupOnClosing(object? sender, CancelEventArgs e)
+    private void HandlePopupClosing(object? sender, CancelEventArgs e)
     {
-        var vm = (MainViewModel?)DataContext;
-        if (vm?.FreezePopups == true)
+        if (ViewModel?.FreezePopups == true)
         {
             e.Cancel = true;
         }
     }
 
-    private void RootClosed(object? sender, EventArgs e)
+    private void HandleRootClosed(object? sender, EventArgs e)
     {
         Close();
     }
@@ -294,7 +296,7 @@ internal partial class MainWindow : Window, IStyleHost
     {
         _hotKeys = options.HotKeys;
 
-        (DataContext as MainViewModel)?.SetOptions(options);
+        ViewModel?.SetOptions(options);
         if (options.ThemeVariant is { } themeVariant)
         {
             RequestedThemeVariant = themeVariant;
@@ -305,7 +307,7 @@ internal partial class MainWindow : Window, IStyleHost
     {
         if (control is not null)
         {
-            (DataContext as MainViewModel)?.SelectControl(control);
+            ViewModel?.SelectControl(control);
         }
     }
 }

@@ -1,0 +1,159 @@
+<UserControl
+  x:Class="ClassicDiagnostics.Avalonia.Views.ControlPropertiesView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="using:ClassicDiagnostics.Avalonia.Controls"
+  xmlns:local="using:ClassicDiagnostics.Avalonia.Views" xmlns:valueConverters="clr-namespace:ClassicDiagnostics.Avalonia.ValueConverters"
+  xmlns:vm="using:ClassicDiagnostics.Avalonia.ViewModels" x:Name="Main"
+  x:DataType="vm:ControlDetailsViewModel">
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="/Assets/Icons.axaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <UserControl.Styles>
+    <Style Selector="TextBlock.Pinned">
+      <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,Auto,*">
+    <Grid
+      ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+      <Button
+        Grid.RowSpan="2" Grid.Column="0"
+        Margin="0,0,4,0"
+        Command="{Binding NavigateToParentProperty}"
+        Content="^"
+        IsEnabled="{Binding CanNavigateToParentProperty}"
+        ToolTip.Tip="Navigate to parent property"/>
+      <TextBlock
+        Grid.Row="0" Grid.Column="1"
+        FontWeight="Bold"
+        Text="{Binding SelectedEntityName}"/>
+      <TextBlock
+        Grid.Row="1" Grid.Column="1"
+        FontStyle="Italic"
+        Text="{Binding SelectedEntityType}"/>
+    </Grid>
+
+    <controls:FilterTextBox
+      Grid.Row="1" BorderThickness="0"
+      DataContext="{Binding TreePage.PropertiesFilter}"
+      PlaceholderText="Filter properties"
+      Text="{Binding FilterString}"
+      UseCaseSensitiveFilter="{Binding UseCaseSensitiveFilter}"
+      UseRegexFilter="{Binding UseRegexFilter}"
+      UseWholeWordFilter="{Binding UseWholeWordFilter}"/>
+
+    <DataGrid
+      x:Name="DataGrid" Grid.Row="2"
+      BorderThickness="0" CanUserResizeColumns="true"
+      DoubleTapped="HandlePropertiesGridDoubleTapped"
+      ItemsSource="{Binding PropertiesView}"
+      RowBackground="Transparent"
+      SelectedItem="{Binding SelectedProperty, Mode=TwoWay}">
+      <DataGrid.Columns>
+        <DataGridTemplateColumn
+          x:DataType="vm:PropertyViewModel" Header="Property"
+          IsReadOnly="True">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate DataType="vm:PropertyViewModel">
+              <!--
+                The transparent background keeps empty cell space hit-testable so the pin button
+                can appear consistently while the pointer is inside the row.
+              -->
+              <DockPanel Background="Transparent">
+                <DockPanel.Styles>
+                  <Style Selector="DockPanel[IsPointerOver=False] &gt; ToggleButton">
+                    <Setter Property="IsVisible" Value="False"/>
+                  </Style>
+                </DockPanel.Styles>
+                <ToggleButton
+                  DockPanel.Dock="Right" Background="Transparent"
+                  BorderBrush="Transparent"
+                  Command="{Binding #Main.ViewModel?.TogglePinnedProperty}"
+                  CommandParameter="{Binding}"
+                  IsChecked="{Binding IsPinned}">
+                  <Panel>
+                    <Image
+                      Width="12" Height="12"
+                      IsVisible="{Binding IsPinned}"
+                      Source="{StaticResource PinIcon}"/>
+                    <Image
+                      Width="12" Height="12"
+                      IsVisible="{Binding !IsPinned}"
+                      Source="{StaticResource UnpinIcon}"/>
+                  </Panel>
+                </ToggleButton>
+                <TextBlock
+                  VerticalAlignment="Center"
+                  Classes.Pinned="{Binding IsPinned}"
+                  Text="{Binding Name}"/>
+              </DockPanel>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+        <DataGridTemplateColumn
+          Width="100" Header="Value">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate>
+              <local:PropertyValueEditorView/>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+        <DataGridTemplateColumn
+          x:DataType="vm:PropertyViewModel" Header="Type"
+          IsReadOnly="True"
+          IsVisible="{Binding !#Main.ViewModel?.TreePage.MainView.ShowDetailsPropertyType, TargetNullValue=True}">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate DataType="vm:PropertyViewModel">
+              <TextBlock
+                Text="{Binding Type}"
+                TextTrimming="{x:Static TextTrimming.PrefixCharacterEllipsis}"
+                ToolTip.Tip="{Binding TypeTooltip}"/>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+        <DataGridTemplateColumn
+          x:DataType="vm:PropertyViewModel" Header="Assigned Type"
+          IsReadOnly="True"
+          IsVisible="{Binding #Main.ViewModel?.TreePage.MainView.ShowDetailsPropertyType, TargetNullValue=False}">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate DataType="vm:PropertyViewModel">
+              <TextBlock
+                Text="{Binding AssignedType, Converter={x:Static valueConverters:GetTypeNameConverter.Shared}}"
+                TextTrimming="{x:Static TextTrimming.PrefixCharacterEllipsis}"
+                ToolTip.Tip="{Binding AssignedTypeTooltip}"/>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+        <DataGridTemplateColumn
+          x:DataType="vm:PropertyViewModel" Header="Property Type"
+          IsReadOnly="True"
+          IsVisible="{Binding #Main.ViewModel?.TreePage.MainView.ShowDetailsPropertyType, TargetNullValue=False}">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate DataType="vm:PropertyViewModel">
+              <TextBlock
+                Text="{Binding PropertyType, Converter={x:Static valueConverters:GetTypeNameConverter.Shared}}"
+                TextTrimming="{x:Static TextTrimming.PrefixCharacterEllipsis}"
+                ToolTip.Tip="{Binding PropertyTypeTooltip}"/>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+        <DataGridTextColumn
+          x:DataType="vm:PropertyViewModel"
+          Binding="{Binding Priority}"
+          Header="Priority" IsReadOnly="True"/>
+      </DataGrid.Columns>
+
+      <DataGrid.Styles>
+        <Style Selector="DataGridRow TextBox">
+          <Setter Property="SelectionBrush" Value="LightBlue"/>
+        </Style>
+      </DataGrid.Styles>
+    </DataGrid>
+  </Grid>
+</UserControl>

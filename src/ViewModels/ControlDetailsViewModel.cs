@@ -5,10 +5,11 @@ using System.Reflection;
 using Avalonia.Collections;
 using Avalonia.Controls.Metadata;
 using Avalonia.Threading;
+using ClassicDiagnostics.Avalonia.Properties;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 
-internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesChangedListener
+internal class ControlDetailsViewModel : ReactiveViewModelBase, IClassesChangedListener
 {
     // new DataGridPathGroupDescription(nameof(AvaloniaPropertyViewModel.Group))
     private readonly static IReadOnlyList<DataGridPathGroupDescription> GroupDescriptors =
@@ -22,43 +23,50 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
     ];
 
     private readonly AvaloniaObject _avaloniaObject;
-    private readonly ISet<string> _pinnedProperties;
+    private readonly IPropertyInspector _propertyInspector;
+    private readonly IPinnedPropertyStore _pinnedProperties;
     private readonly Stack<(string Name, object Entry)> _selectedEntitiesStack = new();
-    private IDictionary<object, PropertyViewModel[]>? _propertyIndex;
+    private readonly StyledElement? _styledElement;
+    private IReadOnlyDictionary<object, PropertyViewModel[]>? _propertyIndex;
     private object? _selectedEntity;
     private bool _showImplementedInterfaces;
 
-    public ControlDetailsViewModel(TreePageViewModel treePage, AvaloniaObject avaloniaObject, ISet<string> pinnedProperties)
+    public ControlDetailsViewModel(TreePageViewModel treePage, AvaloniaObject avaloniaObject, IPinnedPropertyStore pinnedProperties)
     {
         _avaloniaObject = avaloniaObject;
         _pinnedProperties = pinnedProperties;
+        _propertyInspector = PropertyInspector.Default;
+        _styledElement = avaloniaObject as StyledElement;
         TreePage = treePage;
         Layout = avaloniaObject is Visual visual ? new ControlLayoutViewModel(visual) : null;
 
         NavigateToProperty(_avaloniaObject, (_avaloniaObject as Control)?.Name ?? _avaloniaObject.ToString());
 
         AppliedFrames = [];
+        Classes = [];
         PseudoClasses = [];
 
-        if (avaloniaObject is StyledElement styledElement)
+        if (_styledElement is not null)
         {
-            styledElement.Classes.AddListener(this);
+            _styledElement.Classes.AddListener(this);
+            RefreshClasses();
 
-            var pseudoClassAttributes = styledElement.GetType().GetCustomAttributes<PseudoClassesAttribute>(true);
+            var pseudoClassAttributes = _styledElement.GetType().GetCustomAttributes<PseudoClassesAttribute>(true);
 
             foreach (var classAttribute in pseudoClassAttributes)
             {
                 foreach (var className in classAttribute.PseudoClasses)
                 {
-                    PseudoClasses.Add(new PseudoClassViewModel(className, styledElement));
+                    AddPseudoClassViewModel(className);
                 }
             }
+            AddActivePseudoClasses();
 
             var clipboard = TopLevel.GetTopLevel(_avaloniaObject as Visual)?.Clipboard;
 
-            foreach (var appliedStyle in AvaloniaPrivateApi.Current.GetAppliedStyleFrames(styledElement).OrderBy(s => s.Priority))
+            foreach (var appliedStyle in AvaloniaPrivateApi.Current.GetAppliedStyleFrames(_styledElement).OrderBy(s => s.Priority))
             {
-                AppliedFrames.Add(new ValueFrameViewModel(styledElement, appliedStyle, clipboard));
+                AppliedFrames.Add(new ValueFrameViewModel(_styledElement, appliedStyle, clipboard));
             }
 
             UpdateStyles();
@@ -77,7 +85,11 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
 
     public ObservableCollection<ValueFrameViewModel> AppliedFrames { get; }
 
+    public ObservableCollection<StyleClassViewModel> Classes { get; }
+
     public ObservableCollection<PseudoClassViewModel> PseudoClasses { get; }
+
+    public bool HasStyleClassSection => _styledElement is not null;
 
     public object? SelectedEntity
     {
@@ -123,26 +135,38 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
 
     public ControlLayoutViewModel? Layout { get; }
 
+    public string? ClassEditError
+    {
+        get;
+        private set => SetProperty(ref field, value);
+    }
+
+    public string NewClassName
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = string.Empty;
+
+    public string? PseudoClassEditError
+    {
+        get;
+        private set => SetProperty(ref field, value);
+    }
+
+    public string NewPseudoClassName
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = string.Empty;
+
     void IClassesChangedListener.Changed()
     {
+        RefreshClasses();
+        AddActivePseudoClasses();
+
         if (!SnapshotFrames)
         {
             Dispatcher.UIThread.Post(UpdateStyles);
-        }
-    }
-
-    public void Dispose()
-    {
-        if (_avaloniaObject is INotifyPropertyChanged notifyPropertyChanged)
-        {
-            notifyPropertyChanged.PropertyChanged -= ControlPropertyChanged;
-        }
-
-        _avaloniaObject.PropertyChanged -= ControlPropertyChanged;
-
-        if (_avaloniaObject is StyledElement styledElement)
-        {
-            styledElement.Classes.RemoveListener(this);
         }
     }
 
@@ -176,42 +200,113 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
         }
     }
 
-    private static IEnumerable<PropertyViewModel> GetAvaloniaProperties(object obj)
+    protected override void Dispose(bool disposing)
     {
-        if (obj is AvaloniaObject avaloniaObject)
+        if (!disposing)
         {
-            return AvaloniaPropertyRegistry.Instance.GetRegistered(avaloniaObject)
-                .Union(AvaloniaPropertyRegistry.Instance.GetRegisteredAttached(avaloniaObject.GetType()))
-                .Select(x => new AvaloniaPropertyViewModel(avaloniaObject, x));
+            base.Dispose(disposing);
+            return;
         }
 
-        return [];
+        if (_avaloniaObject is INotifyPropertyChanged notifyPropertyChanged)
+        {
+            notifyPropertyChanged.PropertyChanged -= ControlPropertyChanged;
+        }
+
+        _avaloniaObject.PropertyChanged -= ControlPropertyChanged;
+
+        if (_styledElement is not null)
+        {
+            _styledElement.Classes.RemoveListener(this);
+        }
+
+        base.Dispose(disposing);
     }
 
-    private static IEnumerable<PropertyViewModel> GetClrProperties(object o, bool showImplementedInterfaces)
+    public void AddClass()
     {
-        foreach (var p in GetClrProperties(o, o.GetType()))
+        if (_styledElement is null)
         {
-            yield return p;
+            return;
         }
 
-        if (showImplementedInterfaces)
+        var className = NormalizeClassName(NewClassName);
+        if (className.Length == 0)
         {
-            foreach (var i in o.GetType().GetInterfaces())
-            {
-                foreach (var p in GetClrProperties(o, i))
-                {
-                    yield return p;
-                }
-            }
+            ClassEditError = "Class name is required.";
+            return;
+        }
+
+        if (className.StartsWith(':'))
+        {
+            ClassEditError = "Pseudo classes must be added in the Pseudo Classes section.";
+            return;
+        }
+
+        if (_styledElement.Classes.Contains(className))
+        {
+            ClassEditError = $"Class '{className}' already exists.";
+            return;
+        }
+
+        try
+        {
+            _styledElement.Classes.Add(className);
+            NewClassName = string.Empty;
+            ClassEditError = null;
+            RefreshClasses();
+        }
+        catch (Exception exception)
+        {
+            ClassEditError = exception.Message;
+            DevToolsDiagnostics.Report(exception, $"Failed to add class '{className}'.");
         }
     }
 
-    private static IEnumerable<PropertyViewModel> GetClrProperties(object o, Type t)
+    public void AddPseudoClass()
     {
-        return t.GetProperties()
-            .Where(x => x.GetIndexParameters().Length == 0)
-            .Select(x => new ClrPropertyViewModel(o, x));
+        if (_styledElement is null)
+        {
+            return;
+        }
+
+        var pseudoClassName = NormalizePseudoClassName(NewPseudoClassName);
+        if (pseudoClassName.Length <= 1)
+        {
+            PseudoClassEditError = "Pseudo class name is required.";
+            return;
+        }
+
+        var pseudoClass = AddPseudoClassViewModel(pseudoClassName);
+        pseudoClass.IsActive = true;
+        if (pseudoClass.Error is not null)
+        {
+            PseudoClassEditError = pseudoClass.Error;
+            return;
+        }
+
+        NewPseudoClassName = string.Empty;
+        PseudoClassEditError = null;
+    }
+
+    internal void RemoveClass(StyleClassViewModel styleClass)
+    {
+        if (_styledElement is null)
+        {
+            return;
+        }
+
+        try
+        {
+            _styledElement.Classes.Remove(styleClass.Name);
+            ClassEditError = null;
+            RefreshClasses();
+        }
+        catch (Exception exception)
+        {
+            ClassEditError = exception.Message;
+            DevToolsDiagnostics.Report(exception, $"Failed to remove class '{styleClass.Name}'.");
+        }
     }
 
     private void ControlPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
@@ -299,16 +394,61 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
         FramesStatus = $"Value Frames ({activeCount}/{AppliedFrames.Count} active)";
     }
 
+    private PseudoClassViewModel AddPseudoClassViewModel(string name)
+    {
+        var normalizedName = NormalizePseudoClassName(name);
+        if (PseudoClasses.FirstOrDefault(x => x.Name == normalizedName) is { } existing)
+        {
+            return existing;
+        }
+
+        var pseudoClass = new PseudoClassViewModel(normalizedName, _styledElement!);
+        PseudoClasses.Add(pseudoClass);
+        return pseudoClass;
+    }
+
+    private void AddActivePseudoClasses()
+    {
+        if (_styledElement is null)
+        {
+            return;
+        }
+
+        foreach (var className in _styledElement.Classes.Where(x => x.StartsWith(':')))
+        {
+            AddPseudoClassViewModel(className).Update();
+        }
+    }
+
+    private void RefreshClasses()
+    {
+        if (_styledElement is null)
+        {
+            return;
+        }
+
+        Classes.Clear();
+        foreach (var className in _styledElement.Classes.Where(x => !x.StartsWith(':')).OrderBy(x => x))
+        {
+            Classes.Add(new StyleClassViewModel(className, this));
+        }
+    }
+
     private bool FilterProperty(object arg)
     {
         return !(arg is PropertyViewModel property) || TreePage.PropertiesFilter.Filter(property.Name);
     }
 
-    private static IEnumerable<PropertyInfo> GetAllPublicProperties(Type type)
+    private static string NormalizeClassName(string? className)
     {
-        return type
-            .GetProperties()
-            .Concat(type.GetInterfaces().SelectMany(i => i.GetProperties()));
+        var normalizedName = className?.Trim() ?? string.Empty;
+        return normalizedName.StartsWith('.') ? normalizedName[1..].Trim() : normalizedName;
+    }
+
+    private static string NormalizePseudoClassName(string? pseudoClassName)
+    {
+        var normalizedName = pseudoClassName?.Trim() ?? string.Empty;
+        return normalizedName.StartsWith(':') ? normalizedName : $":{normalizedName}";
     }
 
     public void NavigateToSelectedProperty()
@@ -316,34 +456,15 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
         var selectedProperty = SelectedProperty;
         var selectedEntity = SelectedEntity;
         var selectedEntityName = SelectedEntityName;
-        if (selectedEntity == null
-            || selectedProperty == null
-            || selectedProperty.PropertyType == typeof(string)
-            || selectedProperty.PropertyType.IsValueType)
+        if (selectedEntity == null || selectedProperty == null)
             return;
 
-        object? property = null;
-
-        switch (selectedProperty)
+        var property = selectedProperty.Value;
+        var descriptor = PropertyValueDescriptorFactory.Default.Create(property);
+        if (!descriptor.CanNavigate || property is null)
         {
-            case AvaloniaPropertyViewModel avaloniaProperty:
-
-                property = (_selectedEntity as Control)?.GetValue(avaloniaProperty.Property);
-
-                break;
-
-            case ClrPropertyViewModel clrProperty:
-            {
-                property = GetAllPublicProperties(selectedEntity.GetType())
-                    .FirstOrDefault(pi => clrProperty.Property == pi)?
-                    .GetValue(selectedEntity);
-
-                break;
-            }
-        }
-
-        if (property == null)
             return;
+        }
 
         _selectedEntitiesStack.Push((Name: selectedEntityName!, Entry: selectedEntity));
 
@@ -390,19 +511,13 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
         SelectedEntityName = entityName;
         SelectedEntityType = obj.ToString();
 
-        var properties = GetAvaloniaProperties(obj)
-            .Concat(GetClrProperties(obj, _showImplementedInterfaces))
-            .Do(p =>
-            {
-                p.IsPinned = _pinnedProperties.Contains(p.FullName);
-            })
-            .ToArray();
+        var inspection = _propertyInspector.Inspect(
+            obj,
+            new PropertyInspectionOptions(_showImplementedInterfaces, _pinnedProperties));
 
-        _propertyIndex = properties
-            .GroupBy(x => x.Key)
-            .ToDictionary(x => x.Key, x => x.ToArray());
+        _propertyIndex = inspection.PropertyIndex;
 
-        var view = new DataGridCollectionView(properties);
+        var view = new DataGridCollectionView(inspection.Properties);
         view.GroupDescriptions.AddRange(GroupDescriptors);
         view.SortDescriptions.AddRange(SortDescriptions);
         view.Filter = FilterProperty;
@@ -436,11 +551,11 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
             return;
         }
 
-        foreach (var o in PropertiesView)
+        foreach (var item in PropertiesView)
         {
-            if (o is AvaloniaPropertyViewModel propertyVm && propertyVm.Property == property)
+            if (item is AvaloniaPropertyViewModel propertyViewModel && propertyViewModel.Property == property)
             {
-                SelectedProperty = propertyVm;
+                SelectedProperty = propertyViewModel;
 
                 break;
             }
@@ -458,17 +573,7 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
     {
         if (parameter is PropertyViewModel model)
         {
-            var fullname = model.FullName;
-            if (!_pinnedProperties.Add(fullname))
-            {
-                _pinnedProperties.Remove(fullname);
-                model.IsPinned = false;
-            }
-            else
-            {
-                model.IsPinned = true;
-            }
-
+            model.IsPinned = _pinnedProperties.Toggle(model.FullName);
             PropertiesView?.Refresh();
         }
     }
@@ -513,10 +618,13 @@ internal class ControlDetailsViewModel : ViewModelBase, IDisposable, IClassesCha
                     return 0;
                 case "Attached Properties":
                     return 1;
-                case "CLR Properties":
+                case "Items":
+                case "Entries":
                     return 2;
-                default:
+                case "CLR Properties":
                     return 3;
+                default:
+                    return 4;
             }
         }
     }

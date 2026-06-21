@@ -1,18 +1,21 @@
 using ClassicDiagnostics.Avalonia.ViewModels;
 using ClassicDiagnostics.Avalonia.Views;
+using ClassicDiagnostics.Avalonia.Elements;
 
 namespace ClassicDiagnostics.Avalonia;
 
 internal sealed class DevToolsViewRegistry
 {
-    private readonly Dictionary<Type, Func<Control>> _factories = new();
+    private readonly Dictionary<Type, Func<object, Control>> _factories = new();
 
     public static DevToolsViewRegistry Default { get; } = CreateDefault();
 
-    public void Register<TViewModel>(Func<Control> factory)
+    public void Register<TViewModel>(Func<TViewModel, Control> factory)
         where TViewModel : ViewModelBase
     {
-        _factories[typeof(TViewModel)] = factory ?? throw new ArgumentNullException(nameof(factory));
+        ArgumentNullException.ThrowIfNull(factory);
+
+        _factories[typeof(TViewModel)] = data => factory((TViewModel)data);
     }
 
     public Control? Build(object? data)
@@ -23,17 +26,20 @@ internal sealed class DevToolsViewRegistry
         }
 
         return _factories.TryGetValue(data.GetType(), out var factory) ?
-            factory() :
+            factory(data) :
             new TextBlock { Text = $"No view registered for {data.GetType().FullName}" };
     }
 
     private static DevToolsViewRegistry CreateDefault()
     {
         var registry = new DevToolsViewRegistry();
-        registry.Register<TreePageViewModel>(() => new TreePageView());
-        registry.Register<ControlDetailsViewModel>(() => new ControlDetailsView());
-        registry.Register<EventsPageViewModel>(() => new EventsPageView());
-        registry.Register<HotKeyPageViewModel>(() => new HotKeyPageView());
+        registry.Register<ElementsPageViewModel>(viewModel => new ElementsPageView(viewModel));
+        registry.Register<TreePageViewModel>(viewModel => new TreePageView(viewModel));
+        registry.Register<ControlDetailsViewModel>(viewModel => new ControlDetailsView(viewModel));
+        registry.Register<EventsPageViewModel>(viewModel => new EventsPageView(viewModel));
+        registry.Register<HotKeyPageViewModel>(viewModel => new HotKeyPageView(viewModel));
+        registry.Register<TracePageViewModel>(viewModel => new TracePageView(viewModel));
+        registry.Register<SettingsPageViewModel>(viewModel => new SettingsPageView(viewModel));
         return registry;
     }
 }

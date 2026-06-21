@@ -7,7 +7,7 @@ namespace ClassicDiagnostics.Avalonia.Extensions;
 internal static class ReactiveExtensions
 {
     public static IObservable<TValue> GetObservable<TOwner, TValue>(
-        this TOwner vm,
+        this TOwner owner,
         Expression<Func<TOwner, TValue>> property,
         bool fireImmediately = true)
         where TOwner : INotifyPropertyChanged
@@ -18,10 +18,10 @@ internal static class ReactiveExtensions
 
             void Fire()
             {
-                o.OnNext((TValue)propertyInfo.GetValue(vm)!);
+                o.OnNext((TValue)propertyInfo.GetValue(owner)!);
             }
 
-            void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+            void HandlePropertyChanged(object? sender, PropertyChangedEventArgs e)
             {
                 if (e.PropertyName == propertyInfo.Name)
                 {
@@ -34,9 +34,9 @@ internal static class ReactiveExtensions
                 Fire();
             }
 
-            vm.PropertyChanged += OnPropertyChanged;
+            owner.PropertyChanged += HandlePropertyChanged;
 
-            return Disposable.Create(() => vm.PropertyChanged -= OnPropertyChanged);
+            return Disposable.Create(() => owner.PropertyChanged -= HandlePropertyChanged);
         });
     }
 

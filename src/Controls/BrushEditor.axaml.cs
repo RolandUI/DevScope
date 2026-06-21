@@ -10,7 +10,6 @@ namespace ClassicDiagnostics.Avalonia.Controls;
 [TemplatePart("PART_ClearButton", typeof(Button))]
 internal class BrushEditor : TemplatedControl
 {
-
     /// <summary>
     ///     Defines the <see cref="Brush" /> property.
     /// </summary>
@@ -19,13 +18,12 @@ internal class BrushEditor : TemplatedControl
             nameof(Brush),
             o => o.Brush,
             (o, v) => o.Brush = v);
+
     private readonly ColorView _colorView = new()
     {
         HexInputAlphaPosition = AlphaComponentPosition.Leading, // Always match XAML
     };
-    private readonly EventHandler<RoutedEventArgs> clearHandler;
 
-    private IBrush? _brush;
     private Button? _clearButton;
 
     public BrushEditor()
@@ -34,33 +32,32 @@ internal class BrushEditor : TemplatedControl
         _colorView.ColorChanged += (_, e) =>
         {
             // Avoid unnecessary value setters by checking if color was actually changed.
-            if (Brush is null || Brush is not ISolidColorBrush oldSolidBrush || oldSolidBrush.Color != e.NewColor)
+            if (Brush is not ISolidColorBrush oldSolidBrush || oldSolidBrush.Color != e.NewColor)
             {
                 Brush = new ImmutableSolidColorBrush(e.NewColor);
             }
         };
-        clearHandler = (s, e) => Brush = default;
     }
 
     protected override Type StyleKeyOverride => typeof(BrushEditor);
 
     public IBrush? Brush
     {
-        get => _brush;
-        set => SetAndRaise(BrushProperty, ref _brush, value);
+        get;
+        set => SetAndRaise(BrushProperty, ref field, value);
     }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
-        if (_clearButton is not null)
-        {
-            _clearButton.Click -= clearHandler;
-        }
+
+        _clearButton?.Click -= HandleClear;
         _clearButton = e.NameScope.Find<Button>("PART_ClearButton");
-        if (_clearButton is Button button)
+        _clearButton?.Click += HandleClear;
+
+        void HandleClear(object? sender, RoutedEventArgs args)
         {
-            button.Click += clearHandler;
+            Brush = null;
         }
     }
 
@@ -74,6 +71,7 @@ internal class BrushEditor : TemplatedControl
             {
                 _colorView.Color = scb.Color;
             }
+
             ToolTip.SetTip(this, Brush?.GetType().Name ?? "(null)");
             InvalidateVisual();
         }
@@ -123,6 +121,7 @@ internal class BrushEditor : TemplatedControl
 
             return l < 0.5 ? Brushes.White : Brushes.Black;
         }
+
         return Brushes.White;
     }
 }

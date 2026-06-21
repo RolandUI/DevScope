@@ -1,8 +1,8 @@
-﻿using Avalonia.Markup.Xaml;
+using ClassicDiagnostics.Avalonia.ViewModels;
 
 namespace ClassicDiagnostics.Avalonia.Views;
 
-internal partial class MainView : UserControl
+internal partial class MainView : ReactiveUserControl<MainViewModel>
 {
     public MainView()
     {
@@ -11,6 +11,6 @@ internal partial class MainView : UserControl
 
     private void InitializeComponent()
     {
-        AvaloniaXamlLoader.Load(this);
+        LoadComponent();
     }
 }

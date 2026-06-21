@@ -1,119 +1,53 @@
 using System.ComponentModel;
+using ClassicDiagnostics.Avalonia.Properties;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 
 internal sealed class AvaloniaPropertyViewModel : PropertyViewModel
 {
-    private readonly AvaloniaObject _target;
-    private Type _assignedType;
-    private string _group;
-    private string _priority;
-    private object? _value;
+    public AvaloniaProperty Property => _accessor.Property;
 
-    public AvaloniaPropertyViewModel(AvaloniaObject o, AvaloniaProperty property)
-    {
-        _target = o;
-        Property = property;
+    public override Type AssignedType => _accessor.AssignedType;
 
-        Name = property.IsAttached ?
-            $"[{property.OwnerType.Name}.{property.Name}]" :
-            property.Name;
-        DeclaringType = property.OwnerType;
-        PropertyType = property.PropertyType;
-        _assignedType = property.PropertyType;
-        _group = property.IsAttached ? "Attached Properties" : "Properties";
-        _priority = "Unset";
-        Update();
-    }
+    public override Type? DeclaringType => _accessor.DeclaringType;
 
-    public AvaloniaProperty Property { get; }
-    public override object Key => Property;
-    public override string Name { get; }
-    public override bool? IsAttached => Property.IsAttached;
-    public override string Priority => _priority;
-    public override Type AssignedType => _assignedType;
+    public override string Group => IsPinned ? "Pinned" : _accessor.Group;
+
+    public override bool? IsAttached => _accessor.IsAttached;
+
+    public override bool IsReadonly => _accessor.IsReadOnly;
+
+    public override object Key => _accessor.Key;
+
+    public override string Name => _accessor.Name;
+
+    public override string Priority => _accessor.Priority;
+
+    public override Type PropertyType => _accessor.PropertyType;
 
     public override object? Value
     {
-        get => _value;
+        get => _accessor.Value;
         set
         {
-            try
+            if (_accessor.Write(value).IsSuccess)
             {
-                _target.SetValue(Property, value);
-                Update();
-            }
-            catch (Exception exception)
-            {
-                DevToolsDiagnostics.Report(
-                    exception,
-                    $"Failed to set Avalonia property '{Property.OwnerType.Name}.{Property.Name}'.");
+                RaisePropertyStateChanged();
             }
         }
     }
 
-    public override string Group => IsPinned ? "Pinned" : _group;
+    private readonly AvaloniaPropertyAccessor _accessor;
 
-    public override Type? DeclaringType { get; }
-    public override Type PropertyType { get; }
-    public override bool IsReadonly => Property.IsReadOnly;
+    public AvaloniaPropertyViewModel(AvaloniaObject target, AvaloniaProperty property)
+    {
+        _accessor = new AvaloniaPropertyAccessor(target, property);
+    }
 
     public override void Update()
     {
-        if (Property.IsDirect)
-        {
-            object? value;
-            Type? valueType = null;
-
-            try
-            {
-                value = _target.GetValue(Property);
-                valueType = value?.GetType();
-            }
-            catch (Exception e)
-            {
-                value = e.GetBaseException();
-            }
-
-            SetProperty(ref _value, value, nameof(Value));
-            SetProperty(ref _assignedType, valueType ?? Property.PropertyType, nameof(AssignedType));
-            SetProperty(ref _priority, "Direct", nameof(Priority));
-
-            _group = "Properties";
-        }
-        else
-        {
-            object? value;
-            Type? valueType = null;
-            BindingPriority? priority = null;
-
-            try
-            {
-                var diagnostic = _target.GetDiagnostic(Property);
-                value = diagnostic.Value;
-                valueType = value?.GetType();
-                priority = diagnostic.Priority;
-            }
-            catch (Exception e)
-            {
-                value = e.GetBaseException();
-            }
-
-            SetProperty(ref _value, value, nameof(Value));
-            SetProperty(ref _assignedType, valueType ?? Property.PropertyType, nameof(AssignedType));
-
-            if (priority != null)
-            {
-                SetProperty(ref _priority, priority.ToString()!, nameof(Priority));
-                SetProperty(ref _group, IsAttached == true ? "Attached Properties" : "Properties", nameof(Group));
-            }
-            else
-            {
-                SetProperty(ref _priority, "Unset", nameof(Priority));
-                SetProperty(ref _group, "Unset", nameof(Group));
-            }
-        }
-        RaisePropertyChanged(nameof(Type));
+        _accessor.Update();
+        RaisePropertyStateChanged();
     }
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
@@ -123,5 +57,16 @@ internal sealed class AvaloniaPropertyViewModel : PropertyViewModel
         {
             RaisePropertyChanged(nameof(Group));
         }
+    }
+
+    private void RaisePropertyStateChanged()
+    {
+        RaisePropertyChanged(nameof(Value));
+        RaisePropertyChanged(nameof(AssignedType));
+        RaisePropertyChanged(nameof(Priority));
+        RaisePropertyChanged(nameof(Group));
+        RaisePropertyChanged(nameof(Type));
+        RaisePropertyChanged(nameof(TypeTooltip));
+        RaisePropertyChanged(nameof(AssignedTypeTooltip));
     }
 }

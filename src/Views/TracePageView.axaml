@@ -1,0 +1,6 @@
+<UserControl
+  x:Class="ClassicDiagnostics.Avalonia.Views.TracePageView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:ClassicDiagnostics.Avalonia.ViewModels"
+  x:DataType="vm:TracePageViewModel">
+  <Grid/>
+</UserControl>

@@ -1,33 +1,45 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:ClassicDiagnostics.Avalonia.ViewModels"
-             Padding="4"
-             x:Class="ClassicDiagnostics.Avalonia.Views.HotKeyPageView"
-             x:DataType="vm:HotKeyPageViewModel">
-  <Grid RowDefinitions="auto,*" Grid.IsSharedSizeScope="True">
+<UserControl
+  x:Class="ClassicDiagnostics.Avalonia.Views.HotKeyPageView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:ClassicDiagnostics.Avalonia.ViewModels"
+  Padding="4" x:DataType="vm:HotKeyPageViewModel">
+  <Grid
+    Grid.IsSharedSizeScope="True" RowDefinitions="auto,*">
     <Grid>
       <Grid.ColumnDefinitions>
-        <ColumnDefinition SharedSizeGroup="A" Width="auto"/>
+        <ColumnDefinition
+          Width="auto" SharedSizeGroup="A"/>
         <ColumnDefinition Width="8"/>
-        <ColumnDefinition SharedSizeGroup="B" Width="*"/>
+        <ColumnDefinition
+          Width="*" SharedSizeGroup="B"/>
       </Grid.ColumnDefinitions>
 
-      <TextBlock FontWeight="Bold" Text="Action"/>
-      <TextBlock Grid.Column="2" FontWeight="Bold" Text="Gesture"/>
+      <TextBlock
+        FontWeight="Bold" Text="Action"/>
+      <TextBlock
+        Grid.Column="2" FontWeight="Bold"
+        Text="Gesture"/>
     </Grid>
 
-    <ItemsControl Grid.Row="1" Grid.ColumnSpan="3" ItemsSource="{Binding HotKeyDescriptions}">
+    <ItemsControl
+      Grid.Row="1" Grid.ColumnSpan="3"
+      ItemsSource="{Binding HotKeyDescriptions}">
       <ItemsControl.ItemTemplate>
         <DataTemplate>
           <Grid>
             <Grid.ColumnDefinitions>
-              <ColumnDefinition SharedSizeGroup="A" Width="auto"/>
+              <ColumnDefinition
+                Width="auto" SharedSizeGroup="A"/>
               <ColumnDefinition Width="8"/>
-              <ColumnDefinition SharedSizeGroup="B" Width="*"/>
+              <ColumnDefinition
+                Width="*" SharedSizeGroup="B"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="{Binding BriefDescription}" ToolTip.Tip="{Binding DetailedDescription}"/>
-            <TextBlock Grid.Column="2" Text="{Binding Gesture}"/>
+            <TextBlock
+              Text="{Binding BriefDescription}"
+              ToolTip.Tip="{Binding DetailedDescription}"/>
+            <TextBlock
+              Grid.Column="2"
+              Text="{Binding Gesture}"/>
           </Grid>
         </DataTemplate>
       </ItemsControl.ItemTemplate>

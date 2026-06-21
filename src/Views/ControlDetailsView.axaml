@@ -1,8 +1,8 @@
 ﻿<UserControl
   x:Class="ClassicDiagnostics.Avalonia.Views.ControlDetailsView" xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ap="clr-namespace:ClassicDiagnostics.Avalonia.AttachedProperties"
-  xmlns:controls="using:ClassicDiagnostics.Avalonia.Controls" xmlns:conv="using:ClassicDiagnostics.Avalonia.Converters"
-  xmlns:local="using:ClassicDiagnostics.Avalonia.Views" xmlns:vm="using:ClassicDiagnostics.Avalonia.ViewModels"
+  xmlns:controls="using:ClassicDiagnostics.Avalonia.Controls" xmlns:local="using:ClassicDiagnostics.Avalonia.Views"
+  xmlns:valueConverters="clr-namespace:ClassicDiagnostics.Avalonia.ValueConverters" xmlns:vm="using:ClassicDiagnostics.Avalonia.ViewModels"
   x:Name="Main" x:DataType="vm:ControlDetailsViewModel">
 
   <UserControl.Resources>
@@ -10,13 +10,6 @@
       <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="/Assets/Icons.axaml"/>
       </ResourceDictionary.MergedDictionaries>
-      <conv:BoolToOpacityConverter
-        x:Key="BoolToOpacity" Opacity="0.6"/>
-      <conv:GetTypeNameConverter x:Key="GetTypeName"/>
-      <conv:BoolToImageConverter
-        x:Key="pc"
-        FalseImage="{StaticResource UnpinIcon}"
-        TrueImage="{StaticResource PinIcon}"/>
     </ResourceDictionary>
   </UserControl.Resources>
 
@@ -75,7 +68,7 @@
       <DataGrid
         x:Name="DataGrid" Grid.Row="2"
         BorderThickness="0" CanUserResizeColumns="true"
-        DoubleTapped="PropertiesGrid_OnDoubleTapped"
+        DoubleTapped="HandlePropertiesGridDoubleTapped"
         ItemsSource="{Binding PropertiesView}"
         RowBackground="Transparent"
         SelectedItem="{Binding SelectedProperty, Mode=TwoWay}">
@@ -98,12 +91,19 @@
                   <ToggleButton
                     DockPanel.Dock="Right" Background="Transparent"
                     BorderBrush="Transparent"
-                    Command="{Binding #Main.((vm:ControlDetailsViewModel)DataContext).TogglePinnedProperty}"
+                    Command="{Binding #Main.ViewModel?.TogglePinnedProperty}"
                     CommandParameter="{Binding}"
                     IsChecked="{Binding IsPinned}">
-                    <Image
-                      Width="12" Height="12"
-                      Source="{Binding IsPinned, Converter={StaticResource pc}}"/>
+                    <Panel>
+                      <Image
+                        Width="12" Height="12"
+                        IsVisible="{Binding IsPinned}"
+                        Source="{StaticResource PinIcon}"/>
+                      <Image
+                        Width="12" Height="12"
+                        IsVisible="{Binding !IsPinned}"
+                        Source="{StaticResource UnpinIcon}"/>
+                    </Panel>
                   </ToggleButton>
                   <TextBlock
                     VerticalAlignment="Center"
@@ -121,21 +121,45 @@
               </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
           </DataGridTemplateColumn>
-          <DataGridTextColumn
-            x:DataType="vm:PropertyViewModel"
-            Binding="{Binding Type}"
-            Header="Type" IsReadOnly="True"
-            IsVisible="{Binding !$parent[UserControl;2].((vm:MainViewModel)DataContext).ShowDetailsPropertyType}"/>
-          <DataGridTextColumn
-            x:DataType="vm:PropertyViewModel"
-            Binding="{Binding AssignedType, Converter={StaticResource GetTypeName}}"
-            Header="Assigned Type" IsReadOnly="True"
-            IsVisible="{Binding $parent[UserControl;2].((vm:MainViewModel)DataContext).ShowDetailsPropertyType}"/>
-          <DataGridTextColumn
-            x:DataType="vm:PropertyViewModel"
-            Binding="{Binding PropertyType, Converter={StaticResource GetTypeName}}"
-            Header="Property Type" IsReadOnly="True"
-            IsVisible="{Binding $parent[UserControl;2].((vm:MainViewModel)DataContext).ShowDetailsPropertyType}"/>
+          <DataGridTemplateColumn
+            x:DataType="vm:PropertyViewModel" Header="Type"
+            IsReadOnly="True"
+            IsVisible="{Binding !#Main.ViewModel?.TreePage.MainView.ShowDetailsPropertyType, TargetNullValue=True}">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate DataType="vm:PropertyViewModel">
+                <TextBlock
+                  Text="{Binding Type}"
+                  TextTrimming="{x:Static TextTrimming.PrefixCharacterEllipsis}"
+                  ToolTip.Tip="{Binding TypeTooltip}"/>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+          <DataGridTemplateColumn
+            x:DataType="vm:PropertyViewModel" Header="Assigned Type"
+            IsReadOnly="True"
+            IsVisible="{Binding #Main.ViewModel?.TreePage.MainView.ShowDetailsPropertyType, TargetNullValue=False}">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate DataType="vm:PropertyViewModel">
+                <TextBlock
+                  Text="{Binding AssignedType, Converter={x:Static valueConverters:GetTypeNameConverter.Shared}}"
+                  TextTrimming="{x:Static TextTrimming.PrefixCharacterEllipsis}"
+                  ToolTip.Tip="{Binding AssignedTypeTooltip}"/>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+          <DataGridTemplateColumn
+            x:DataType="vm:PropertyViewModel" Header="Property Type"
+            IsReadOnly="True"
+            IsVisible="{Binding #Main.ViewModel?.TreePage.MainView.ShowDetailsPropertyType, TargetNullValue=False}">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate DataType="vm:PropertyViewModel">
+                <TextBlock
+                  Text="{Binding PropertyType, Converter={x:Static valueConverters:GetTypeNameConverter.Shared}}"
+                  TextTrimming="{x:Static TextTrimming.PrefixCharacterEllipsis}"
+                  ToolTip.Tip="{Binding PropertyTypeTooltip}"/>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
           <DataGridTextColumn
             x:DataType="vm:PropertyViewModel"
             Binding="{Binding Priority}"
@@ -214,13 +238,14 @@
               <DataTemplate>
                 <Border
                   BorderBrush="#6C6C6C" BorderThickness="0,0,0,1"
-                  Opacity="{Binding IsActive, Converter={StaticResource BoolToOpacity}}">
+                  Opacity="{Binding IsActive, Converter={x:Static valueConverters:BoolToOpacityConverter.Shared}}">
                   <Border.IsVisible>
                     <MultiBinding Converter="{x:Static BoolConverters.And}">
                       <MultiBinding Converter="{x:Static BoolConverters.Or}">
                         <Binding Path="IsActive"/>
                         <!--  Rider marks it as an error, because it doesn't know about new binding rules yet.  -->
-                        <Binding Path="#Main.((vm:ControlDetailsViewModel)DataContext).ShowInactiveFrames"/>
+                        <Binding
+                          Path="#Main.ViewModel?.ShowInactiveFrames" TargetNullValue="False"/>
                       </MultiBinding>
                       <Binding Path="IsVisible"/>
                     </MultiBinding>
@@ -289,7 +314,7 @@
                           <Panel
                             HorizontalAlignment="Left"
                             IsVisible="{Binding IsVisible}"
-                            Opacity="{Binding IsActive, Converter={StaticResource BoolToOpacity}}">
+                            Opacity="{Binding IsActive, Converter={x:Static valueConverters:BoolToOpacityConverter.Shared}}">
                             <Panel.ContextMenu>
                               <ContextMenu>
                                 <MenuItem
@@ -303,7 +328,7 @@
                             <StackPanel
                               Orientation="Horizontal" Spacing="2">
                               <TextBlock
-                                Classes="property-name" PointerPressed="PropertyNamePressed"
+                                Classes="property-name" PointerPressed="HandlePropertyNamePointerPressed"
                                 Text="{Binding Name}"/>
                               <TextBlock Text=":"/>
                               <TextBlock>{</TextBlock>
@@ -325,7 +350,7 @@
                           <Panel
                             HorizontalAlignment="Left"
                             IsVisible="{Binding IsVisible}"
-                            Opacity="{Binding IsActive, Converter={StaticResource BoolToOpacity}}">
+                            Opacity="{Binding IsActive, Converter={x:Static valueConverters:BoolToOpacityConverter.Shared}}">
                             <Panel.ContextMenu>
                               <ContextMenu>
                                 <MenuItem
@@ -343,7 +368,7 @@
                               HorizontalAlignment="Left" Orientation="Horizontal"
                               Spacing="2">
                               <TextBlock
-                                Classes="property-name" PointerPressed="PropertyNamePressed"
+                                Classes="property-name" PointerPressed="HandlePropertyNamePointerPressed"
                                 Text="{Binding Name}"/>
                               <TextBlock Text=":"/>
                               <TextBlock Text="{Binding Value}"/>
@@ -368,7 +393,7 @@
                           <Panel
                             HorizontalAlignment="Left"
                             IsVisible="{Binding IsVisible}"
-                            Opacity="{Binding IsActive, Converter={StaticResource BoolToOpacity}}">
+                            Opacity="{Binding IsActive, Converter={x:Static valueConverters:BoolToOpacityConverter.Shared}}">
                             <Panel.ContextMenu>
                               <ContextMenu>
                                 <MenuItem
@@ -382,7 +407,7 @@
                             <StackPanel
                               Orientation="Horizontal" Spacing="2">
                               <TextBlock
-                                Classes="property-name" PointerPressed="PropertyNamePressed"
+                                Classes="property-name" PointerPressed="HandlePropertyNamePointerPressed"
                                 Text="{Binding Name}"/>
                               <TextBlock Text=":"/>
                               <TextBlock Text="{Binding Value}"/>

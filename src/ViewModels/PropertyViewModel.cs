@@ -17,6 +17,14 @@ internal abstract class PropertyViewModel : ViewModelBase
         PropertyType.GetTypeName() :
         $"{PropertyType.GetTypeName()} {{{AssignedType.GetTypeName()}}}";
 
+    public string TypeTooltip => PropertyType == AssignedType ?
+        PropertyType.GetDetailedTypeName() :
+        $"Property type:{Environment.NewLine}{PropertyType.GetDetailedTypeName()}{Environment.NewLine}{Environment.NewLine}Assigned type:{Environment.NewLine}{AssignedType.GetDetailedTypeName()}";
+
+    public string AssignedTypeTooltip => AssignedType.GetDetailedTypeName();
+
+    public string PropertyTypeTooltip => PropertyType.GetDetailedTypeName();
+
     public abstract bool IsReadonly { get; }
 
     public bool IsPinned

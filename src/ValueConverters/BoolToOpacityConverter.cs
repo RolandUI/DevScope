@@ -1,11 +1,13 @@
 ﻿using System.Globalization;
 using Avalonia.Data.Converters;
 
-namespace ClassicDiagnostics.Avalonia.Converters;
+namespace ClassicDiagnostics.Avalonia.ValueConverters;
 
 internal class BoolToOpacityConverter : IValueConverter
 {
-    public double Opacity { get; set; }
+    public static BoolToOpacityConverter Shared { get; } = new();
+
+    public double Opacity { get; set; } = 0.6;
 
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {

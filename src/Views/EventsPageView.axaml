@@ -89,7 +89,7 @@
       Grid.Column="2" RowDefinitions="*,4,2*,Auto">
 
       <ListBox
-        Name="EventsList"
+        x:Name="EventsList"
         ItemsSource="{Binding RecordedEvents}"
         SelectedItem="{Binding SelectedEvent, Mode=TwoWay}">
         <ListBox.Styles>
@@ -110,13 +110,13 @@
                 Grid.Column="1" Margin="10,0,0,0"
                 Orientation="Horizontal" Spacing="2">
                 <TextBlock
-                  Classes="nav" DoubleTapped="NavigateTo"
+                  Classes="nav" DoubleTapped="HandleNavigateDoubleTapped"
                   FontWeight="Bold"
                   Tag="{Binding Event}"
                   Text="{Binding Event.Name}"/>
                 <TextBlock Text="on"/>
                 <TextBlock
-                  Classes="nav" DoubleTapped="NavigateTo"
+                  Classes="nav" DoubleTapped="HandleNavigateDoubleTapped"
                   Tag="{Binding Originator}"
                   Text="{Binding Originator.HandlerName}"/>
               </StackPanel>
@@ -128,9 +128,9 @@
                 <TextBlock Text="::"/>
                 <TextBlock Text="Handled by"/>
                 <TextBlock
-                  Classes="nav" DoubleTapped="NavigateTo"
+                  Classes="nav" DoubleTapped="HandleNavigateDoubleTapped"
                   Tag="{Binding HandledBy}"
-                  Text="{Binding HandledBy.HandlerName}"/>
+                  Text="{Binding HandledBy?.HandlerName}"/>
               </StackPanel>
 
               <StackPanel
@@ -155,7 +155,7 @@
           DockPanel.Dock="Top" FontSize="16"
           Text="Event chain:"/>
 
-        <ListBox ItemsSource="{Binding SelectedEvent.EventChain}">
+        <ListBox ItemsSource="{Binding SelectedEvent?.EventChain}">
           <ListBox.Styles>
             <Style Selector="ListBoxItem">
               <Setter Property="Classes.handled" Value="{Binding Handled, x:DataType=m:EventChainLink}"/>
@@ -165,7 +165,7 @@
             <DataTemplate>
               <StackPanel
                 Background="Transparent" Orientation="Vertical"
-                PointerEntered="ListBoxItem_PointerEntered" PointerExited="ListBoxItem_PointerExited">
+                PointerEntered="HandleEventChainItemPointerEntered" PointerExited="HandleEventChainItemPointerExited">
 
                 <Rectangle
                   IsVisible="{Binding BeginsNewRoute}"
@@ -178,7 +178,7 @@
                     FontWeight="Bold"
                     Text="{Binding Route}"/>
                   <TextBlock
-                    Classes="nav" DoubleTapped="NavigateTo"
+                    Classes="nav" DoubleTapped="HandleNavigateDoubleTapped"
                     Tag="{Binding}"
                     Text="{Binding HandlerName}"/>
                 </StackPanel>

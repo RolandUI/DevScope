@@ -40,4 +40,241 @@
   <DrawingImage Drawing="{StaticResource unpin_xaml}" x:Key="UnpinIcon"/>
   <DrawingImage Drawing="{StaticResource Pin_xaml}" x:Key="PinIcon"/>
 
+  <!--
+    Placeholder Lucide resources for the new DevTools shell. The keys are stable so the final
+    Lucide path data can be dropped in without touching view markup.
+  -->
+  <DrawingGroup x:Key="LucidePlaceholder_xaml">
+    <GeometryDrawing Brush="{DynamicResource PinColor}">
+      <GeometryDrawing.Geometry>
+        <PathGeometry Figures="M 4 4 L 20 4 L 20 20 L 4 20 Z M 7 8 L 17 8 M 7 12 L 17 12 M 7 16 L 13 16"/>
+      </GeometryDrawing.Geometry>
+    </GeometryDrawing>
+  </DrawingGroup>
+
+  <DrawingImage x:Key="LucideMousePointerClick">
+    <DrawingImage.Drawing>
+      <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M14,4.1L12,6">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M5.1,8L2.2,7.2">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M6,12L4.1,14">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M7.2,2.2L8,5.1">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M9.037,9.69A0.498,0.498,0,0,1,9.69,9.037L20.69,13.537A0.5,0.5,0,0,1,20.616,14.486L16.267,15.527A1,1,0,0,0,15.527,16.266L14.487,20.616A0.5,0.5,0,0,1,13.537,20.69z">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+    </DrawingImage>
+  
+  <DrawingImage x:Key="LucideRadioTower">
+    <DrawingImage.Drawing>
+    <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+      <GeometryDrawing Geometry="F1 M24,24z M0,0z M4.9,16.1C1,12.2,1,5.8,4.9,1.9">
+        <GeometryDrawing.Pen>
+          <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+        </GeometryDrawing.Pen>
+      </GeometryDrawing>
+      <GeometryDrawing Geometry="F1 M24,24z M0,0z M7.8,4.7A6.14,6.14,0,0,0,7,12.2">
+        <GeometryDrawing.Pen>
+          <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+        </GeometryDrawing.Pen>
+      </GeometryDrawing>
+      <GeometryDrawing>
+        <GeometryDrawing.Pen>
+          <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+        </GeometryDrawing.Pen>
+        <GeometryDrawing.Geometry>
+          <EllipseGeometry RadiusX="2" RadiusY="2" Center="12,9" />
+        </GeometryDrawing.Geometry>
+      </GeometryDrawing>
+      <GeometryDrawing Geometry="F1 M24,24z M0,0z M16.2,4.8C18.2,6.8,18.46,9.91,17,12.27">
+        <GeometryDrawing.Pen>
+          <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+        </GeometryDrawing.Pen>
+      </GeometryDrawing>
+      <GeometryDrawing Geometry="F1 M24,24z M0,0z M19.1,1.9A9.96,9.96,0,0,1,19.1,16">
+        <GeometryDrawing.Pen>
+          <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+        </GeometryDrawing.Pen>
+      </GeometryDrawing>
+      <GeometryDrawing Geometry="F1 M24,24z M0,0z M9.5,18L14.5,18">
+        <GeometryDrawing.Pen>
+          <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+        </GeometryDrawing.Pen>
+      </GeometryDrawing>
+      <GeometryDrawing Geometry="F1 M24,24z M0,0z M8,22L12,11 16,22">
+        <GeometryDrawing.Pen>
+          <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+        </GeometryDrawing.Pen>
+      </GeometryDrawing>
+    </DrawingGroup>
+  </DrawingImage.Drawing>
+  </DrawingImage>
+
+  <DrawingImage x:Key="LucideSquareTerminal">
+    <DrawingImage.Drawing>
+      <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M7,11L9,9 7,7">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M11,13L15,13">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing>
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+          <GeometryDrawing.Geometry>
+            <RectangleGeometry RadiusX="2" RadiusY="2" Rect="3,3,18,18" />
+          </GeometryDrawing.Geometry>
+        </GeometryDrawing>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+  </DrawingImage>
+
+  <DrawingImage x:Key="LucideSettings">
+    <DrawingImage.Drawing>
+      <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M9.671,4.136A2.34,2.34,0,0,1,14.33,4.136A2.34,2.34,0,0,0,17.649,6.051A2.34,2.34,0,0,1,19.979,10.084A2.34,2.34,0,0,0,19.979,13.915A2.34,2.34,0,0,1,17.649,17.948A2.34,2.34,0,0,0,14.33,19.863A2.34,2.34,0,0,1,9.671,19.863A2.34,2.34,0,0,0,6.351,17.948A2.34,2.34,0,0,1,4.021,13.915A2.34,2.34,0,0,0,4.021,10.084A2.34,2.34,0,0,1,6.35,6.051A2.34,2.34,0,0,0,9.669,4.136">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing>
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+          <GeometryDrawing.Geometry>
+            <EllipseGeometry RadiusX="3" RadiusY="3" Center="12,12" />
+          </GeometryDrawing.Geometry>
+        </GeometryDrawing>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+  </DrawingImage>
+
+  <DrawingImage x:Key="LucideListTree">
+    <DrawingImage.Drawing>
+      <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M8,5L21,5">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M13,12L21,12">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M13,19L21,19">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M3,10A2,2,0,0,0,5,12L8,12">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M3,5L3,17A2,2,0,0,0,5,19L8,19">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+    </DrawingImage>
+
+  <DrawingImage x:Key="LucideScanEye">
+    <DrawingImage.Drawing>
+      <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M3,7L3,5A2,2,0,0,1,5,3L7,3">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M17,3L19,3A2,2,0,0,1,21,5L21,7">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M21,17L21,19A2,2,0,0,1,19,21L17,21">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M7,21L5,21A2,2,0,0,1,3,19L3,17">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+        <GeometryDrawing>
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+          <GeometryDrawing.Geometry>
+            <EllipseGeometry RadiusX="1" RadiusY="1" Center="12,12" />
+          </GeometryDrawing.Geometry>
+        </GeometryDrawing>
+        <GeometryDrawing Geometry="F1 M24,24z M0,0z M18.944,12.33A1,1,0,0,0,18.944,11.67A7.5,7.5,0,0,0,5.056,11.67A1,1,0,0,0,5.056,12.33A7.5,7.5,0,0,0,18.944,12.33">
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+        </GeometryDrawing>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+    </DrawingImage>
+
+  <DrawingImage x:Key="LucideEllipsis">
+    <DrawingImage.Drawing>
+      <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+        <GeometryDrawing>
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+          <GeometryDrawing.Geometry>
+            <EllipseGeometry RadiusX="1" RadiusY="1" Center="12,12" />
+          </GeometryDrawing.Geometry>
+        </GeometryDrawing>
+        <GeometryDrawing>
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+          <GeometryDrawing.Geometry>
+            <EllipseGeometry RadiusX="1" RadiusY="1" Center="19,12" />
+          </GeometryDrawing.Geometry>
+        </GeometryDrawing>
+        <GeometryDrawing>
+          <GeometryDrawing.Pen>
+            <Pen Brush="#FF000000" Thickness="2" LineJoin="Round" />
+          </GeometryDrawing.Pen>
+          <GeometryDrawing.Geometry>
+            <EllipseGeometry RadiusX="1" RadiusY="1" Center="5,12" />
+          </GeometryDrawing.Geometry>
+        </GeometryDrawing>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+    </DrawingImage>
+
 </ResourceDictionary>

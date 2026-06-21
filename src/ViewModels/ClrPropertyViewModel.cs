@@ -1,88 +1,54 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Reflection;
+using ClassicDiagnostics.Avalonia.Properties;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 
 internal sealed class ClrPropertyViewModel : PropertyViewModel
 {
-    private readonly object _target;
-    private Type _assignedType;
-    private object? _value;
+    public PropertyInfo Property => _accessor.Property;
 
-    public ClrPropertyViewModel(object o, PropertyInfo property)
-    {
-        _target = o;
-        Property = property;
+    public override Type AssignedType => _accessor.AssignedType;
 
-        if (property.DeclaringType is not { IsInterface: true })
-        {
-            Name = property.Name;
-        }
-        else
-        {
-            Name = property.DeclaringType.Name + '.' + property.Name;
-        }
+    public override Type? DeclaringType => _accessor.DeclaringType;
 
-        DeclaringType = property.DeclaringType;
-        PropertyType = property.PropertyType;
-        _assignedType = property.PropertyType;
+    public override string Group => IsPinned ? "Pinned" : _accessor.Group;
 
-        Update();
-    }
+    public override bool? IsAttached => _accessor.IsAttached;
 
-    public PropertyInfo Property { get; }
-    public override object Key => Name;
-    public override string Name { get; }
-    public override string Group => IsPinned ? "Pinned" : "CLR Properties";
+    public override bool IsReadonly => _accessor.IsReadOnly;
 
-    public override Type PropertyType { get; }
-    public override Type AssignedType => _assignedType;
+    public override object Key => _accessor.Key;
 
-    public override bool IsReadonly => !Property.CanWrite;
+    public override string Name => _accessor.Name;
+
+    public override string Priority => _accessor.Priority;
+
+    public override Type PropertyType => _accessor.PropertyType;
 
     public override object? Value
     {
-        get => _value;
+        get => _accessor.Value;
         set
         {
-            try
+            if (_accessor.Write(value).IsSuccess)
             {
-                Property.SetValue(_target, value);
-                Update();
-            }
-            catch (Exception exception)
-            {
-                DevToolsDiagnostics.Report(
-                    exception,
-                    $"Failed to set CLR property '{Property.DeclaringType?.Name}.{Property.Name}'.");
+                RaisePropertyStateChanged();
             }
         }
     }
 
-    public override string Priority => string.Empty;
+    private readonly ClrPropertyAccessor _accessor;
 
-    public override bool? IsAttached => null;
-
-    public override Type? DeclaringType { get; }
+    public ClrPropertyViewModel(object target, PropertyInfo property)
+    {
+        _accessor = new ClrPropertyAccessor(target, property);
+    }
 
     public override void Update()
     {
-        object? value;
-        Type? valueType = null;
-
-        try
-        {
-            value = Property.GetValue(_target);
-            valueType = value?.GetType();
-        }
-        catch (Exception e)
-        {
-            value = e.GetBaseException();
-        }
-
-        SetProperty(ref _value, value, nameof(Value));
-        SetProperty(ref _assignedType, valueType ?? Property.PropertyType, nameof(AssignedType));
-        RaisePropertyChanged(nameof(Type));
+        _accessor.Update();
+        RaisePropertyStateChanged();
     }
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
@@ -92,5 +58,14 @@ internal sealed class ClrPropertyViewModel : PropertyViewModel
         {
             RaisePropertyChanged(nameof(Group));
         }
+    }
+
+    private void RaisePropertyStateChanged()
+    {
+        RaisePropertyChanged(nameof(Value));
+        RaisePropertyChanged(nameof(AssignedType));
+        RaisePropertyChanged(nameof(Type));
+        RaisePropertyChanged(nameof(TypeTooltip));
+        RaisePropertyChanged(nameof(AssignedTypeTooltip));
     }
 }

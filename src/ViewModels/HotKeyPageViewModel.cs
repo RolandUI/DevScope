@@ -3,7 +3,7 @@ using ClassicDiagnostics.Avalonia.Models;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 
-internal class HotKeyPageViewModel : ViewModelBase
+internal class HotKeyPageViewModel : ReactiveViewModelBase
 {
     public ObservableCollection<HotKeyDescription>? HotKeyDescriptions
     {

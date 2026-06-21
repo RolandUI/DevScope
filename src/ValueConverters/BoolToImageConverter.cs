@@ -2,10 +2,12 @@
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 
-namespace ClassicDiagnostics.Avalonia.Converters;
+namespace ClassicDiagnostics.Avalonia.ValueConverters;
 
 internal class BoolToImageConverter : IValueConverter
 {
+    public static BoolToImageConverter Shared { get; } = new();
+
     public IImage? TrueImage { get; set; }
 
     public IImage? FalseImage { get; set; }

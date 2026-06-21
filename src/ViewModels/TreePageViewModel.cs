@@ -5,22 +5,27 @@ namespace ClassicDiagnostics.Avalonia.ViewModels;
 
 internal class TreePageViewModel : ReactiveViewModelBase
 {
-    private readonly ISet<string> _pinnedProperties;
+    private readonly ISelectionCoordinator _selectionCoordinator;
     private ControlDetailsViewModel? _details;
+    private TreeNodeViewModel? _selectedNode;
 
-    public TreePageViewModel(MainViewModel mainView, IReadOnlyList<TreeNode> nodes, ISet<string> pinnedProperties)
+    public TreePageViewModel(
+        MainViewModel mainView,
+        IReadOnlyList<TreeNodeModel> nodes,
+        ISelectionCoordinator selectionCoordinator)
     {
         MainView = mainView;
-        Nodes = nodes;
-        _pinnedProperties = pinnedProperties;
+        _selectionCoordinator = selectionCoordinator;
+        Nodes = nodes.Select(node => new TreeNodeViewModel(node)).ToArray();
+
         PropertiesFilter = new FilterViewModel();
-        PropertiesFilter.RefreshFilter += OnPropertiesFilterRefreshFilter;
-        Disposable.Create(() => PropertiesFilter.RefreshFilter -= OnPropertiesFilterRefreshFilter)
+        PropertiesFilter.RefreshFilter += HandlePropertiesFilterRefreshFilter;
+        Disposable.Create(() => PropertiesFilter.RefreshFilter -= HandlePropertiesFilterRefreshFilter)
             .AddTo(LifetimeDisposables);
 
         SettersFilter = new FilterViewModel();
-        SettersFilter.RefreshFilter += OnSettersFilterRefreshFilter;
-        Disposable.Create(() => SettersFilter.RefreshFilter -= OnSettersFilterRefreshFilter)
+        SettersFilter.RefreshFilter += HandleSettersFilterRefreshFilter;
+        Disposable.Create(() => SettersFilter.RefreshFilter -= HandleSettersFilterRefreshFilter)
             .AddTo(LifetimeDisposables);
     }
 
@@ -30,20 +35,16 @@ internal class TreePageViewModel : ReactiveViewModelBase
 
     public FilterViewModel SettersFilter { get; }
 
-    public IReadOnlyList<TreeNode> Nodes { get; protected set; }
+    public IReadOnlyList<TreeNodeViewModel> Nodes { get; }
 
-    public TreeNode? SelectedNode
+    public TreeNodeViewModel? SelectedNode
     {
-        get;
+        get => _selectedNode;
         set
         {
-            if (SetProperty(ref field, value))
+            if (SetProperty(ref _selectedNode, value))
             {
-                Details = value != null ?
-                    new ControlDetailsViewModel(this, value.Visual, _pinnedProperties) :
-                    null;
-                Details?.UpdatePropertiesView(MainView.ShowImplementedInterfaces);
-                Details?.UpdateStyleFilters();
+                _selectionCoordinator.HandleTreeSelectionChanged(this, value);
             }
         }
     }
@@ -62,6 +63,8 @@ internal class TreePageViewModel : ReactiveViewModelBase
         }
     }
 
+    public event EventHandler<string>? ClipboardCopyRequested;
+
     protected override void Dispose(bool disposing)
     {
         if (!disposing)
@@ -79,9 +82,7 @@ internal class TreePageViewModel : ReactiveViewModelBase
         base.Dispose(disposing);
     }
 
-    public event EventHandler<string>? ClipboardCopyRequested;
-
-    public TreeNode? FindNode(Control control)
+    public TreeNodeViewModel? FindNode(Control control)
     {
         foreach (var node in Nodes)
         {
@@ -98,29 +99,12 @@ internal class TreePageViewModel : ReactiveViewModelBase
 
     public void SelectControl(Control control)
     {
-        var node = default(TreeNode);
-        var c = control;
-
-        while (node == null && c != null)
-        {
-            node = FindNode(c);
-
-            if (node == null)
-            {
-                c = c.GetVisualParent<Control>();
-            }
-        }
-
-        if (node != null)
-        {
-            SelectedNode = node;
-            ExpandNode(node.Parent);
-        }
+        _selectionCoordinator.SelectControl(control, this);
     }
 
     public void CopySelector()
     {
-        if (SelectedNode?.Visual is Visual currentVisual)
+        if (SelectedNode?.Model.Target is Visual currentVisual)
         {
             var selector = GetVisualSelector(currentVisual);
             ClipboardCopyRequested?.Invoke(this, selector);
@@ -131,7 +115,7 @@ internal class TreePageViewModel : ReactiveViewModelBase
     {
         var parts = new List<string>();
 
-        var currentVisual = SelectedNode?.Visual as Visual;
+        var currentVisual = SelectedNode?.Model.Target as Visual;
         while (currentVisual is not null)
         {
             parts.Add(GetVisualSelector(currentVisual));
@@ -153,7 +137,7 @@ internal class TreePageViewModel : ReactiveViewModelBase
         {
             ExpandNode(selectedNode);
 
-            var stack = new Stack<TreeNode>();
+            var stack = new Stack<TreeNodeViewModel>();
             stack.Push(selectedNode);
 
             while (stack.Count > 0)
@@ -172,7 +156,7 @@ internal class TreePageViewModel : ReactiveViewModelBase
     {
         if (SelectedNode is { } selectedNode)
         {
-            var stack = new Stack<TreeNode>();
+            var stack = new Stack<TreeNodeViewModel>();
             stack.Push(selectedNode);
 
             while (stack.Count > 0)
@@ -194,12 +178,64 @@ internal class TreePageViewModel : ReactiveViewModelBase
 
     public void BringIntoView()
     {
-        (SelectedNode?.Visual as Control)?.BringIntoView();
+        (SelectedNode?.Model.Target as Control)?.BringIntoView();
     }
 
     public void Focus()
     {
-        (SelectedNode?.Visual as Control)?.Focus();
+        (SelectedNode?.Model.Target as Control)?.Focus();
+    }
+
+    internal bool SelectControlFromCoordinator(Control control)
+    {
+        var node = default(TreeNodeViewModel);
+        var current = control;
+
+        while (node == null && current != null)
+        {
+            node = FindNode(current);
+
+            if (node == null)
+            {
+                current = current.GetVisualParent<Control>();
+            }
+        }
+
+        if (node == null)
+        {
+            return false;
+        }
+
+        SetSelectedNodeFromCoordinator(node);
+        ExpandNode(node.Parent);
+        return true;
+    }
+
+    internal void SetDetails(ControlDetailsViewModel? details)
+    {
+        Details = details;
+    }
+
+    internal void SelectAndRevealNode(TreeNodeViewModel node)
+    {
+        SelectedNode = node;
+        ExpandNode(node.Parent);
+    }
+
+    internal void ClearSelectionFromCoordinator()
+    {
+        SetSelectedNodeFromCoordinator(null);
+        SetDetails(null);
+    }
+
+    internal void UpdatePropertiesView()
+    {
+        Details?.UpdatePropertiesView(MainView.ShowImplementedInterfaces);
+    }
+
+    private void SetSelectedNodeFromCoordinator(TreeNodeViewModel? node)
+    {
+        SetProperty(ref _selectedNode, node, nameof(SelectedNode));
     }
 
     private static string GetVisualSelector(Visual visual)
@@ -211,7 +247,7 @@ internal class TreePageViewModel : ReactiveViewModelBase
         return $$"""{{{type.Assembly.FullName}}}{{type.Namespace}}|{{type.Name}}{{name}}{{classes}}{{pseudo}}""";
     }
 
-    private static void ExpandNode(TreeNode? node)
+    private static void ExpandNode(TreeNodeViewModel? node)
     {
         while (true)
         {
@@ -226,22 +262,19 @@ internal class TreePageViewModel : ReactiveViewModelBase
         }
     }
 
-    private static TreeNode? FindNode(TreeNode node, Control control)
+    private static TreeNodeViewModel? FindNode(TreeNodeViewModel node, Control control)
     {
-        return node.Visual == control ? node : node.Children.Select(child => FindNode(child, control)).OfType<TreeNode>().FirstOrDefault();
+        return node.Model.Target == control ?
+            node :
+            node.Children.Select(child => FindNode(child, control)).OfType<TreeNodeViewModel>().FirstOrDefault();
     }
 
-    internal void UpdatePropertiesView()
-    {
-        Details?.UpdatePropertiesView(MainView.ShowImplementedInterfaces);
-    }
-
-    private void OnPropertiesFilterRefreshFilter(object? sender, EventArgs e)
+    private void HandlePropertiesFilterRefreshFilter(object? sender, EventArgs e)
     {
         Details?.PropertiesView?.Refresh();
     }
 
-    private void OnSettersFilterRefreshFilter(object? sender, EventArgs e)
+    private void HandleSettersFilterRefreshFilter(object? sender, EventArgs e)
     {
         Details?.UpdateStyleFilters();
     }

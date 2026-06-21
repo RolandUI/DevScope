@@ -2,10 +2,6 @@
 
 internal class PseudoClassViewModel : ViewModelBase
 {
-    private readonly IPseudoClasses _pseudoClasses;
-    private readonly StyledElement _source;
-    private bool _isUpdating;
-
     public PseudoClassViewModel(string name, StyledElement source)
     {
         Name = name;
@@ -17,19 +13,32 @@ internal class PseudoClassViewModel : ViewModelBase
 
     public string Name { get; }
 
+    public string? Error
+    {
+        get;
+        private set => SetProperty(ref field, value);
+    }
+
     public bool IsActive
     {
         get;
         set
         {
-            SetProperty(ref field, value);
+            if (!SetProperty(ref field, value))
+            {
+                return;
+            }
 
             if (!_isUpdating)
             {
-                _pseudoClasses.Set(Name, value);
+                SetPseudoClass(value);
             }
         }
     }
+
+    private readonly IPseudoClasses _pseudoClasses;
+    private readonly StyledElement _source;
+    private bool _isUpdating;
 
     public void Update()
     {
@@ -42,6 +51,21 @@ internal class PseudoClassViewModel : ViewModelBase
         finally
         {
             _isUpdating = false;
+        }
+    }
+
+    private void SetPseudoClass(bool value)
+    {
+        try
+        {
+            _pseudoClasses.Set(Name, value);
+            Error = null;
+        }
+        catch (Exception exception)
+        {
+            Error = exception.Message;
+            DevToolsDiagnostics.Report(exception, $"Failed to set pseudo class '{Name}'.");
+            Update();
         }
     }
 }

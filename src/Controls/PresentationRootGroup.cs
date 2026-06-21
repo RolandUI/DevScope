@@ -15,7 +15,7 @@ internal class PresentationRootGroup : AvaloniaObject, IDisposable
         if (Source.Items is INotifyCollectionChanged notifyCollectionChanged)
         {
             _collectionChangedSource = notifyCollectionChanged;
-            _collectionChangedHandler = OnCollectionChanged;
+            _collectionChangedHandler = HandleSourceCollectionChanged;
             notifyCollectionChanged.CollectionChanged += _collectionChangedHandler;
         }
     }
@@ -43,7 +43,7 @@ internal class PresentationRootGroup : AvaloniaObject, IDisposable
         _isDisposed = true;
     }
 
-    private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
+    private void HandleSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args)
     {
         if (args.OldItems is not null)
         {

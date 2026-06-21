@@ -48,11 +48,13 @@ internal class EventTreeNode(EventOwnerTreeNode parent, RoutedEvent @event, Even
 
         if (!_isRegistered)
         {
-            var allRoutes = RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble;
-
             // Routed event class handlers are global registrations, so disabling a node must
             // detach the handler rather than only ignoring callbacks at runtime.
-            _classHandlerRegistration = Event.AddClassHandler(typeof(object), HandleEvent, allRoutes, true);
+            _classHandlerRegistration = Event.AddClassHandler(
+                typeof(object),
+                HandleEvent,
+                RoutingStrategies.Direct | RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
+                true);
             _routeFinishedSubscription = Event.RouteFinished.Subscribe(HandleRouteFinished);
 
             _isRegistered = true;
@@ -61,9 +63,7 @@ internal class EventTreeNode(EventOwnerTreeNode parent, RoutedEvent @event, Even
 
     private void UnregisterTracker()
     {
-        if (!_isRegistered &&
-            _classHandlerRegistration is null &&
-            _routeFinishedSubscription is null)
+        if (!_isRegistered && _classHandlerRegistration is null && _routeFinishedSubscription is null)
         {
             return;
         }

@@ -6,15 +6,19 @@
 public enum DevToolsViewKind
 {
     /// <summary>
-    ///     The Logical Tree diagnostic view
+    ///     Elements diagnostic view
     /// </summary>
-    LogicalTree,
-    /// <summary>
-    ///     The Visual Tree diagnostic view
-    /// </summary>
-    VisualTree,
+    Elements,
     /// <summary>
     ///     Events diagnostic view
     /// </summary>
     Events,
+    /// <summary>
+    ///     Trace diagnostic view
+    /// </summary>
+    Trace,
+    /// <summary>
+    ///     Settings diagnostic view
+    /// </summary>
+    Settings,
 }

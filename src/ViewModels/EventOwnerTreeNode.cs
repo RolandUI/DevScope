@@ -6,12 +6,12 @@ namespace ClassicDiagnostics.Avalonia.ViewModels;
 
 internal class EventOwnerTreeNode : EventTreeNodeBase
 {
-    public EventOwnerTreeNode(Type type, IEnumerable<RoutedEvent> events, EventsPageViewModel vm)
+    public EventOwnerTreeNode(Type type, IEnumerable<RoutedEvent> events, EventsPageViewModel viewModel)
         : base(null, type.Name)
     {
         Children = new AvaloniaList<EventTreeNodeBase>(
             events.OrderBy(e => e.Name)
-                .Select(e => new EventTreeNode(this, e, vm)));
+                .Select(e => new EventTreeNode(this, e, viewModel)));
         IsExpanded = true;
     }
 

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Input.Raw;
 using Avalonia.Media;
@@ -6,28 +6,48 @@ using Avalonia.Metadata;
 using Avalonia.Rendering;
 using Avalonia.Threading;
 using ClassicDiagnostics.Avalonia.Controls;
-using ClassicDiagnostics.Avalonia.Models;
+using ClassicDiagnostics.Avalonia.Elements;
+using ClassicDiagnostics.Avalonia.Properties;
+using ClassicDiagnostics.Avalonia.Tree;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 
 internal class MainViewModel : ReactiveViewModelBase
 {
+    private readonly ElementsPageViewModel _elements;
     private readonly EventsPageViewModel _events;
-    private readonly HotKeyPageViewModel _hotKeys;
     private readonly TreePageViewModel _logicalTree;
-    private readonly HashSet<string> _pinnedProperties = new();
+    private readonly IPinnedPropertyStore _pinnedProperties = new PinnedPropertyStore();
     private readonly AvaloniaObject _root;
+    private readonly ISelectionCoordinator _selectionCoordinator;
+    private readonly SettingsPageViewModel _settings;
+    private readonly TracePageViewModel _trace;
     private readonly TreePageViewModel _visualTree;
     private IDisposable? _currentFocusHighlightAdorner;
+    private DevToolsViewKind _selectedViewKind;
     private IScreenshotHandler? _screenshotHandler;
 
     public MainViewModel(AvaloniaObject root)
     {
         _root = root;
-        _logicalTree = new TreePageViewModel(this, LogicalTreeNode.Create(root), _pinnedProperties);
-        _visualTree = new TreePageViewModel(this, VisualTreeNode.Create(root), _pinnedProperties);
+        _selectionCoordinator = new SelectionCoordinator(
+            _pinnedProperties,
+            () => ShowImplementedInterfaces,
+            SelectTreeFromCoordinator);
+        _logicalTree = new TreePageViewModel(this, new LogicalTreeProvider().Create(root), _selectionCoordinator);
+        _visualTree = new TreePageViewModel(this, new VisualTreeProvider().Create(root), _selectionCoordinator);
+        _selectionCoordinator.Attach(_logicalTree, _visualTree);
+        _elements = new ElementsPageViewModel(_logicalTree, _visualTree, _selectionCoordinator);
         _events = new EventsPageViewModel(this);
-        _hotKeys = new HotKeyPageViewModel();
+        _trace = new TracePageViewModel();
+        _settings = new SettingsPageViewModel();
+        Tabs =
+        [
+            new DevToolsTabItemViewModel(this, DevToolsViewKind.Elements, "Elements", "LucideMousePointerClick"),
+            new DevToolsTabItemViewModel(this, DevToolsViewKind.Events, "Events", "LucideRadioTower"),
+            new DevToolsTabItemViewModel(this, DevToolsViewKind.Trace, "Trace", "LucideSquareTerminal"),
+            new DevToolsTabItemViewModel(this, DevToolsViewKind.Settings, "Settings", "LucideSettings"),
+        ];
 
         UpdateFocusedControl();
 
@@ -39,7 +59,7 @@ internal class MainViewModel : ReactiveViewModelBase
                 .AddTo(LifetimeDisposables);
         }
 
-        SelectedTab = 0;
+        SelectView(DevToolsViewKind.Elements);
         InputManager.Instance!.PreProcess
             .Subscribe(e =>
             {
@@ -91,64 +111,24 @@ internal class MainViewModel : ReactiveViewModelBase
     public ViewModelBase? Content
     {
         get;
-        private set
-        {
-            if (field is TreePageViewModel oldTree &&
-                value is TreePageViewModel newTree &&
-                oldTree?.SelectedNode?.Visual is Control control)
-            {
-                // HACK: We want to select the currently selected control in the new tree, but
-                // to select nested nodes in TreeView, currently the TreeView has to be able to
-                // expand the parent nodes. Because at this point the TreeView isn't visible,
-                // this will fail unless we schedule the selection to run after layout.
-                DispatcherTimer.RunOnce(
-                    () =>
-                    {
-                        try
-                        {
-                            newTree.SelectControl(control);
-                        }
-                        catch (Exception exception)
-                        {
-                            DevToolsDiagnostics.Report(
-                                exception,
-                                "Failed to select the previously selected control after switching tree tabs.");
-                        }
-                    },
-                    TimeSpan.FromMilliseconds(0));
-            }
-
-            SetProperty(ref field, value);
-        }
+        private set => SetProperty(ref field, value);
     }
 
-    public int SelectedTab
+    public IReadOnlyList<DevToolsTabItemViewModel> Tabs { get; }
+
+    public DevToolsViewKind SelectedViewKind
     {
-        get;
-        // [MemberNotNull(nameof(_content))]
-        set
-        {
-            field = value;
-
-            switch (value)
-            {
-                case 1:
-                    Content = _visualTree;
-                    break;
-                case 2:
-                    Content = _events;
-                    break;
-                case 3:
-                    Content = _hotKeys;
-                    break;
-                default:
-                    Content = _logicalTree;
-                    break;
-            }
-
-            RaisePropertyChanged();
-        }
+        get => _selectedViewKind;
+        private set => SetProperty(ref _selectedViewKind, value);
     }
+
+    public bool IsElementsSelected => SelectedViewKind == DevToolsViewKind.Elements;
+
+    public bool IsEventsSelected => SelectedViewKind == DevToolsViewKind.Events;
+
+    public bool IsTraceSelected => SelectedViewKind == DevToolsViewKind.Trace;
+
+    public bool IsSettingsSelected => SelectedViewKind == DevToolsViewKind.Settings;
 
     public string? FocusedControl
     {
@@ -206,6 +186,7 @@ internal class MainViewModel : ReactiveViewModelBase
             return;
         }
 
+        _elements.Dispose();
         _logicalTree.Dispose();
         _visualTree.Dispose();
         _events.Dispose();
@@ -286,21 +267,20 @@ internal class MainViewModel : ReactiveViewModelBase
 
     public void ShowHotKeys()
     {
-        SelectedTab = 3;
+        SelectView(DevToolsViewKind.Settings);
     }
 
     public void SelectControl(Control control)
     {
-        var tree = Content as TreePageViewModel;
-
-        tree?.SelectControl(control);
+        SelectView(DevToolsViewKind.Elements);
+        _selectionCoordinator.SelectControl(control, _elements.CurrentTree);
     }
 
     public void EnableSnapshotStyles(bool enable)
     {
-        if (Content is TreePageViewModel treeVm && treeVm.Details != null)
+        if (_elements.CurrentDetails != null)
         {
-            treeVm.Details.SnapshotFrames = enable;
+            _elements.CurrentDetails.SnapshotFrames = enable;
         }
     }
 
@@ -328,25 +308,15 @@ internal class MainViewModel : ReactiveViewModelBase
 
     public void RequestTreeNavigateTo(Control control, bool isVisualTree)
     {
-        var tree = isVisualTree ? _visualTree : _logicalTree;
-
-        var node = tree.FindNode(control);
-
-        if (node != null)
-        {
-            SelectedTab = isVisualTree ? 1 : 0;
-
-            tree.SelectControl(control);
-        }
+        _selectionCoordinator.RequestTreeNavigateTo(control, isVisualTree);
     }
 
     [DependsOn(nameof(TreePageViewModel.SelectedNode))]
     [DependsOn(nameof(Content))]
     public bool CanShot(object? parameter)
     {
-        return Content is TreePageViewModel tree
-            && tree.SelectedNode != null
-            && tree.SelectedNode.Visual is Visual visual
+        return _elements.CurrentTree.SelectedNode != null
+            && _elements.CurrentTree.SelectedNode.Model.Target is Visual visual
             && visual.VisualRoot != null;
     }
 
@@ -357,7 +327,7 @@ internal class MainViewModel : ReactiveViewModelBase
 
     private async Task ShotAsync(object? parameter)
     {
-        if ((Content as TreePageViewModel)?.SelectedNode?.Visual is Control control
+        if (_elements.CurrentTree.SelectedNode?.Model.Target is Control control
             && _screenshotHandler is not null)
         {
             await _screenshotHandler.Take(control);
@@ -370,18 +340,13 @@ internal class MainViewModel : ReactiveViewModelBase
         StartupScreenIndex = options.StartupScreenIndex;
         ShowImplementedInterfaces = options.ShowImplementedInterfaces;
         FocusHighlighter = options.FocusHighlighterBrush;
-        SelectedTab = (int)options.LaunchView;
-
-        _hotKeys.SetOptions(options);
+        SelectView(options.LaunchView);
     }
 
     public void ToggleShowImplementedInterfaces(object parameter)
     {
         ShowImplementedInterfaces = !ShowImplementedInterfaces;
-        if (Content is TreePageViewModel viewModel)
-        {
-            viewModel.UpdatePropertiesView();
-        }
+        _elements.CurrentTree.UpdatePropertiesView();
     }
 
     public void ToggleShowDetailsPropertyType(object parameter)
@@ -392,5 +357,47 @@ internal class MainViewModel : ReactiveViewModelBase
     public void SelectFocusHighlighter(object parameter)
     {
         FocusHighlighter = parameter as IBrush;
+    }
+
+    public void SelectView(object? parameter)
+    {
+        if (parameter is DevToolsViewKind viewKind)
+        {
+            SelectView(viewKind);
+        }
+    }
+
+    private void SelectView(DevToolsViewKind viewKind)
+    {
+        Content = viewKind switch
+        {
+            DevToolsViewKind.Events => _events,
+            DevToolsViewKind.Trace => _trace,
+            DevToolsViewKind.Settings => _settings,
+            _ => _elements,
+        };
+        SelectedViewKind = viewKind is DevToolsViewKind.Events or DevToolsViewKind.Trace or DevToolsViewKind.Settings
+            ? viewKind
+            : DevToolsViewKind.Elements;
+        RaiseTabSelectionChanged();
+    }
+
+    private void SelectTreeFromCoordinator(bool isVisualTree)
+    {
+        SelectView(DevToolsViewKind.Elements);
+        _elements.SelectTreeMode(isVisualTree ? ElementsTreeMode.Visual : ElementsTreeMode.Logical);
+    }
+
+    private void RaiseTabSelectionChanged()
+    {
+        RaisePropertyChanged(nameof(IsElementsSelected));
+        RaisePropertyChanged(nameof(IsEventsSelected));
+        RaisePropertyChanged(nameof(IsTraceSelected));
+        RaisePropertyChanged(nameof(IsSettingsSelected));
+
+        foreach (var tab in Tabs)
+        {
+            tab.RaiseSelectionChanged();
+        }
     }
 }

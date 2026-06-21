@@ -1,16 +1,16 @@
-using Avalonia.Markup.Xaml;
+using ClassicDiagnostics.Avalonia.ViewModels;
 
 namespace ClassicDiagnostics.Avalonia.Views;
 
-internal partial class HotKeyPageView : UserControl
+internal partial class HotKeyPageView : ReactiveUserControl<HotKeyPageViewModel>
 {
-    public HotKeyPageView()
+    public HotKeyPageView(HotKeyPageViewModel viewModel) : base(viewModel)
     {
         InitializeComponent();
     }
 
     private void InitializeComponent()
     {
-        AvaloniaXamlLoader.Load(this);
+        LoadComponent();
     }
 }

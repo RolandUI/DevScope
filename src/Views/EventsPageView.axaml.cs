@@ -9,21 +9,30 @@ using ClassicDiagnostics.Avalonia.ViewModels;
 
 namespace ClassicDiagnostics.Avalonia.Views;
 
-internal partial class EventsPageView : UserControl
+internal partial class EventsPageView : ReactiveUserControl<EventsPageViewModel>
 {
-    private readonly ListBox _events;
     private IDisposable? _adorner;
     private EventsPageViewModel? _recordedEventsOwner;
 
     public EventsPageView()
     {
         InitializeComponent();
-        _events = this.GetControl<ListBox>("EventsList");
     }
 
-    public void NavigateTo(object sender, TappedEventArgs e)
+    public EventsPageView(EventsPageViewModel viewModel)
+        : base(viewModel)
     {
-        if (DataContext is not EventsPageViewModel viewModel || sender is not Control control) return;
+        InitializeComponent();
+    }
+
+    public void HandleNavigateDoubleTapped(object sender, TappedEventArgs e)
+    {
+        if (sender is not Control control)
+        {
+            return;
+        }
+
+        var viewModel = RequiredViewModel;
 
         switch (control.Tag)
         {
@@ -32,9 +41,9 @@ internal partial class EventsPageView : UserControl
                 viewModel.RequestTreeNavigateTo(chainLink);
                 break;
             }
-            case RoutedEvent evt:
+            case RoutedEvent routedEvent:
             {
-                viewModel.SelectEventByType(evt);
+                viewModel.SelectEventByType(routedEvent);
 
                 break;
             }
@@ -47,13 +56,13 @@ internal partial class EventsPageView : UserControl
 
         if (_recordedEventsOwner is not null)
         {
-            _recordedEventsOwner.RecordedEvents.CollectionChanged -= OnRecordedEventsChanged;
+            _recordedEventsOwner.RecordedEvents.CollectionChanged -= HandleRecordedEventsChanged;
             _recordedEventsOwner = null;
         }
 
-        if (DataContext is EventsPageViewModel viewModel)
+        if (ViewModel is { } viewModel)
         {
-            viewModel.RecordedEvents.CollectionChanged += OnRecordedEventsChanged;
+            viewModel.RecordedEvents.CollectionChanged += HandleRecordedEventsChanged;
             _recordedEventsOwner = viewModel;
         }
     }
@@ -64,7 +73,7 @@ internal partial class EventsPageView : UserControl
 
         if (_recordedEventsOwner is not null)
         {
-            _recordedEventsOwner.RecordedEvents.CollectionChanged -= OnRecordedEventsChanged;
+            _recordedEventsOwner.RecordedEvents.CollectionChanged -= HandleRecordedEventsChanged;
             _recordedEventsOwner = null;
         }
 
@@ -72,30 +81,30 @@ internal partial class EventsPageView : UserControl
         _adorner = null;
     }
 
-    private void OnRecordedEventsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    private void HandleRecordedEventsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (sender is not ObservableCollection<FiredEvent> events) return;
 
         var @event = events.LastOrDefault();
         if (@event is null) return;
 
-        Dispatcher.UIThread.Post(() => _events.ScrollIntoView(@event));
+        Dispatcher.UIThread.Post(() => EventsList.ScrollIntoView(@event));
     }
 
     private void InitializeComponent()
     {
-        AvaloniaXamlLoader.Load(this);
+        LoadComponent();
     }
 
-    private void ListBoxItem_PointerEntered(object? sender, PointerEventArgs e)
+    private void HandleEventChainItemPointerEntered(object? sender, PointerEventArgs e)
     {
-        if (DataContext is EventsPageViewModel viewModel && sender is Control { DataContext: EventChainLink { Handler: Visual visual } })
+        if (sender is Control { DataContext: EventChainLink { Handler: Visual visual } })
         {
-            _adorner = ControlHighlightAdorner.Add(visual, viewModel.MainView.ShouldVisualizeMarginPadding);
+            _adorner = ControlHighlightAdorner.Add(visual, RequiredViewModel.MainView.ShouldVisualizeMarginPadding);
         }
     }
 
-    private void ListBoxItem_PointerExited(object? sender, PointerEventArgs e)
+    private void HandleEventChainItemPointerExited(object? sender, PointerEventArgs e)
     {
         _adorner?.Dispose();
         _adorner = null;

@@ -3,47 +3,31 @@ using ClassicDiagnostics.Avalonia.ViewModels;
 
 namespace ClassicDiagnostics.Avalonia.Views;
 
-internal partial class ControlDetailsView : UserControl
+internal partial class ControlDetailsView : ReactiveUserControl<ControlDetailsViewModel>
 {
-    private readonly DataGrid _dataGrid;
-
-    public ControlDetailsView()
+    public ControlDetailsView(ControlDetailsViewModel viewModel) : base(viewModel)
     {
         InitializeComponent();
-
-        _dataGrid = this.GetControl<DataGrid>("DataGrid");
     }
 
     private void InitializeComponent()
     {
-        AvaloniaXamlLoader.Load(this);
+        LoadComponent();
     }
 
-    private void PropertiesGrid_OnDoubleTapped(object sender, TappedEventArgs e)
+    private void HandlePropertiesGridDoubleTapped(object sender, TappedEventArgs e)
     {
-        if (sender is DataGrid grid && grid.DataContext is ControlDetailsViewModel controlDetails)
-        {
-            controlDetails.NavigateToSelectedProperty();
-        }
-
+        RequiredViewModel.NavigateToSelectedProperty();
     }
 
-    public void PropertyNamePressed(object sender, PointerPressedEventArgs e)
+    public void HandlePropertyNamePointerPressed(object sender, PointerPressedEventArgs e)
     {
-        var mainVm = (ControlDetailsViewModel?)DataContext;
-
-        if (mainVm is null)
+        if (sender is Control { DataContext: SetterViewModel setterViewModel })
         {
-            return;
-        }
-
-        if (sender is Control control && control.DataContext is SetterViewModel setterVm)
-        {
-            mainVm.SelectProperty(setterVm.Property);
-
-            if (mainVm.SelectedProperty is not null)
+            RequiredViewModel.SelectProperty(setterViewModel.Property);
+            if (RequiredViewModel.SelectedProperty is not null)
             {
-                _dataGrid.ScrollIntoView(mainVm.SelectedProperty, null);
+                DataGrid.ScrollIntoView(RequiredViewModel.SelectedProperty, null);
             }
         }
     }

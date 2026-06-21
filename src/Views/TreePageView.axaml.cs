@@ -1,26 +1,22 @@
 using Avalonia.LogicalTree;
-using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using ClassicDiagnostics.Avalonia.Controls;
-using ClassicDiagnostics.Avalonia.Models;
 using ClassicDiagnostics.Avalonia.ViewModels;
 
 namespace ClassicDiagnostics.Avalonia.Views;
 
-internal partial class TreePageView : UserControl
+internal partial class TreePageView : ReactiveUserControl<TreePageViewModel>
 {
-    private readonly TreeView _tree;
     private IDisposable? _adorner;
     private TreeViewItem? _hovered;
 
-    public TreePageView()
+    public TreePageView(TreePageViewModel viewModel) : base(viewModel)
     {
         InitializeComponent();
-        _tree = this.GetControl<TreeView>("tree");
     }
 
-    protected void UpdateAdorner(object? sender, PointerEventArgs e)
+    protected void HandleTreePointerMoved(object? sender, PointerEventArgs e)
     {
         if (e.Source is not StyledElement source)
         {
@@ -35,7 +31,7 @@ internal partial class TreePageView : UserControl
 
         _adorner?.Dispose();
 
-        if (item is null || item.TreeViewOwner != _tree)
+        if (item is null || item.TreeViewOwner != Tree)
         {
             _hovered = null;
             return;
@@ -43,17 +39,15 @@ internal partial class TreePageView : UserControl
 
         _hovered = item;
 
-        var target = (item.DataContext as TreeNode)?.Visual;
-        var shouldVisualizeMarginPadding = (DataContext as TreePageViewModel)?.MainView.ShouldVisualizeMarginPadding;
-        if (target is null || shouldVisualizeMarginPadding is null)
+        if (item.DataContext is not TreeNodeViewModel treeNodeViewModel)
         {
             return;
         }
 
-        _adorner = AddHighlight(target, shouldVisualizeMarginPadding == true);
+        _adorner = AddHighlight(treeNodeViewModel.Model.Target, RequiredViewModel.MainView.ShouldVisualizeMarginPadding);
     }
 
-    private void RemoveAdorner(object? sender, PointerEventArgs e)
+    private void HandleTreePointerExited(object? sender, PointerEventArgs e)
     {
         _adorner?.Dispose();
         _adorner = null;
@@ -66,18 +60,18 @@ internal partial class TreePageView : UserControl
         if (change.Property == DataContextProperty)
         {
             if (change.GetOldValue<object?>() is TreePageViewModel oldViewModel)
-                oldViewModel.ClipboardCopyRequested -= OnClipboardCopyRequested;
+                oldViewModel.ClipboardCopyRequested -= HandleClipboardCopyRequested;
             if (change.GetNewValue<object?>() is TreePageViewModel newViewModel)
-                newViewModel.ClipboardCopyRequested += OnClipboardCopyRequested;
+                newViewModel.ClipboardCopyRequested += HandleClipboardCopyRequested;
         }
     }
 
     private void InitializeComponent()
     {
-        AvaloniaXamlLoader.Load(this);
+        LoadComponent();
     }
 
-    private void OnClipboardCopyRequested(object? sender, string selector)
+    private void HandleClipboardCopyRequested(object? sender, string selector)
     {
         if (TopLevel.GetTopLevel(this)?.Clipboard is { } clipboard)
         {
@@ -116,7 +110,7 @@ internal partial class TreePageView : UserControl
 
     private IBrush GetHighlightBrush()
     {
-        return (DataContext as TreePageViewModel)?.MainView.FocusHighlighter ?? Brushes.Red;
+        return RequiredViewModel.MainView.FocusHighlighter ?? Brushes.Red;
     }
 
     private IDisposable? AddHighlight(AvaloniaObject target, bool shouldVisualizeMarginPadding)

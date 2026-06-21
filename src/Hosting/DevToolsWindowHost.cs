@@ -26,7 +26,7 @@ internal static class DevToolsWindowHost
         };
         window.SetOptions(options);
         window.SelectedControl(focusedControl);
-        window.Closed += OnDebuggerWindowClosed;
+        window.Closed += HandleDebuggerWindowClosed;
         DebuggerWindow = window;
 
         window.Show();
@@ -68,14 +68,14 @@ internal static class DevToolsWindowHost
         window.SelectedControl(focusedControl);
     }
 
-    private static void OnDebuggerWindowClosed(object? sender, EventArgs e)
+    private static void HandleDebuggerWindowClosed(object? sender, EventArgs e)
     {
         if (sender is not MainWindow window)
         {
             return;
         }
 
-        window.Closed -= OnDebuggerWindowClosed;
+        window.Closed -= HandleDebuggerWindowClosed;
         if (ReferenceEquals(DebuggerWindow, window))
         {
             DebuggerWindow = null;
