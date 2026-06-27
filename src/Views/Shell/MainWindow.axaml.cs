@@ -32,12 +32,16 @@ internal partial class MainWindow : Window, IStyleHost
             {
                 switch (x)
                 {
-                    case RawPointerEventArgs pointerEventArgs:
-                        _lastPointerPosition = ((PresentationSource)x.Root).PointToScreen(pointerEventArgs.Position) ?? default;
+                    case RawPointerEventArgs { Root: PresentationSource source } pointerEventArgs:
+                    {
+                        _lastPointerPosition = AvaloniaMutatedApiAccessor.PointToScreen(source, pointerEventArgs.Position) ?? default;
                         break;
+                    }
                     case RawKeyEventArgs { Type: RawKeyEventType.KeyDown } keyEventArgs:
+                    {
                         RawKeyDown(keyEventArgs);
                         break;
+                    }
                 }
             });
 

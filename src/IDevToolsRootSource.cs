@@ -73,18 +73,15 @@ internal sealed class SingleViewApplicationRootSource(
     {
         get
         {
-            // Browser/iOS single-view lifetimes expose the actual host through the
-            // private-api ISingleTopLevelApplicationLifetime. Prefer it as the presentation
-            // root. MainView is only a clue for finding its TopLevel, not an Application child.
-            if (AvaloniaPrivateApi.Current.GetSingleViewTopLevel(_lifetime) is { } topLevel)
+            return _lifetime switch
             {
-                return [topLevel];
-            }
-
-            return _lifetime.MainView is { } mainView &&
-                TopLevel.GetTopLevel(mainView) is { } mainViewTopLevel ?
-                [mainViewTopLevel] :
-                [];
+                // Browser/iOS single-view lifetimes expose the actual host through the
+                // private-api ISingleTopLevelApplicationLifetime. Prefer it as the presentation
+                // root. MainView is only a clue for finding its TopLevel, not an Application child.
+                ISingleTopLevelApplicationLifetime { TopLevel: { } topLevel } => [topLevel],
+                { MainView: { } mainView } when TopLevel.GetTopLevel(mainView) is { } mainViewTopLevel => [mainViewTopLevel],
+                _ => []
+            };
         }
     }
 

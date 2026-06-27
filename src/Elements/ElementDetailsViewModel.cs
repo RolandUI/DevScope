@@ -137,7 +137,7 @@ internal class ElementDetailsViewModel : ReactiveViewModelBase, IClassesChangedL
 
             var clipboard = TopLevel.GetTopLevel(_avaloniaObject as Visual)?.Clipboard;
 
-            foreach (var appliedStyle in AvaloniaPrivateApi.Current.GetAppliedStyleFrames(_styledElement).OrderBy(s => s.Priority))
+            foreach (var appliedStyle in _styledElement.GetValueStoreDiagnostic().AppliedFrames.OrderBy(s => s.Priority))
             {
                 AppliedFrames.Add(new ValueFrameViewModel(_styledElement, appliedStyle, clipboard));
             }

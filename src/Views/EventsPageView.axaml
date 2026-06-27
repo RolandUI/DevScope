@@ -83,77 +83,89 @@
     </Grid>
 
     <GridSplitter
-      Grid.Column="1" Width="4"/>
+      Grid.Column="1" Width="4"
+      Margin="-2,0" Background="Transparent"
+      ResizeDirection="Columns"/>
 
     <Grid
       Grid.Column="2" RowDefinitions="*,4,2*,Auto">
 
-      <ListBox
-        x:Name="EventsList"
-        ItemsSource="{Binding RecordedEvents}"
-        SelectedItem="{Binding SelectedEvent, Mode=TwoWay}">
-        <ListBox.Styles>
-          <Style Selector="ListBoxItem">
-            <Setter Property="Classes.handled" Value="{Binding IsHandled, x:DataType=m:FiredEvent}"/>
-          </Style>
-        </ListBox.Styles>
+      <DockPanel
+        Grid.Row="0" Margin="0,5,0,0"
+        LastChildFill="True" VerticalSpacing="2">
+        <TextBlock
+          DockPanel.Dock="Top" FontSize="14"
+          Text="Event list"/>
 
-        <ListBox.ItemTemplate>
-          <DataTemplate>
-            <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto">
+        <ListBox
+          x:Name="EventsList"
+          ItemsSource="{Binding RecordedEvents}"
+          SelectedItem="{Binding SelectedEvent, Mode=TwoWay}">
+          <ListBox.Styles>
+            <Style Selector="ListBoxItem">
+              <Setter Property="Classes.handled" Value="{Binding IsHandled, x:DataType=m:FiredEvent}"/>
+            </Style>
+          </ListBox.Styles>
 
-              <TextBlock
-                Grid.Column="0"
-                Text="{Binding TriggerTime, StringFormat={}{0:HH:mm:ss.fff}}"/>
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto">
 
-              <StackPanel
-                Grid.Column="1" Margin="10,0,0,0"
-                Orientation="Horizontal" Spacing="2">
                 <TextBlock
-                  Classes="nav" DoubleTapped="HandleNavigateDoubleTapped"
-                  FontWeight="Bold"
-                  Tag="{Binding Event}"
-                  Text="{Binding Event.Name}"/>
-                <TextBlock Text="on"/>
-                <TextBlock
-                  Classes="nav" DoubleTapped="HandleNavigateDoubleTapped"
-                  Tag="{Binding Originator}"
-                  Text="{Binding Originator.HandlerName}"/>
-              </StackPanel>
+                  Grid.Column="0"
+                  Text="{Binding TriggerTime, StringFormat={}{0:HH:mm:ss.fff}}"/>
 
-              <StackPanel
-                Grid.Column="2" Margin="2,0,0,0"
-                IsVisible="{Binding IsHandled}"
-                Orientation="Horizontal" Spacing="2">
-                <TextBlock Text="::"/>
-                <TextBlock Text="Handled by"/>
-                <TextBlock
-                  Classes="nav" DoubleTapped="HandleNavigateDoubleTapped"
-                  Tag="{Binding HandledBy}"
-                  Text="{Binding HandledBy?.HandlerName}"/>
-              </StackPanel>
+                <StackPanel
+                  Grid.Column="1" Margin="10,0,0,0"
+                  Orientation="Horizontal" Spacing="2">
+                  <TextBlock
+                    Classes="nav" DoubleTapped="HandleNavigateDoubleTapped"
+                    FontWeight="Bold"
+                    Tag="{Binding Event}"
+                    Text="{Binding Event.Name}"/>
+                  <TextBlock Text="on"/>
+                  <TextBlock
+                    Classes="nav" DoubleTapped="HandleNavigateDoubleTapped"
+                    Tag="{Binding Originator}"
+                    Text="{Binding Originator.HandlerName}"/>
+                </StackPanel>
 
-              <StackPanel
-                Grid.Column="4" HorizontalAlignment="Right"
-                Orientation="Horizontal">
-                <TextBlock Text="Routing ("/>
-                <TextBlock Text="{Binding Event.RoutingStrategies}"/>
-                <TextBlock Text=")"/>
-              </StackPanel>
+                <StackPanel
+                  Grid.Column="2" Margin="2,0,0,0"
+                  IsVisible="{Binding IsHandled}"
+                  Orientation="Horizontal" Spacing="2">
+                  <TextBlock Text="::"/>
+                  <TextBlock Text="Handled by"/>
+                  <TextBlock
+                    Classes="nav" DoubleTapped="HandleNavigateDoubleTapped"
+                    Tag="{Binding HandledBy}"
+                    Text="{Binding HandledBy?.HandlerName}"/>
+                </StackPanel>
 
-            </Grid>
-          </DataTemplate>
-        </ListBox.ItemTemplate>
-      </ListBox>
+                <StackPanel
+                  Grid.Column="4" HorizontalAlignment="Right"
+                  Orientation="Horizontal">
+                  <TextBlock Text="Routing ("/>
+                  <TextBlock Text="{Binding Event.RoutingStrategies}"/>
+                  <TextBlock Text=")"/>
+                </StackPanel>
+
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
 
       <GridSplitter
-        Grid.Row="1" Height="4"/>
+        Grid.Row="1" Height="4"
+        Margin="-2,0" Background="Transparent"/>
 
       <DockPanel
-        Grid.Row="2" LastChildFill="True">
+        Grid.Row="2" LastChildFill="True"
+        VerticalSpacing="2">
         <TextBlock
-          DockPanel.Dock="Top" FontSize="16"
-          Text="Event chain:"/>
+          DockPanel.Dock="Top" FontSize="14"
+          Text="Event chain"/>
 
         <ListBox ItemsSource="{Binding SelectedEvent?.EventChain}">
           <ListBox.Styles>
