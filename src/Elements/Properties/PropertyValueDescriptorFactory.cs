@@ -1,19 +1,10 @@
 using System.Collections;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
-using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Properties;
+namespace ClassicDiagnostics.Avalonia.Elements.Properties;
 
-internal sealed class PropertyValueDescriptorFactory
+internal static class PropertyValueDescriptorFactory
 {
-    public static PropertyValueDescriptorFactory Default { get; } = new();
-
-    private PropertyValueDescriptorFactory()
-    {
-    }
-
-    public PropertyValueDescriptor Create(object? value)
+    public static PropertyValueDescriptor Create(object? value)
     {
         if (value is null)
         {

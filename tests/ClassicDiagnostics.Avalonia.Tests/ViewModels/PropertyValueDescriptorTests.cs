@@ -1,4 +1,3 @@
-using ClassicDiagnostics.Avalonia.Properties;
 using ClassicDiagnostics.Avalonia.Elements;
 using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
 using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
@@ -27,8 +26,8 @@ internal sealed class PropertyValueDescriptorTests
     [Test]
     public void FactoryDiscoversArrayAndListChildren()
     {
-        var array = PropertyValueDescriptorFactory.Default.Create(new[] { "first", "second" });
-        var list = PropertyValueDescriptorFactory.Default.Create(new List<int> { 10, 20 });
+        var array = PropertyValueDescriptorFactory.Create(new[] { "first", "second" });
+        var list = PropertyValueDescriptorFactory.Create(new List<int> { 10, 20 });
 
         Assert.That(array.Children.Select(child => child.Name), Is.EqualTo(new[] { "[0]", "[1]" }));
         Assert.That(array.Children.Select(child => child.Value), Is.EqualTo(new[] { "first", "second" }));
@@ -39,7 +38,7 @@ internal sealed class PropertyValueDescriptorTests
     [Test]
     public void FactoryDiscoversDictionaryChildren()
     {
-        var descriptor = PropertyValueDescriptorFactory.Default.Create(
+        var descriptor = PropertyValueDescriptorFactory.Create(
             new Dictionary<string, object?>
             {
                 ["name"] = "Avalonia",
@@ -54,7 +53,7 @@ internal sealed class PropertyValueDescriptorTests
 
     private static void AssertKind(object? value, PropertyValueDescriptorKind kind, bool canNavigate)
     {
-        var descriptor = PropertyValueDescriptorFactory.Default.Create(value);
+        var descriptor = PropertyValueDescriptorFactory.Create(value);
 
         Assert.That(descriptor.Kind, Is.EqualTo(kind));
         Assert.That(descriptor.CanNavigate, Is.EqualTo(canNavigate));

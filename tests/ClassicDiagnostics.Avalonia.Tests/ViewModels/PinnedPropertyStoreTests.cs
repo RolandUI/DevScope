@@ -1,5 +1,4 @@
 using Avalonia.Controls;
-using ClassicDiagnostics.Avalonia.Properties;
 using ClassicDiagnostics.Avalonia.Elements.Trees;
 using ClassicDiagnostics.Avalonia.ViewModels;
 using ClassicDiagnostics.Avalonia.Elements;

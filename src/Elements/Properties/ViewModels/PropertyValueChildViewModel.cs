@@ -1,5 +1,3 @@
-using ClassicDiagnostics.Avalonia.Properties;
-
 namespace ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
 
 internal sealed class PropertyValueChildViewModel(

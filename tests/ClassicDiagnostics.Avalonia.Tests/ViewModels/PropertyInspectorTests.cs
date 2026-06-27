@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using ClassicDiagnostics.Avalonia.Properties;
 using ClassicDiagnostics.Avalonia.ViewModels;
 using ClassicDiagnostics.Avalonia.Elements;
 using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
@@ -100,7 +99,7 @@ internal sealed class PropertyInspectorTests
         Assert.That(properties.Select(property => property.Name), Is.EqualTo(new[] { "[0]", "[1]" }));
         Assert.That(properties.Select(property => property.Group), Is.EqualTo(new[] { "Items", "Items" }));
         Assert.That(properties[0].Value, Is.EqualTo("first"));
-        Assert.That(PropertyValueDescriptorFactory.Default.Create(properties[1].Value).CanNavigate, Is.True);
+        Assert.That(PropertyValueDescriptorFactory.Create(properties[1].Value).CanNavigate, Is.True);
     }
 
     [Test]

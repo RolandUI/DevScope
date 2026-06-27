@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using ClassicDiagnostics.Avalonia.Properties;
 
 namespace ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
 

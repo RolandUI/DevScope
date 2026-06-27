@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using ClassicDiagnostics.Avalonia.Elements;
 using ClassicDiagnostics.Avalonia.Elements.Trees;
-using ClassicDiagnostics.Avalonia.Properties;
 using ClassicDiagnostics.Avalonia.Shell;
 using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
 using ClassicDiagnostics.Avalonia.Elements.Properties.Services;

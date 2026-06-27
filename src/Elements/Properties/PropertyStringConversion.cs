@@ -1,11 +1,8 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
-using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Properties;
+namespace ClassicDiagnostics.Avalonia.Elements.Properties;
 
 internal static class PropertyStringConversion
 {

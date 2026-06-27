@@ -5,8 +5,8 @@ using Avalonia.Data.Converters;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml.Converters;
 using Avalonia.Media;
+using ClassicDiagnostics.Avalonia.Elements.Properties;
 using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
-using ClassicDiagnostics.Avalonia.Properties;
 using ClassicDiagnostics.Avalonia.Views.Controls;
 using Path = Avalonia.Controls.Shapes.Path;
 

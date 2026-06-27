@@ -1,8 +1,4 @@
-using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
-using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
-
-namespace ClassicDiagnostics.Avalonia.Properties;
+namespace ClassicDiagnostics.Avalonia.Elements.Properties;
 
 internal interface IPropertyAccessor
 {

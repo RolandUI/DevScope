@@ -1,10 +1,7 @@
 using Avalonia.Media;
-using ClassicDiagnostics.Avalonia.ViewModels;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
 using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Properties;
+namespace ClassicDiagnostics.Avalonia.Elements.Properties;
 
 internal sealed class PropertyEditorFactory : IPropertyEditorFactory
 {
@@ -17,7 +14,7 @@ internal sealed class PropertyEditorFactory : IPropertyEditorFactory
     public PropertyEditorDescriptor Create(PropertyViewModel property)
     {
         var propertyType = property.PropertyType;
-        var valueDescriptor = PropertyValueDescriptorFactory.Default.Create(property.Value);
+        var valueDescriptor = PropertyValueDescriptorFactory.Create(property.Value);
         var kind = GetKind(propertyType, property.IsReadonly, valueDescriptor);
 
         return new PropertyEditorDescriptor(

@@ -1,10 +1,7 @@
 using System.Reflection;
-using ClassicDiagnostics.Avalonia.ViewModels;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
 using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Properties;
+namespace ClassicDiagnostics.Avalonia.Elements.Properties;
 
 internal sealed class PropertyInspector : IPropertyInspector
 {
@@ -32,7 +29,7 @@ internal sealed class PropertyInspector : IPropertyInspector
 
     private static IEnumerable<PropertyViewModel> GetProperties(object target, bool showImplementedInterfaces)
     {
-        var descriptor = PropertyValueDescriptorFactory.Default.Create(target);
+        var descriptor = PropertyValueDescriptorFactory.Create(target);
 
         if (descriptor.Kind is PropertyValueDescriptorKind.Array
             or PropertyValueDescriptorKind.List

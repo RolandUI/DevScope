@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using ClassicDiagnostics.Avalonia.Models;
-using ClassicDiagnostics.Avalonia.Properties;
 using ClassicDiagnostics.Avalonia.Elements.Trees;
 using ClassicDiagnostics.Avalonia.ViewModels;
 using ClassicDiagnostics.Avalonia.Views.Controls;

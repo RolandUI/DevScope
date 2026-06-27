@@ -1,6 +1,6 @@
 using Avalonia.Threading;
+using ClassicDiagnostics.Avalonia.Elements.Properties;
 using ClassicDiagnostics.Avalonia.Elements.Trees;
-using ClassicDiagnostics.Avalonia.Properties;
 
 namespace ClassicDiagnostics.Avalonia.Elements;
 

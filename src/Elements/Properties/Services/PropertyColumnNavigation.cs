@@ -1,5 +1,4 @@
 using System.Collections;
-using ClassicDiagnostics.Avalonia.Properties;
 
 namespace ClassicDiagnostics.Avalonia.Elements.Properties.Services;
 

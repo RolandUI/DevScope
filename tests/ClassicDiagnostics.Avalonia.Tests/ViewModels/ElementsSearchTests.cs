@@ -2,7 +2,6 @@ using Avalonia.Controls;
 using ClassicDiagnostics.Avalonia.Elements;
 using ClassicDiagnostics.Avalonia.Elements.Search;
 using ClassicDiagnostics.Avalonia.Elements.Trees;
-using ClassicDiagnostics.Avalonia.Properties;
 using ClassicDiagnostics.Avalonia.Shell;
 
 namespace ClassicDiagnostics.Avalonia.Tests.ViewModels;

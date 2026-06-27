@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.ObjectModel;
-using ClassicDiagnostics.Avalonia.Properties;
 using ClassicDiagnostics.Avalonia.ViewModels;
 
 namespace ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;

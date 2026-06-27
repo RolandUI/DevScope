@@ -1,5 +1,4 @@
 using Avalonia.Media;
-using ClassicDiagnostics.Avalonia.Properties;
 using ClassicDiagnostics.Avalonia.ViewModels;
 using ClassicDiagnostics.Avalonia.Elements;
 using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
