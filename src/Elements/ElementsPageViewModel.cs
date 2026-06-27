@@ -1,16 +1,18 @@
 using System.ComponentModel;
+using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
 using ClassicDiagnostics.Avalonia.Elements.Search;
+using ClassicDiagnostics.Avalonia.Elements.Trees;
 using ClassicDiagnostics.Avalonia.ViewModels;
 
 namespace ClassicDiagnostics.Avalonia.Elements;
 
 internal sealed class ElementsPageViewModel : ReactiveViewModelBase
 {
-    public TreePageViewModel LogicalTree { get; }
+    public ElementsTreeViewModel LogicalTree { get; }
 
-    public TreePageViewModel VisualTree { get; }
+    public ElementsTreeViewModel VisualTree { get; }
 
-    public TreePageViewModel CurrentTree
+    public ElementsTreeViewModel CurrentTree
     {
         get => _currentTree;
         private set
@@ -32,37 +34,28 @@ internal sealed class ElementsPageViewModel : ReactiveViewModelBase
         }
     }
 
-    public ControlDetailsViewModel? CurrentDetails
+    public ElementDetailsViewModel? CurrentDetails
     {
         get;
         private set => SetProperty(ref field, value);
     }
+
+    public PropertyExplorerViewModel? CurrentPropertyExplorer => CurrentDetails?.PropertyExplorer;
 
     public ElementsFindViewModel Find { get; }
 
     public ElementsTreeMode SelectedTreeMode
     {
         get;
-        private set
-        {
-            if (SetProperty(ref field, value))
-            {
-                RaisePropertyChanged(nameof(IsLogicalTreeSelected));
-                RaisePropertyChanged(nameof(IsVisualTreeSelected));
-            }
-        }
+        private set => SetProperty(ref field, value);
     }
 
-    public bool IsLogicalTreeSelected => SelectedTreeMode == ElementsTreeMode.Logical;
-
-    public bool IsVisualTreeSelected => SelectedTreeMode == ElementsTreeMode.Visual;
-
     private readonly ISelectionCoordinator _selectionCoordinator;
-    private TreePageViewModel _currentTree;
+    private ElementsTreeViewModel _currentTree;
 
     public ElementsPageViewModel(
-        TreePageViewModel logicalTree,
-        TreePageViewModel visualTree,
+        ElementsTreeViewModel logicalTree,
+        ElementsTreeViewModel visualTree,
         ISelectionCoordinator selectionCoordinator)
     {
         LogicalTree = logicalTree;
@@ -71,7 +64,7 @@ internal sealed class ElementsPageViewModel : ReactiveViewModelBase
         _currentTree = logicalTree;
         _currentTree.PropertyChanged += CurrentTreePropertyChanged;
         Disposable.Create(() => _currentTree.PropertyChanged -= CurrentTreePropertyChanged).AddTo(LifetimeDisposables);
-        Find = new ElementsFindViewModel(new TreeSearchService());
+        Find = new ElementsFindViewModel();
         Find.AttachTree(_currentTree);
     }
 
@@ -91,14 +84,14 @@ internal sealed class ElementsPageViewModel : ReactiveViewModelBase
         CurrentTree = treeMode == ElementsTreeMode.Visual ? VisualTree : LogicalTree;
     }
 
-    public TreePageViewModel GetTree(bool isVisualTree)
+    public ElementsTreeViewModel GetTree(bool isVisualTree)
     {
         return isVisualTree ? VisualTree : LogicalTree;
     }
 
     private void CurrentTreePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(TreePageViewModel.Details))
+        if (e.PropertyName == nameof(ElementsTreeViewModel.Details))
         {
             UpdateCurrentDetails();
         }
@@ -107,5 +100,6 @@ internal sealed class ElementsPageViewModel : ReactiveViewModelBase
     private void UpdateCurrentDetails()
     {
         CurrentDetails = CurrentTree.Details;
+        RaisePropertyChanged(nameof(CurrentPropertyExplorer));
     }
 }

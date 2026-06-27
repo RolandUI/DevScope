@@ -1,0 +1,68 @@
+<UserControl
+  x:Class="ClassicDiagnostics.Avalonia.Views.Elements.Properties.ContainerPropertiesColumnView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:properties="using:ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels"
+  x:DataType="properties:ContainerPropertiesColumnViewModel">
+
+  <Grid RowDefinitions="*,Auto">
+    <DataGrid
+      Grid.Row="0" BorderThickness="0"
+      CanUserResizeColumns="true"
+      ItemsSource="{Binding Items}"
+      RowBackground="Transparent"
+      SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
+      <DataGrid.Columns>
+        <DataGridTextColumn
+          x:DataType="properties:PropertyContainerItemViewModel"
+          Binding="{Binding Index}"
+          Header="Index" IsReadOnly="True"/>
+        <DataGridTemplateColumn
+          x:DataType="properties:PropertyContainerItemViewModel" Header="Key"
+          IsReadOnly="True">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate DataType="properties:PropertyContainerItemViewModel">
+              <TextBlock
+                Text="{Binding KeyText}"
+                ToolTip.Tip="{Binding KeyText}"/>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+        <DataGridTemplateColumn
+          x:DataType="properties:PropertyContainerItemViewModel" Header="Value"
+          IsReadOnly="True">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate DataType="properties:PropertyContainerItemViewModel">
+              <TextBlock
+                Text="{Binding ValueText}"
+                ToolTip.Tip="{Binding ValueText}"/>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+        <DataGridTemplateColumn
+          x:DataType="properties:PropertyContainerItemViewModel" Header="Type"
+          IsReadOnly="True">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate DataType="properties:PropertyContainerItemViewModel">
+              <TextBlock
+                Text="{Binding Type}"
+                ToolTip.Tip="{Binding TypeTooltip}"/>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+      </DataGrid.Columns>
+    </DataGrid>
+
+    <Grid
+      Grid.Row="1" Margin="4,2"
+      ColumnDefinitions="*,Auto">
+      <TextBlock
+        Grid.Column="0" VerticalAlignment="Center"
+        Foreground="{DynamicResource ThemeForegroundLowBrush}"
+        Text="{Binding Status}"/>
+      <Button
+        Grid.Column="1"
+        Command="{Binding ShowMore}"
+        Content="Show more"
+        IsVisible="{Binding CanShowMore}"/>
+    </Grid>
+  </Grid>
+</UserControl>

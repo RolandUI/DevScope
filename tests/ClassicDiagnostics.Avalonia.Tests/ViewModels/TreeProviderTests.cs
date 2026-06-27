@@ -1,11 +1,17 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using Avalonia.Threading;
-using ClassicDiagnostics.Avalonia.Controls;
 using ClassicDiagnostics.Avalonia.Models;
 using ClassicDiagnostics.Avalonia.Properties;
-using ClassicDiagnostics.Avalonia.Tree;
+using ClassicDiagnostics.Avalonia.Elements.Trees;
 using ClassicDiagnostics.Avalonia.ViewModels;
+using ClassicDiagnostics.Avalonia.Views.Controls;
+using ClassicDiagnostics.Avalonia.Elements;
+using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
+using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
+using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
+using ClassicDiagnostics.Avalonia.Rooting;
+using ClassicDiagnostics.Avalonia.Shell;
 
 namespace ClassicDiagnostics.Avalonia.Tests.ViewModels;
 
@@ -25,7 +31,7 @@ internal sealed class TreeProviderTests
                 secondWindow,
             };
             var source = new TestRootSource(windows);
-            var host = new PresentationRootGroup(source);
+            var host = new PresentationRootNode(source);
             var root = new LogicalTreeProvider().Create(host).Single();
 
             try
@@ -72,7 +78,7 @@ internal sealed class TreeProviderTests
                 secondWindow,
             };
             var source = new TestRootSource(windows);
-            var host = new PresentationRootGroup(source);
+            var host = new PresentationRootNode(source);
             var root = new VisualTreeProvider().Create(host).Single();
 
             try
@@ -146,8 +152,8 @@ internal sealed class TreeProviderTests
             var main = new MainViewModel(root);
             var selectedVisualTree = false;
             var coordinator = new SelectionCoordinator(new PinnedPropertyStore(), () => true, value => selectedVisualTree = value);
-            var logicalTree = new TreePageViewModel(main, new LogicalTreeProvider().Create(root), coordinator);
-            var visualTree = new TreePageViewModel(main, new VisualTreeProvider().Create(root), coordinator);
+            var logicalTree = new ElementsTreeViewModel(main, new LogicalTreeProvider().Create(root), coordinator);
+            var visualTree = new ElementsTreeViewModel(main, new VisualTreeProvider().Create(root), coordinator);
             coordinator.Attach(logicalTree, visualTree);
 
             try

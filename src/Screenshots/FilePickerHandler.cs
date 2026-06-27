@@ -1,5 +1,5 @@
-﻿using Avalonia.Platform.Storage;
-using ClassicDiagnostics.Avalonia.Views;
+using Avalonia.Platform.Storage;
+using ClassicDiagnostics.Avalonia.Views.Shell;
 using Lifetimes = Avalonia.Controls.ApplicationLifetimes;
 
 namespace ClassicDiagnostics.Avalonia.Screenshots;

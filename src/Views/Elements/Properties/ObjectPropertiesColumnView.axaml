@@ -1,0 +1,119 @@
+<UserControl
+  x:Class="ClassicDiagnostics.Avalonia.Views.Elements.Properties.ObjectPropertiesColumnView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:ClassicDiagnostics.Avalonia.Views.Elements.Properties"
+  xmlns:properties="using:ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels" xmlns:valueConverters="clr-namespace:ClassicDiagnostics.Avalonia.ValueConverters"
+  x:Name="Main" x:DataType="properties:ObjectPropertiesColumnViewModel">
+
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="/Assets/Icons.axaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <UserControl.Styles>
+    <Style Selector="TextBlock.Pinned">
+      <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+  </UserControl.Styles>
+
+  <DataGrid
+    BorderThickness="0" CanUserResizeColumns="true"
+    ItemsSource="{Binding PropertiesView}"
+    RowBackground="Transparent"
+    SelectedItem="{Binding SelectedProperty, Mode=TwoWay}">
+    <DataGrid.Columns>
+      <DataGridTemplateColumn
+        x:DataType="properties:PropertyViewModel" Header="Property"
+        IsReadOnly="True">
+        <DataGridTemplateColumn.CellTemplate>
+          <DataTemplate DataType="properties:PropertyViewModel">
+            <DockPanel Background="Transparent">
+              <DockPanel.Styles>
+                <Style Selector="DockPanel[IsPointerOver=False] &gt; ToggleButton">
+                  <Setter Property="IsVisible" Value="False"/>
+                </Style>
+              </DockPanel.Styles>
+              <ToggleButton
+                DockPanel.Dock="Right" Background="Transparent"
+                BorderBrush="Transparent"
+                Command="{Binding #Main.ViewModel?.TogglePinnedProperty}"
+                CommandParameter="{Binding}"
+                IsChecked="{Binding IsPinned}">
+                <Panel>
+                  <Image
+                    Width="12" Height="12"
+                    IsVisible="{Binding IsPinned}"
+                    Source="{StaticResource PinIcon}"/>
+                  <Image
+                    Width="12" Height="12"
+                    IsVisible="{Binding !IsPinned}"
+                    Source="{StaticResource UnpinIcon}"/>
+                </Panel>
+              </ToggleButton>
+              <TextBlock
+                VerticalAlignment="Center"
+                Classes.Pinned="{Binding IsPinned}"
+                Text="{Binding Name}"/>
+            </DockPanel>
+          </DataTemplate>
+        </DataGridTemplateColumn.CellTemplate>
+      </DataGridTemplateColumn>
+      <DataGridTemplateColumn
+        Width="100" Header="Value">
+        <DataGridTemplateColumn.CellTemplate>
+          <DataTemplate>
+            <local:PropertyValueEditorView/>
+          </DataTemplate>
+        </DataGridTemplateColumn.CellTemplate>
+      </DataGridTemplateColumn>
+      <DataGridTemplateColumn
+        x:DataType="properties:PropertyViewModel" Header="Type"
+        IsReadOnly="True"
+        IsVisible="{Binding !#Main.ViewModel?.ShowDetailsPropertyType, TargetNullValue=True}">
+        <DataGridTemplateColumn.CellTemplate>
+          <DataTemplate DataType="properties:PropertyViewModel">
+            <TextBlock
+              Text="{Binding Type}"
+              ToolTip.Tip="{Binding TypeTooltip}"/>
+          </DataTemplate>
+        </DataGridTemplateColumn.CellTemplate>
+      </DataGridTemplateColumn>
+      <DataGridTemplateColumn
+        x:DataType="properties:PropertyViewModel" Header="Assigned Type"
+        IsReadOnly="True"
+        IsVisible="{Binding #Main.ViewModel?.ShowDetailsPropertyType, TargetNullValue=False}">
+        <DataGridTemplateColumn.CellTemplate>
+          <DataTemplate DataType="properties:PropertyViewModel">
+            <TextBlock
+              Text="{Binding AssignedType, Converter={x:Static valueConverters:GetTypeNameConverter.Shared}}"
+              ToolTip.Tip="{Binding AssignedTypeTooltip}"/>
+          </DataTemplate>
+        </DataGridTemplateColumn.CellTemplate>
+      </DataGridTemplateColumn>
+      <DataGridTemplateColumn
+        x:DataType="properties:PropertyViewModel" Header="Property Type"
+        IsReadOnly="True"
+        IsVisible="{Binding #Main.ViewModel?.ShowDetailsPropertyType, TargetNullValue=False}">
+        <DataGridTemplateColumn.CellTemplate>
+          <DataTemplate DataType="properties:PropertyViewModel">
+            <TextBlock
+              Text="{Binding PropertyType, Converter={x:Static valueConverters:GetTypeNameConverter.Shared}}"
+              ToolTip.Tip="{Binding PropertyTypeTooltip}"/>
+          </DataTemplate>
+        </DataGridTemplateColumn.CellTemplate>
+      </DataGridTemplateColumn>
+      <DataGridTextColumn
+        x:DataType="properties:PropertyViewModel"
+        Binding="{Binding Priority}"
+        Header="Priority" IsReadOnly="True"/>
+    </DataGrid.Columns>
+
+    <DataGrid.Styles>
+      <Style Selector="DataGridRow TextBox">
+        <Setter Property="SelectionBrush" Value="LightBlue"/>
+      </Style>
+    </DataGrid.Styles>
+  </DataGrid>
+</UserControl>

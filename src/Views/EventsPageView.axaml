@@ -1,6 +1,6 @@
-﻿<UserControl
+<UserControl
   x:Class="ClassicDiagnostics.Avalonia.Views.EventsPageView" xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="using:ClassicDiagnostics.Avalonia.Controls"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:ClassicDiagnostics.Avalonia.Views.Controls"
   xmlns:m="clr-namespace:ClassicDiagnostics.Avalonia.Models" xmlns:vm="using:ClassicDiagnostics.Avalonia.ViewModels"
   Margin="2" x:DataType="vm:EventsPageViewModel">
   <UserControl.Styles>

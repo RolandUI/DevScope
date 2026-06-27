@@ -8,9 +8,4 @@ internal partial class SettingsPageView : ReactiveUserControl<SettingsPageViewMo
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        LoadComponent();
-    }
 }

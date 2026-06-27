@@ -1,7 +1,13 @@
 using Avalonia.Controls;
 using ClassicDiagnostics.Avalonia.Properties;
-using ClassicDiagnostics.Avalonia.Tree;
+using ClassicDiagnostics.Avalonia.Elements.Trees;
 using ClassicDiagnostics.Avalonia.ViewModels;
+using ClassicDiagnostics.Avalonia.Elements;
+using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
+using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
+using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
+using ClassicDiagnostics.Avalonia.Rooting;
+using ClassicDiagnostics.Avalonia.Shell;
 
 namespace ClassicDiagnostics.Avalonia.Tests.ViewModels;
 
@@ -76,7 +82,7 @@ internal sealed class PinnedPropertyStoreTests
                 firstDetails.Dispose();
                 isFirstDetailsDisposed = true;
 
-                var secondDetails = new ControlDetailsViewModel(tree, button, store);
+                var secondDetails = new ElementDetailsViewModel(tree, button, store);
                 try
                 {
                     var secondProperty = FindContentProperty(secondDetails);
@@ -102,22 +108,22 @@ internal sealed class PinnedPropertyStoreTests
         });
     }
 
-    private static ControlDetailsViewModel CreateDetails(
+    private static ElementDetailsViewModel CreateDetails(
         Control target,
         IPinnedPropertyStore store,
         out MainViewModel main,
-        out TreePageViewModel tree)
+        out ElementsTreeViewModel tree)
     {
         var root = new StackPanel();
         root.Children.Add(target);
         main = new MainViewModel(root);
         var coordinator = new SelectionCoordinator(store, () => false, _ => { });
-        tree = new TreePageViewModel(main, new LogicalTreeProvider().Create(root), coordinator);
+        tree = new ElementsTreeViewModel(main, new LogicalTreeProvider().Create(root), coordinator);
         coordinator.Attach(tree, tree);
-        return new ControlDetailsViewModel(tree, target, store);
+        return new ElementDetailsViewModel(tree, target, store);
     }
 
-    private static AvaloniaPropertyViewModel FindContentProperty(ControlDetailsViewModel details)
+    private static AvaloniaPropertyViewModel FindContentProperty(ElementDetailsViewModel details)
     {
         return details.PropertiesView!
             .OfType<AvaloniaPropertyViewModel>()

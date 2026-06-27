@@ -1,0 +1,92 @@
+<Styles
+  xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:controls="clr-namespace:ClassicDiagnostics.Avalonia.Views.Controls" x:ClassModifier="internal"
+  x:DataType="controls:FilterTextBox">
+
+  <Design.PreviewWith>
+    <Border Padding="10">
+      <controls:FilterTextBox
+        Width="200" Text="Hello World"/>
+    </Border>
+  </Design.PreviewWith>
+
+  <Style Selector="TextBox.filter-text-box">
+    <Setter Property="CornerRadius" Value="99"/>
+    <Setter Property="Background" Value="{DynamicResource ThemeControlMidBrush}"/>
+    <Setter Property="Padding" Value="6,2"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="InnerRightContent">
+      <Template>
+        <StackPanel
+          Orientation="Horizontal" Spacing="1">
+          <Button
+            Classes="textBoxClearButton" Margin="0,0,2,0"
+            Command="{Binding $parent[TextBox].Clear}"
+            Cursor="Hand" Focusable="False"
+            Opacity="0.5"
+            Theme="{StaticResource SimpleTextBoxClearButtonTheme}"
+            ToolTip.Tip="Clear"/>
+          <ToggleButton
+            Classes="filter-text-box-toggle"
+            IsChecked="{Binding $parent[controls:FilterTextBox].UseCaseSensitiveFilter}"
+            ToolTip.Tip="Match Case">
+            <Image Source="{StaticResource LucideCaseSensitive}"/>
+          </ToggleButton>
+          <ToggleButton
+            Classes="filter-text-box-toggle"
+            IsChecked="{Binding $parent[controls:FilterTextBox].UseWholeWordFilter}"
+            ToolTip.Tip="Match Whole Word">
+            <Image Source="{StaticResource LucideWholeWord}"/>
+          </ToggleButton>
+          <ToggleButton
+            Classes="filter-text-box-toggle"
+            IsChecked="{Binding $parent[controls:FilterTextBox].UseRegexFilter}"
+            ToolTip.Tip="Use Regular Expression">
+            <Image
+              Margin="2"
+              Source="{StaticResource LucideRegex}"/>
+          </ToggleButton>
+        </StackPanel>
+      </Template>
+    </Setter>
+  </Style>
+
+  <Style Selector="TextBox.filter-text-box Button.textBoxClearButton">
+    <Setter Property="IsVisible" Value="False"/>
+  </Style>
+  <Style Selector="TextBox.filter-text-box[AcceptsReturn=False][IsReadOnly=False]:focus:not(TextBox:empty) Button.textBoxClearButton">
+    <Setter Property="IsVisible" Value="True"/>
+  </Style>
+
+  <Style Selector="ToggleButton.filter-text-box-toggle">
+    <Setter Property="Width" Value="18"/>
+    <Setter Property="Height" Value="18"/>
+    <Setter Property="Padding" Value="0"/>
+
+    <Style Selector="^&gt; Image">
+      <Setter Property="Opacity" Value="0.6"/>
+    </Style>
+  </Style>
+  <Style Selector="ToggleButton.filter-text-box-toggle:pointerover &gt; Image">
+    <Setter Property="Opacity" Value="0.7"/>
+  </Style>
+  <Style Selector="ToggleButton.filter-text-box-toggle:pressed &gt; Image, ToggleButton.filter-text-box-toggle:checked &gt; Image">
+    <Setter Property="Opacity" Value="0.8"/>
+  </Style>
+
+  <Style Selector="ToggleButton.filter-text-box-toggle">
+    <Setter Property="Cursor" Value="Hand"/>
+    <Setter Property="Padding" Value="1"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="VerticalAlignment" Value="Top"/>
+  </Style>
+  <Style Selector="ToggleButton.filter-text-box-toggle /template/ ContentPresenter">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="CornerRadius" Value="0"/>
+  </Style>
+  <Style Selector="ToggleButton.filter-text-box-toggle:pressed /template/ ContentPresenter, ToggleButton.filter-text-box-toggle:checked /template/ ContentPresenter">
+    <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentColor}"/>
+    <Setter Property="Background" Value="{DynamicResource ThemeAccentColor4}"/>
+  </Style>
+</Styles>

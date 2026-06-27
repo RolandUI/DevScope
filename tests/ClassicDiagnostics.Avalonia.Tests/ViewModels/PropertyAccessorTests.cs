@@ -2,6 +2,13 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using ClassicDiagnostics.Avalonia.Properties;
+using ClassicDiagnostics.Avalonia.Elements;
+using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
+using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
+using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
+using ClassicDiagnostics.Avalonia.Elements.Trees;
+using ClassicDiagnostics.Avalonia.Rooting;
+using ClassicDiagnostics.Avalonia.Shell;
 
 namespace ClassicDiagnostics.Avalonia.Tests.ViewModels;
 

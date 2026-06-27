@@ -1,5 +1,5 @@
-﻿using Avalonia.Controls.Primitives;
-using ClassicDiagnostics.Avalonia.Views;
+using Avalonia.Controls.Primitives;
+using ClassicDiagnostics.Avalonia.Views.Shell;
 
 namespace ClassicDiagnostics.Avalonia.Extensions;
 

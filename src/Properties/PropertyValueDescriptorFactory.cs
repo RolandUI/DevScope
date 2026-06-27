@@ -1,11 +1,12 @@
 using System.Collections;
+using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
+using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
+using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
 
 namespace ClassicDiagnostics.Avalonia.Properties;
 
 internal sealed class PropertyValueDescriptorFactory
 {
-    private const int MaxEnumerableChildren = 256;
-
     public static PropertyValueDescriptorFactory Default { get; } = new();
 
     private PropertyValueDescriptorFactory()
@@ -59,7 +60,7 @@ internal sealed class PropertyValueDescriptorFactory
                 CreateIndexedChildren(list.Cast<object?>()));
         }
 
-        if (value is IEnumerable enumerable)
+        if (value is IEnumerable)
         {
             return new PropertyValueDescriptor(
                 PropertyValueDescriptorKind.Enumerable,
@@ -67,7 +68,7 @@ internal sealed class PropertyValueDescriptorFactory
                 count: null,
                 isReadOnly: true,
                 canNavigate: true,
-                CreateIndexedChildren(enumerable.Cast<object?>().Take(MaxEnumerableChildren)));
+                []);
         }
 
         return CreateSimple(PropertyValueDescriptorKind.Object, valueType, canNavigate: true);

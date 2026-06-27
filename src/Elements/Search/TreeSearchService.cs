@@ -1,16 +1,16 @@
 using System.Text.RegularExpressions;
-using ClassicDiagnostics.Avalonia.ViewModels;
+using ClassicDiagnostics.Avalonia.Elements.Trees;
 
 namespace ClassicDiagnostics.Avalonia.Elements.Search;
 
-internal sealed class TreeSearchService
+internal static class TreeSearchService
 {
-    public TreeSearchResults Search(TreePageViewModel tree, string? query)
+    public static TreeSearchResults Search(ElementsTreeViewModel tree, string? query)
     {
         return Search(tree, query, TreeSearchOptions.Default);
     }
 
-    public TreeSearchResults Search(TreePageViewModel tree, string? query, TreeSearchOptions options)
+    public static TreeSearchResults Search(ElementsTreeViewModel tree, string? query, TreeSearchOptions options)
     {
         var normalizedQuery = query?.Trim() ?? string.Empty;
         if (normalizedQuery.Length == 0)
@@ -28,7 +28,7 @@ internal sealed class TreeSearchService
             SearchText(tree, normalizedQuery, options);
     }
 
-    private static TreeSearchResults Search(TreePageViewModel tree, Func<TreeNodeViewModel, bool> predicate)
+    private static TreeSearchResults Search(ElementsTreeViewModel tree, Func<TreeNodeViewModel, bool> predicate)
     {
         var matches = new List<TreeNodeViewModel>();
 
@@ -40,7 +40,7 @@ internal sealed class TreeSearchService
         return new TreeSearchResults(matches, null);
     }
 
-    private static TreeSearchResults SearchText(TreePageViewModel tree, string query, TreeSearchOptions options)
+    private static TreeSearchResults SearchText(ElementsTreeViewModel tree, string query, TreeSearchOptions options)
     {
         try
         {
@@ -68,8 +68,7 @@ internal sealed class TreeSearchService
 
     private static bool LooksLikeSelector(string query)
     {
-        return query[0] is '.' or '#' or ':'
-            || query.Any(c => c is '.' or '#' or ':');
+        return query[0] is '.' or '#' or ':' || query.Any(c => c is '.' or '#' or ':');
     }
 
     private static void Visit(

@@ -1,0 +1,176 @@
+<ResourceDictionary
+  xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="avares://ClassicDiagnostics.Avalonia/Assets/Icons.axaml"/>
+  </ResourceDictionary.MergedDictionaries>
+
+  <ControlTheme
+    x:Key="{x:Type CommandBarToggleButton}"
+    TargetType="CommandBarToggleButton">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0,0,0,2"/>
+    <Setter Property="CornerRadius" Value="2"/>
+    <Setter Property="Padding" Value="6,4"/>
+    <Setter Property="FontSize" Value="13"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border
+          x:Name="PART_Border"
+          Padding="{TemplateBinding Padding}"
+          Background="{TemplateBinding Background}"
+          BorderBrush="{TemplateBinding BorderBrush}"
+          BorderThickness="{TemplateBinding BorderThickness}"
+          CornerRadius="{TemplateBinding CornerRadius}">
+          <StackPanel
+            x:Name="PART_LayoutRoot" HorizontalAlignment="Center"
+            VerticalAlignment="Center" Spacing="4">
+            <ContentPresenter
+              x:Name="PART_IconPresenter" HorizontalAlignment="Center"
+              Content="{TemplateBinding Icon}"
+              Foreground="{TemplateBinding Foreground}"/>
+            <TextBlock
+              x:Name="PART_Label" HorizontalAlignment="Center"
+              FontSize="{TemplateBinding FontSize}"
+              Foreground="{TemplateBinding Foreground}"
+              Text="{TemplateBinding Label}"
+              TextTrimming="CharacterEllipsis"/>
+          </StackPanel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!--  Checked  -->
+    <Style Selector="^:checked /template/ Border#PART_Border">
+      <Setter Property="Background" Value="{DynamicResource ThemeBorderLowColor}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+    </Style>
+
+    <!--  Hover  -->
+    <Style Selector="^:pointerover /template/ Border#PART_Border">
+      <Setter Property="Background" Value="{DynamicResource ThemeControlMidHighBrush}"/>
+    </Style>
+
+    <!--  Pressed  -->
+    <Style Selector="^:pressed /template/ Border#PART_Border">
+      <Setter Property="Background" Value="{DynamicResource ThemeControlHighBrush}"/>
+    </Style>
+
+    <!--  Compact: hide label, reduce width  -->
+    <Style Selector="^[IsCompact=True]">
+      <Setter Property="Width" Value="40"/>
+    </Style>
+    <Style Selector="^[IsCompact=True] /template/ TextBlock#PART_Label">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+
+    <!--  LabelPosition=Right: horizontal layout, auto-width  -->
+    <Style Selector="^[LabelPosition=Right]">
+      <Setter Property="Width" Value="NaN"/>
+      <Setter Property="MinWidth" Value="40"/>
+    </Style>
+    <Style Selector="^[LabelPosition=Right] /template/ StackPanel#PART_LayoutRoot">
+      <Setter Property="Orientation" Value="Horizontal"/>
+    </Style>
+    <Style Selector="^[LabelPosition=Right] /template/ ContentPresenter#PART_IconPresenter">
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="^[LabelPosition=Right] /template/ TextBlock#PART_Label">
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!--  IsInOverflow: full-width horizontal layout  -->
+    <Style Selector="^[IsInOverflow=True]">
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="Width" Value="NaN"/>
+      <Setter Property="BorderThickness" Value="2,0,0,0"/>
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ StackPanel#PART_LayoutRoot">
+      <Setter Property="HorizontalAlignment" Value="Left"/>
+      <Setter Property="Orientation" Value="Horizontal"/>
+      <Setter Property="Spacing" Value="0"/>
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ ContentPresenter#PART_IconPresenter">
+      <Setter Property="Width" Value="16"/>
+      <Setter Property="Height" Value="16"/>
+      <Setter Property="Margin" Value="4,0,10,0"/>
+      <Setter Property="HorizontalAlignment" Value="Left"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ TextBlock#PART_Label">
+      <Setter Property="IsVisible" Value="True"/>
+      <Setter Property="HorizontalAlignment" Value="Left"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme
+    x:Key="{x:Type CommandBar}"
+    TargetType="CommandBar">
+    <Setter Property="Template">
+      <ControlTemplate TargetType="CommandBar">
+        <Panel>
+          <DockPanel KeyboardNavigation.TabNavigation="Cycle">
+            <!--  Overflow button (docked right)  -->
+            <Button
+              x:Name="PART_OverflowButton" DockPanel.Dock="Right"
+              MinWidth="40" Padding="12,0"
+              VerticalAlignment="Stretch" Background="Transparent"
+              BorderThickness="0"
+              IsVisible="{TemplateBinding IsOverflowButtonVisible}">
+              <Image
+                Width="14" Height="14"
+                Source="{StaticResource LucideEllipsis}"/>
+            </Button>
+
+            <!--  Custom content area (docked left)  -->
+            <ContentPresenter
+              x:Name="PART_ContentPresenter" DockPanel.Dock="Left"
+              VerticalAlignment="Center"
+              Content="{TemplateBinding Content}"/>
+
+            <!--  Primary commands (fills remaining space)  -->
+            <ItemsControl
+              x:Name="PART_PrimaryCommands" HorizontalAlignment="Left"
+              VerticalAlignment="Stretch" ClipToBounds="True"
+              ItemsSource="{Binding VisiblePrimaryCommands, RelativeSource={RelativeSource TemplatedParent}}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel
+                    Orientation="Horizontal" Spacing="2"/>
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+            </ItemsControl>
+          </DockPanel>
+
+          <!--  Overflow popup  -->
+          <Popup
+            x:Name="PART_OverflowPopup" IsLightDismissEnabled="True"
+            IsOpen="{TemplateBinding IsOpen, Mode=TwoWay}"
+            Placement="Bottom"
+            PlacementTarget="{Binding #PART_OverflowButton}"
+            WindowManagerAddShadowHint="True">
+            <Border
+              MinWidth="160" Padding="4"
+              Background="{DynamicResource ThemeBackgroundBrush}"
+              BorderBrush="{DynamicResource ThemeBorderLowBrush}"
+              BorderThickness="{DynamicResource ThemeBorderThickness}">
+              <ItemsControl
+                x:Name="PART_OverflowPresenter"
+                ItemsSource="{Binding OverflowItems, RelativeSource={RelativeSource TemplatedParent}}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Spacing="2"/>
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+              </ItemsControl>
+            </Border>
+          </Popup>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

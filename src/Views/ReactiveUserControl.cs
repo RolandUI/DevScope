@@ -1,10 +1,8 @@
-using Avalonia.Markup.Xaml;
 using ClassicDiagnostics.Avalonia.ViewModels;
 
 namespace ClassicDiagnostics.Avalonia.Views;
 
-internal abstract class ReactiveUserControl<TViewModel> : UserControl
-    where TViewModel : ViewModelBase
+internal abstract class ReactiveUserControl<TViewModel> : UserControl where TViewModel : ViewModelBase
 {
     public TViewModel? ViewModel
     {
@@ -22,11 +20,6 @@ internal abstract class ReactiveUserControl<TViewModel> : UserControl
     protected ReactiveUserControl(TViewModel viewModel, bool disposeOnUnloaded = false)
     {
         AttachViewModel(viewModel, disposeOnUnloaded);
-    }
-
-    protected void LoadComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
     }
 
     protected override void OnDataContextChanged(EventArgs e)

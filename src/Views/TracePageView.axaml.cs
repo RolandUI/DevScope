@@ -8,9 +8,4 @@ internal partial class TracePageView : ReactiveUserControl<TracePageViewModel>
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        LoadComponent();
-    }
 }

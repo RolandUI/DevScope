@@ -1,24 +1,23 @@
+using ClassicDiagnostics.Avalonia.Elements.Trees;
 using ClassicDiagnostics.Avalonia.ViewModels;
 
 namespace ClassicDiagnostics.Avalonia.Elements.Search;
 
-internal sealed class ElementsFindViewModel(TreeSearchService searchService) : ViewModelBase
+internal sealed class ElementsFindViewModel : ViewModelBase
 {
     public bool HasMatches => MatchCount > 0;
 
     public bool IsVisible
     {
         get;
-        private set
+        set
         {
-            if (SetProperty(ref field, value))
+            if (SetProperty(ref field, value) && value)
             {
-                RaisePropertyChanged(nameof(IsHidden));
+                Refresh();
             }
         }
     }
-
-    public bool IsHidden => !IsVisible;
 
     public int CurrentIndex
     {
@@ -113,17 +112,12 @@ internal sealed class ElementsFindViewModel(TreeSearchService searchService) : V
 
     private IReadOnlyList<TreeNodeViewModel> _matches = [];
     private string? _deferredMessage;
-    private TreePageViewModel? _tree;
+    private ElementsTreeViewModel? _tree;
 
-    public void AttachTree(TreePageViewModel tree)
+    public void AttachTree(ElementsTreeViewModel tree)
     {
         _tree = tree;
         Refresh();
-    }
-
-    public void Close()
-    {
-        IsVisible = false;
     }
 
     public void FindNext()
@@ -134,12 +128,6 @@ internal sealed class ElementsFindViewModel(TreeSearchService searchService) : V
     public void FindPrevious()
     {
         Move(-1);
-    }
-
-    public void Show()
-    {
-        IsVisible = true;
-        Refresh();
     }
 
     private void Move(int offset)
@@ -166,7 +154,7 @@ internal sealed class ElementsFindViewModel(TreeSearchService searchService) : V
             return;
         }
 
-        var results = searchService.Search(
+        var results = TreeSearchService.Search(
             _tree,
             Query,
             new TreeSearchOptions(UseCaseSensitiveFilter, UseRegexFilter, UseWholeWordFilter));

@@ -1,0 +1,40 @@
+<UserControl
+  x:Class="ClassicDiagnostics.Avalonia.Views.Elements.Properties.PropertyColumnsView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:ClassicDiagnostics.Avalonia.Views.Elements.Properties"
+  xmlns:properties="using:ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels" x:Name="Main"
+  x:DataType="properties:PropertyColumnsViewModel">
+
+  <UserControl.Styles>
+    <Style Selector="GridSplitter.PropertyColumnSplitter">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="ResizeDirection" Value="Columns"/>
+    </Style>
+  </UserControl.Styles>
+
+  <ScrollViewer
+    HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+    <ItemsControl ItemsSource="{Binding Columns}">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <StackPanel Orientation="Horizontal"/>
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate DataType="properties:PropertyColumnViewModel">
+          <Grid
+            Width="{Binding Width}"
+            ColumnDefinitions="*,Auto">
+            <local:PropertyColumnChromeView
+              Grid.Column="0"
+              DataContext="{Binding}"/>
+            <GridSplitter
+              Classes="PropertyColumnSplitter" Grid.Column="1"
+              Width="4" DragDelta="HandleColumnSplitterDragDelta"
+              IsVisible="{Binding CanResize}"
+              Tag="{Binding}"/>
+          </Grid>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </ScrollViewer>
+</UserControl>

@@ -5,14 +5,8 @@ namespace ClassicDiagnostics.Avalonia;
 
 public static class DevTools
 {
-    internal static IDisposable Attach(Application application, DevToolsOptions options)
-    {
-        // Keep design-mode attachment inert just like the legacy inline implementation.
-        return Design.IsDesignMode ? Disposable.Empty : new DevToolsApplicationSession(application, options);
-    }
-
     /// <summary>
-    ///     Attaches DevTools to a Application, to be opened with the specified options.
+    ///     Attaches DevTools to an Application, to be opened with the specified options.
     /// </summary>
     /// <param name="application"></param>
     /// <param name="options">Additional settings of DevTools.</param>
@@ -42,8 +36,8 @@ public static class DevTools
     /// }
     /// </code>
     /// </example>
-    public static void AttachDevTools(this Application application, DevToolsOptions? options = null)
+    public static IDisposable AttachDevTools(this Application application, DevToolsOptions? options = null)
     {
-        Attach(application, options ?? new DevToolsOptions());
+        return Design.IsDesignMode ? Disposable.Empty : new DevToolsApplicationSession(application, options ?? new DevToolsOptions());
     }
 }

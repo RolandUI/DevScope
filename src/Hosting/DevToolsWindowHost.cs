@@ -1,5 +1,5 @@
-using ClassicDiagnostics.Avalonia.Controls;
-using ClassicDiagnostics.Avalonia.Views;
+using ClassicDiagnostics.Avalonia.Rooting;
+using ClassicDiagnostics.Avalonia.Views.Shell;
 using Application = Avalonia.Application;
 
 namespace ClassicDiagnostics.Avalonia.Hosting;
@@ -36,9 +36,9 @@ internal static class DevToolsWindowHost
     {
         return (rootSource, application) switch
         {
-            (_, not null) => new ApplicationPage(rootSource, application),
+            (_, not null) => new ApplicationRootNode(rootSource, application),
             (SingleTopLevelRootSource source, _) => source.TopLevel,
-            _ => new PresentationRootGroup(rootSource),
+            _ => new PresentationRootNode(rootSource),
         };
     }
 

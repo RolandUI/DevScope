@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media;
+using ClassicDiagnostics.Avalonia.Screenshots;
 
 namespace ClassicDiagnostics.Avalonia;
 
@@ -11,16 +12,6 @@ public class DevToolsOptions
     ///     Gets or sets the key gesture used to open DevTools.
     /// </summary>
     public KeyGesture Gesture { get; set; } = new(Key.F12);
-
-    /// <summary>
-    ///     Gets or sets the legacy owner-window display preference.
-    /// </summary>
-    /// <remarks>
-    ///     DevTools now uses one global ownerless diagnostics window, so this option is kept only
-    ///     for source compatibility with older setup code.
-    /// </remarks>
-    [Obsolete("DevTools now uses one global ownerless diagnostics window; this option is ignored.")]
-    public bool ShowAsChildWindow { get; set; } = true;
 
     /// <summary>
     ///     Gets or sets the initial size of the DevTools window. The default value is 1280x720.
@@ -42,8 +33,7 @@ public class DevToolsOptions
     ///     Allow to customize ScreenshotHandler
     /// </summary>
     /// <remarks>Default handler is <see cref="Screenshots.FilePickerHandler" /></remarks>
-    public IScreenshotHandler ScreenshotHandler { get; set; }
-        = Conventions.DefaultScreenshotHandler;
+    public IScreenshotHandler ScreenshotHandler { get; set; } = new FilePickerHandler();
 
     /// <summary>
     ///     Gets or sets whether DevTools theme.

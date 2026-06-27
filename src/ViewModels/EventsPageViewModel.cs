@@ -1,6 +1,7 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using Avalonia.Interactivity;
 using ClassicDiagnostics.Avalonia.Models;
+using ClassicDiagnostics.Avalonia.Shell;
 
 namespace ClassicDiagnostics.Avalonia.ViewModels;
 

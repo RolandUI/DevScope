@@ -1,7 +1,12 @@
 using Avalonia.Controls;
+using ClassicDiagnostics.Avalonia.Elements;
+using ClassicDiagnostics.Avalonia.Elements.Trees;
 using ClassicDiagnostics.Avalonia.Properties;
-using ClassicDiagnostics.Avalonia.Tree;
-using ClassicDiagnostics.Avalonia.ViewModels;
+using ClassicDiagnostics.Avalonia.Shell;
+using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
+using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
+using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
+using ClassicDiagnostics.Avalonia.Rooting;
 
 namespace ClassicDiagnostics.Avalonia.Tests.ViewModels;
 
@@ -151,17 +156,17 @@ internal sealed class ControlDetailsStylesTests
         });
     }
 
-    private static ControlDetailsViewModel CreateDetails(
+    private static ElementDetailsViewModel CreateDetails(
         Control target,
         out MainViewModel main,
-        out TreePageViewModel tree)
+        out ElementsTreeViewModel tree)
     {
         var root = new StackPanel();
         root.Children.Add(target);
         main = new MainViewModel(root);
         var coordinator = new SelectionCoordinator(new PinnedPropertyStore(), () => false, _ => { });
-        tree = new TreePageViewModel(main, new LogicalTreeProvider().Create(root), coordinator);
+        tree = new ElementsTreeViewModel(main, new LogicalTreeProvider().Create(root), coordinator);
         coordinator.Attach(tree, tree);
-        return new ControlDetailsViewModel(tree, target, new PinnedPropertyStore());
+        return new ElementDetailsViewModel(tree, target, new PinnedPropertyStore());
     }
 }

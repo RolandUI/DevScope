@@ -1,0 +1,97 @@
+<ResourceDictionary
+  xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ControlTheme
+    x:Key="{x:Type ScrollBar}"
+    TargetType="ScrollBar">
+    <Setter Property="Cursor" Value="Arrow"/>
+
+    <Style Selector="^:horizontal">
+      <Setter Property="AllowAutoHide" Value="False"/>
+      <Setter Property="Height" Value="10"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border
+            Background="Transparent" UseLayoutRounding="False">
+            <Grid>
+              <Track
+                IsDirectionReversed="False"
+                Maximum="{TemplateBinding Maximum}"
+                Minimum="{TemplateBinding Minimum}"
+                Orientation="{TemplateBinding Orientation}"
+                ViewportSize="{TemplateBinding ViewportSize}"
+                Value="{TemplateBinding Value, Mode=TwoWay}">
+                <Track.DecreaseButton>
+                  <RepeatButton
+                    Name="PART_PageUpButton" Background="Transparent"
+                    BorderThickness="0" Focusable="False"/>
+                </Track.DecreaseButton>
+                <Track.IncreaseButton>
+                  <RepeatButton
+                    Name="PART_PageDownButton" Background="Transparent"
+                    BorderThickness="0" Focusable="False"/>
+                </Track.IncreaseButton>
+                <Thumb Name="PART_Thumb">
+                  <Thumb.Template>
+                    <ControlTemplate>
+                      <Panel>
+                        <Border
+                          Name="ThumbBarHorizontal" Height="6"
+                          Background="{DynamicResource ThemeControlMidBrush}"
+                          CornerRadius="4"/>
+                      </Panel>
+                    </ControlTemplate>
+                  </Thumb.Template>
+                </Thumb>
+              </Track>
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+
+    <Style Selector="^:vertical">
+      <Setter Property="AllowAutoHide" Value="False"/>
+      <Setter Property="Width" Value="10"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border
+            Background="Transparent" UseLayoutRounding="False">
+            <Grid RowDefinitions="Auto,*,Auto">
+              <Track
+                Grid.Row="1" IsDirectionReversed="True"
+                Maximum="{TemplateBinding Maximum}"
+                Minimum="{TemplateBinding Minimum}"
+                Orientation="{TemplateBinding Orientation}"
+                ViewportSize="{TemplateBinding ViewportSize}"
+                Value="{TemplateBinding Value, Mode=TwoWay}">
+                <Track.DecreaseButton>
+                  <RepeatButton
+                    Name="PART_PageUpButton" Background="Transparent"
+                    BorderThickness="0" Focusable="False"/>
+                </Track.DecreaseButton>
+                <Track.IncreaseButton>
+                  <RepeatButton
+                    Name="PART_PageDownButton" Background="Transparent"
+                    BorderThickness="0" Focusable="False"/>
+                </Track.IncreaseButton>
+                <Thumb Name="PART_Thumb">
+                  <Thumb.Template>
+                    <ControlTemplate>
+                      <Panel>
+                        <Border
+                          Name="ThumbBarVertical" Width="6"
+                          Margin="0,2"
+                          Background="{DynamicResource ThemeControlMidBrush}"
+                          CornerRadius="4"/>
+                      </Panel>
+                    </ControlTemplate>
+                  </Thumb.Template>
+                </Thumb>
+              </Track>
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

@@ -1,0 +1,71 @@
+<UserControl
+  x:Class="ClassicDiagnostics.Avalonia.Views.Elements.Properties.PropertyColumnChromeView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:ClassicDiagnostics.Avalonia.Views.Controls"
+  xmlns:local="using:ClassicDiagnostics.Avalonia.Views.Elements.Properties" xmlns:properties="using:ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels"
+  x:DataType="properties:PropertyColumnViewModel">
+
+  <UserControl.DataTemplates>
+    <DataTemplate DataType="properties:ObjectPropertiesColumnViewModel">
+      <local:ObjectPropertiesColumnView/>
+    </DataTemplate>
+    <DataTemplate DataType="properties:ContainerPropertiesColumnViewModel">
+      <local:ContainerPropertiesColumnView/>
+    </DataTemplate>
+  </UserControl.DataTemplates>
+
+  <UserControl.Styles>
+    <Style Selector="Border.PropertyColumn">
+      <Setter Property="BorderBrush" Value="{DynamicResource ThemeControlMidBrush}"/>
+      <Setter Property="BorderThickness" Value="0,0,1,0"/>
+    </Style>
+
+    <Style Selector="Button.PropertyColumnHeaderButton">
+      <Setter Property="Padding" Value="6,2"/>
+      <Setter Property="Margin" Value="2,0,0,0"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Border Classes="PropertyColumn">
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+      <Grid
+        Grid.Row="0" Margin="4,2"
+        ColumnDefinitions="*,Auto,Auto">
+        <TextBlock
+          Grid.Column="0" VerticalAlignment="Center"
+          FontWeight="SemiBold"
+          Text="{Binding Title}"
+          ToolTip.Tip="{Binding Title}"/>
+        <Button
+          Classes="PropertyColumnHeaderButton" Grid.Column="1"
+          Command="{Binding Refresh}"
+          Content="Refresh"/>
+        <Button
+          Classes="PropertyColumnHeaderButton" Grid.Column="2"
+          Command="{Binding Close}"
+          Content="x"
+          IsVisible="{Binding CanClose}"/>
+      </Grid>
+
+      <controls:FilterTextBox
+        Grid.Row="1" BorderThickness="0"
+        DataContext="{Binding Content.Filter}"
+        PlaceholderText="Filter properties"
+        Text="{Binding FilterString}"
+        UseCaseSensitiveFilter="{Binding UseCaseSensitiveFilter}"
+        UseRegexFilter="{Binding UseRegexFilter}"
+        UseWholeWordFilter="{Binding UseWholeWordFilter}"/>
+
+      <ContentControl
+        Grid.Row="2"
+        Content="{Binding Content}"/>
+
+      <SelectableTextBlock
+        Grid.Row="3" Margin="4,2"
+        Foreground="{DynamicResource ThemeForegroundLowBrush}"
+        Text="{Binding Path}"
+        ToolTip.Tip="{Binding Path}"/>
+    </Grid>
+  </Border>
+</UserControl>

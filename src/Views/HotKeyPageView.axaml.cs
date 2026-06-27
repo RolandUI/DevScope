@@ -8,9 +8,4 @@ internal partial class HotKeyPageView : ReactiveUserControl<HotKeyPageViewModel>
     {
         InitializeComponent();
     }
-
-    private void InitializeComponent()
-    {
-        LoadComponent();
-    }
 }

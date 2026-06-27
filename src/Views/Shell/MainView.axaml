@@ -1,0 +1,243 @@
+<UserControl
+  x:Class="ClassicDiagnostics.Avalonia.Views.Shell.MainView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:diag="using:ClassicDiagnostics.Avalonia"
+  xmlns:shell="using:ClassicDiagnostics.Avalonia.Shell" x:DataType="shell:MainViewModel">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="/Assets/Icons.axaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <UserControl.Styles>
+    <Style Selector="Image.Icon">
+      <Setter Property="Width" Value="14"/>
+      <Setter Property="Height" Value="14"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Grid
+    ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,*,Auto">
+    <HyperlinkButton
+      Grid.Row="0" Grid.Column="0"
+      Grid.ColumnSpan="2" Padding="0,4"
+      HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+      VerticalContentAlignment="Center" Background="#F3ECC0"
+      Content="Try the new Avalonia Dev Tools - now available in Accelerate." CornerRadius="0"
+      FontSize="13" FontWeight="Bold"
+      Foreground="#746D44" NavigateUri="https://avaloniaui.net/accelerate"/>
+
+    <CommandBar
+      Grid.Row="1" Grid.Column="0"
+      MinHeight="0" Margin="2"
+      DefaultLabelPosition="Right" IsDynamicOverflowEnabled="True">
+      <CommandBar.PrimaryCommands>
+        <CommandBarToggleButton
+          Classes="Tab"
+          Command="{Binding SelectView}"
+          CommandParameter="{x:Static diag:DevToolsViewKind.Elements}"
+          IsChecked="{Binding IsElementsSelected, Mode=OneWay}"
+          Label="Elements">
+          <CommandBarToggleButton.Icon>
+            <Image
+              Classes="Icon"
+              Source="{StaticResource LucideMousePointerClick}"/>
+          </CommandBarToggleButton.Icon>
+        </CommandBarToggleButton>
+
+        <CommandBarToggleButton
+          Classes="Tab"
+          Command="{Binding SelectView}"
+          CommandParameter="{x:Static diag:DevToolsViewKind.Events}"
+          IsChecked="{Binding IsEventsSelected, Mode=OneWay}"
+          Label="Events">
+          <CommandBarToggleButton.Icon>
+            <Image
+              Classes="Icon"
+              Source="{StaticResource LucideRadioTower}"/>
+          </CommandBarToggleButton.Icon>
+        </CommandBarToggleButton>
+
+        <CommandBarToggleButton
+          Classes="Tab"
+          Command="{Binding SelectView}"
+          CommandParameter="{x:Static diag:DevToolsViewKind.Trace}"
+          IsChecked="{Binding IsTraceSelected, Mode=OneWay}"
+          Label="Trace">
+          <CommandBarToggleButton.Icon>
+            <Image
+              Classes="Icon"
+              Source="{StaticResource LucideSquareTerminal}"/>
+          </CommandBarToggleButton.Icon>
+        </CommandBarToggleButton>
+
+        <CommandBarToggleButton
+          Classes="Tab"
+          Command="{Binding SelectView}"
+          CommandParameter="{x:Static diag:DevToolsViewKind.Settings}"
+          IsChecked="{Binding IsSettingsSelected, Mode=OneWay}"
+          Label="Settings">
+          <CommandBarToggleButton.Icon>
+            <Image
+              Classes="Icon"
+              Source="{StaticResource LucideSettings}"/>
+          </CommandBarToggleButton.Icon>
+        </CommandBarToggleButton>
+      </CommandBar.PrimaryCommands>
+    </CommandBar>
+
+    <Menu
+      Grid.Row="1" Grid.Column="1">
+      <MenuItem>
+        <MenuItem.Header>
+          <Image
+            Classes="Icon"
+            Source="{StaticResource LucideMenu}"/>
+        </MenuItem.Header>
+
+        <MenuItem Header="_File">
+          <MenuItem
+            Command="{Binding $parent[Window].Close}"
+            Header="E_xit"/>
+          <MenuItem
+            Command="{Binding Shot}"
+            Header="Screenshot" HotKey="F8">
+            <MenuItem.Icon>
+              <Image/>
+            </MenuItem.Icon>
+          </MenuItem>
+        </MenuItem>
+
+        <MenuItem Header="_View">
+          <MenuItem Header="Control _Details">
+            <MenuItem
+              Command="{Binding ToggleShowImplementedInterfaces}"
+              Header="Show Implemented Interfaces">
+              <MenuItem.Icon>
+                <CheckBox
+                  BorderThickness="0"
+                  IsChecked="{Binding ShowImplementedInterfaces}"
+                  IsEnabled="False"/>
+              </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem
+              Command="{Binding ToggleShowDetailsPropertyType}"
+              Header="Split Property Type"
+              IsChecked="{Binding ShowDetailsPropertyType}"/>
+          </MenuItem>
+          <MenuItem
+            Command="{Binding ShowHotKeys}"
+            Header="_HotKeys"/>
+        </MenuItem>
+
+        <MenuItem Header="_Overlays">
+          <MenuItem
+            Command="{Binding ToggleVisualizeMarginPadding}"
+            Header="Margin/padding"
+            IsChecked="{Binding ShouldVisualizeMarginPadding}"/>
+          <MenuItem
+            Command="{Binding ToggleDirtyRectsOverlay}"
+            Header="Dirty rects"
+            IsChecked="{Binding ShowDirtyRectsOverlay}"/>
+          <MenuItem
+            Command="{Binding ToggleFpsOverlay}"
+            Header="FPS"
+            IsChecked="{Binding ShowFpsOverlay}"/>
+          <MenuItem
+            Command="{Binding ToggleLayoutTimeGraphOverlay}"
+            Header="Layout time graph"
+            IsChecked="{Binding ShowLayoutTimeGraphOverlay}"/>
+          <MenuItem
+            Command="{Binding ToggleRenderTimeGraphOverlay}"
+            Header="Render time graph"
+            IsChecked="{Binding ShowRenderTimeGraphOverlay}"/>
+          <MenuItem
+            Grid.IsSharedSizeScope="True" Header="Focus Highlighter">
+            <MenuItem.Items>
+              <!--  None  -->
+              <MenuItem
+                Command="{Binding SelectFocusHighlighter}"
+                CommandParameter="{x:Null}"
+                IsChecked="{Binding FocusHighlighter, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Null}}">
+                <MenuItem.Header>
+                  <TextBlock
+                    VerticalAlignment="Center" Text="(none)"/>
+                </MenuItem.Header>
+              </MenuItem>
+              <!--  Red  -->
+              <MenuItem
+                Command="{Binding SelectFocusHighlighter}"
+                CommandParameter="{x:Static Brushes.Red}"
+                IsChecked="{Binding FocusHighlighter, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static Brushes.Red}}">
+                <MenuItem.Header>
+                  <Border Background="Red"/>
+                </MenuItem.Header>
+              </MenuItem>
+              <!--  Blue  -->
+              <MenuItem
+                Command="{Binding SelectFocusHighlighter}"
+                CommandParameter="{x:Static Brushes.Blue}"
+                IsChecked="{Binding FocusHighlighter, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static Brushes.Blue}}">
+                <MenuItem.Header>
+                  <Border Background="Blue"/>
+                </MenuItem.Header>
+              </MenuItem>
+              <!--  Black  -->
+              <MenuItem
+                Command="{Binding SelectFocusHighlighter}"
+                CommandParameter="{x:Static Brushes.Black}"
+                IsChecked="{Binding FocusHighlighter, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static Brushes.Black}}">
+                <MenuItem.Header>
+                  <Border Background="Black"/>
+                </MenuItem.Header>
+              </MenuItem>
+              <!--  White  -->
+              <MenuItem
+                Command="{Binding SelectFocusHighlighter}"
+                CommandParameter="{x:Static Brushes.White}"
+                IsChecked="{Binding FocusHighlighter, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static Brushes.White}}">
+                <MenuItem.Header>
+                  <Border Background="White"/>
+                </MenuItem.Header>
+              </MenuItem>
+            </MenuItem.Items>
+          </MenuItem>
+        </MenuItem>
+      </MenuItem>
+    </Menu>
+
+    <ContentControl
+      Grid.Row="2" Grid.Column="0"
+      Grid.ColumnSpan="2"
+      BorderBrush="{DynamicResource ThemeControlMidBrush}"
+      BorderThickness="0,1,0,0"
+      Content="{Binding Content}"/>
+
+    <Border
+      Grid.Row="3" Grid.Column="0"
+      Grid.ColumnSpan="2"
+      BorderBrush="{DynamicResource ThemeControlMidBrush}"
+      BorderThickness="0,1,0,0">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel
+          Grid.Column="0" Orientation="Horizontal"
+          Spacing="4">
+          <TextBlock>Hold Ctrl+Shift over a control to inspect.</TextBlock>
+          <Separator Margin="4,0"/>
+          <TextBlock>Focused:</TextBlock>
+          <TextBlock Text="{Binding FocusedControl}"/>
+          <Separator Margin="4,0"/>
+          <TextBlock>Pointer Over:</TextBlock>
+          <TextBlock Text="{Binding PointerOverElementName}"/>
+        </StackPanel>
+
+        <TextBlock
+          Grid.Column="1" Margin="2,0"
+          Foreground="Gray"
+          IsVisible="{Binding FreezePopups}"
+          Text="Popups frozen"/>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

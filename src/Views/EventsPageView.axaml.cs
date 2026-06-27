@@ -1,11 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
-using ClassicDiagnostics.Avalonia.Controls;
 using ClassicDiagnostics.Avalonia.Models;
 using ClassicDiagnostics.Avalonia.ViewModels;
+using ClassicDiagnostics.Avalonia.Views.Controls;
 
 namespace ClassicDiagnostics.Avalonia.Views;
 
@@ -14,13 +13,7 @@ internal partial class EventsPageView : ReactiveUserControl<EventsPageViewModel>
     private IDisposable? _adorner;
     private EventsPageViewModel? _recordedEventsOwner;
 
-    public EventsPageView()
-    {
-        InitializeComponent();
-    }
-
-    public EventsPageView(EventsPageViewModel viewModel)
-        : base(viewModel)
+    public EventsPageView(EventsPageViewModel viewModel) : base(viewModel)
     {
         InitializeComponent();
     }
@@ -89,11 +82,6 @@ internal partial class EventsPageView : ReactiveUserControl<EventsPageViewModel>
         if (@event is null) return;
 
         Dispatcher.UIThread.Post(() => EventsList.ScrollIntoView(@event));
-    }
-
-    private void InitializeComponent()
-    {
-        LoadComponent();
     }
 
     private void HandleEventChainItemPointerEntered(object? sender, PointerEventArgs e)

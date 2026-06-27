@@ -1,21 +1,29 @@
+using Avalonia.Controls.Templates;
+using ClassicDiagnostics.Avalonia.Elements;
+using ClassicDiagnostics.Avalonia.Elements.Trees;
 using ClassicDiagnostics.Avalonia.ViewModels;
 using ClassicDiagnostics.Avalonia.Views;
-using ClassicDiagnostics.Avalonia.Elements;
+using ClassicDiagnostics.Avalonia.Views.Elements;
 
 namespace ClassicDiagnostics.Avalonia;
 
-internal sealed class DevToolsViewRegistry
+internal sealed class DevToolsViewRegistry : IDataTemplate
 {
     private readonly Dictionary<Type, Func<object, Control>> _factories = new();
 
-    public static DevToolsViewRegistry Default { get; } = CreateDefault();
-
-    public void Register<TViewModel>(Func<TViewModel, Control> factory)
-        where TViewModel : ViewModelBase
+    public DevToolsViewRegistry()
     {
-        ArgumentNullException.ThrowIfNull(factory);
+        Register<ElementsPageViewModel>(viewModel => new ElementsPage(viewModel));
+        Register<ElementsTreeViewModel>(viewModel => new ElementsTreeView(viewModel));
+        Register<EventsPageViewModel>(viewModel => new EventsPageView(viewModel));
+        Register<HotKeyPageViewModel>(viewModel => new HotKeyPageView(viewModel));
+        Register<TracePageViewModel>(viewModel => new TracePageView(viewModel));
+        Register<SettingsPageViewModel>(viewModel => new SettingsPageView(viewModel));
 
-        _factories[typeof(TViewModel)] = data => factory((TViewModel)data);
+        void Register<TViewModel>(Func<TViewModel, Control> factory) where TViewModel : ViewModelBase
+        {
+            _factories[typeof(TViewModel)] = data => factory((TViewModel)data);
+        }
     }
 
     public Control? Build(object? data)
@@ -30,16 +38,8 @@ internal sealed class DevToolsViewRegistry
             new TextBlock { Text = $"No view registered for {data.GetType().FullName}" };
     }
 
-    private static DevToolsViewRegistry CreateDefault()
+    public bool Match(object? data)
     {
-        var registry = new DevToolsViewRegistry();
-        registry.Register<ElementsPageViewModel>(viewModel => new ElementsPageView(viewModel));
-        registry.Register<TreePageViewModel>(viewModel => new TreePageView(viewModel));
-        registry.Register<ControlDetailsViewModel>(viewModel => new ControlDetailsView(viewModel));
-        registry.Register<EventsPageViewModel>(viewModel => new EventsPageView(viewModel));
-        registry.Register<HotKeyPageViewModel>(viewModel => new HotKeyPageView(viewModel));
-        registry.Register<TracePageViewModel>(viewModel => new TracePageView(viewModel));
-        registry.Register<SettingsPageViewModel>(viewModel => new SettingsPageView(viewModel));
-        return registry;
+        return data is ViewModelBase;
     }
 }

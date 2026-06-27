@@ -1,10 +1,9 @@
 using Avalonia.Controls;
-using Avalonia.Styling;
+using ClassicDiagnostics.Avalonia.Elements;
 using ClassicDiagnostics.Avalonia.Elements.Search;
-using ClassicDiagnostics.Avalonia.Models;
+using ClassicDiagnostics.Avalonia.Elements.Trees;
 using ClassicDiagnostics.Avalonia.Properties;
-using ClassicDiagnostics.Avalonia.Tree;
-using ClassicDiagnostics.Avalonia.ViewModels;
+using ClassicDiagnostics.Avalonia.Shell;
 
 namespace ClassicDiagnostics.Avalonia.Tests.ViewModels;
 
@@ -24,13 +23,11 @@ internal sealed class ElementsSearchTests
 
             try
             {
-                var service = new TreeSearchService();
-
-                Assert.That(service.Search(tree, "Button").Matches, Has.Exactly(1).Matches<TreeNodeViewModel>(
+                Assert.That(TreeSearchService.Search(tree, "Button").Matches, Has.Exactly(1).Matches<TreeNodeViewModel>(
                     node => ReferenceEquals(node.Model.Target, button)));
-                Assert.That(service.Search(tree, "SaveButton").Matches, Has.Exactly(1).Matches<TreeNodeViewModel>(
+                Assert.That(TreeSearchService.Search(tree, "SaveButton").Matches, Has.Exactly(1).Matches<TreeNodeViewModel>(
                     node => ReferenceEquals(node.Model.Target, button)));
-                Assert.That(service.Search(tree, "primary").Matches, Has.Exactly(1).Matches<TreeNodeViewModel>(
+                Assert.That(TreeSearchService.Search(tree, "primary").Matches, Has.Exactly(1).Matches<TreeNodeViewModel>(
                     node => ReferenceEquals(node.Model.Target, button)));
             }
             finally
@@ -56,13 +53,11 @@ internal sealed class ElementsSearchTests
 
             try
             {
-                var service = new TreeSearchService();
-
-                Assert.That(service.Search(tree, "#SaveButton").Matches, Has.Exactly(1).Matches<TreeNodeViewModel>(
+                Assert.That(TreeSearchService.Search(tree, "#SaveButton").Matches, Has.Exactly(1).Matches<TreeNodeViewModel>(
                     node => ReferenceEquals(node.Model.Target, button)));
-                Assert.That(service.Search(tree, ".primary").Matches, Has.Exactly(1).Matches<TreeNodeViewModel>(
+                Assert.That(TreeSearchService.Search(tree, ".primary").Matches, Has.Exactly(1).Matches<TreeNodeViewModel>(
                     node => ReferenceEquals(node.Model.Target, button)));
-                Assert.That(service.Search(tree, "Button.primary:pointerover").Matches, Has.Exactly(1).Matches<TreeNodeViewModel>(
+                Assert.That(TreeSearchService.Search(tree, "Button.primary:pointerover").Matches, Has.Exactly(1).Matches<TreeNodeViewModel>(
                     node => ReferenceEquals(node.Model.Target, button)));
             }
             finally
@@ -82,7 +77,7 @@ internal sealed class ElementsSearchTests
 
             try
             {
-                var results = new TreeSearchService().Search(tree, "//Button");
+                var results = TreeSearchService.Search(tree, "//Button");
 
                 Assert.That(results.Matches, Is.Empty);
                 Assert.That(results.DeferredMessage, Does.Contain("planned"));
@@ -108,16 +103,14 @@ internal sealed class ElementsSearchTests
 
             try
             {
-                var service = new TreeSearchService();
-
                 Assert.That(
-                    service.Search(tree, "savebutton", new TreeSearchOptions(true, false, false)).Matches,
+                    TreeSearchService.Search(tree, "savebutton", new TreeSearchOptions(true, false, false)).Matches,
                     Is.Empty);
                 Assert.That(
-                    service.Search(tree, "Save.*", new TreeSearchOptions(false, true, false)).Matches,
+                    TreeSearchService.Search(tree, "Save.*", new TreeSearchOptions(false, true, false)).Matches,
                     Has.Exactly(1).Matches<TreeNodeViewModel>(node => ReferenceEquals(node.Model.Target, button)));
                 Assert.That(
-                    service.Search(tree, "Save", new TreeSearchOptions(false, false, true)).Matches,
+                    TreeSearchService.Search(tree, "Save", new TreeSearchOptions(false, false, true)).Matches,
                     Is.Empty);
             }
             finally
@@ -128,7 +121,7 @@ internal sealed class ElementsSearchTests
         });
     }
 
-    private static TreePageViewModel CreateTree(
+    private static ElementsTreeViewModel CreateTree(
         Control child,
         out MainViewModel main,
         out SelectionCoordinator coordinator)
@@ -138,7 +131,7 @@ internal sealed class ElementsSearchTests
 
         main = new MainViewModel(root);
         coordinator = new SelectionCoordinator(new PinnedPropertyStore(), () => false, _ => { });
-        var tree = new TreePageViewModel(main, new LogicalTreeProvider().Create(root), coordinator);
+        var tree = new ElementsTreeViewModel(main, new LogicalTreeProvider().Create(root), coordinator);
         coordinator.Attach(tree, tree);
         return tree;
     }

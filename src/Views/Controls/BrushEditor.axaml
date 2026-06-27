@@ -1,0 +1,22 @@
+<ResourceDictionary
+  xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:controls="clr-namespace:ClassicDiagnostics.Avalonia.Views.Controls" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <controls:BrushEditor/>
+  </Design.PreviewWith>
+
+  <ControlTheme
+    x:Key="{x:Type controls:BrushEditor}"
+    TargetType="controls:BrushEditor">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid>
+          <Button
+            x:Name="PART_ClearButton" HorizontalAlignment="Right"
+            VerticalContentAlignment="Center"
+            Theme="{StaticResource SimpleTextBoxClearButtonTheme}"/>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>
