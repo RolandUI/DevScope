@@ -135,6 +135,44 @@
     </DrawingImage.Drawing>
   </DrawingImage>
 
+  <DrawingImage x:Key="LucideKeyboard">
+    <DrawingImage.Drawing>
+      <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+        <GeometryDrawing
+          Geometry="F1 M24,24z M0,0z M10,8L10.01,8"
+          Pen="{StaticResource LucideIconPen}"/>
+        <GeometryDrawing
+          Geometry="F1 M24,24z M0,0z M12,12L12.01,12"
+          Pen="{StaticResource LucideIconPen}"/>
+        <GeometryDrawing
+          Geometry="F1 M24,24z M0,0z M14,8L14.01,8"
+          Pen="{StaticResource LucideIconPen}"/>
+        <GeometryDrawing
+          Geometry="F1 M24,24z M0,0z M16,12L16.01,12"
+          Pen="{StaticResource LucideIconPen}"/>
+        <GeometryDrawing
+          Geometry="F1 M24,24z M0,0z M18,8L18.01,8"
+          Pen="{StaticResource LucideIconPen}"/>
+        <GeometryDrawing
+          Geometry="F1 M24,24z M0,0z M6,8L6.01,8"
+          Pen="{StaticResource LucideIconPen}"/>
+        <GeometryDrawing
+          Geometry="F1 M24,24z M0,0z M7,16L17,16"
+          Pen="{StaticResource LucideIconPen}"/>
+        <GeometryDrawing
+          Geometry="F1 M24,24z M0,0z M8,12L8.01,12"
+          Pen="{StaticResource LucideIconPen}"/>
+        <GeometryDrawing Pen="{StaticResource LucideIconPen}">
+          <GeometryDrawing.Geometry>
+            <RectangleGeometry
+              RadiusX="2" RadiusY="2"
+              Rect="2,4,20,16"/>
+          </GeometryDrawing.Geometry>
+        </GeometryDrawing>
+      </DrawingGroup>
+    </DrawingImage.Drawing>
+  </DrawingImage>
+
   <DrawingImage x:Key="LucideSettings">
     <DrawingImage.Drawing>
       <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">

@@ -18,6 +18,10 @@ public enum DevToolsViewKind
     /// </summary>
     Trace,
     /// <summary>
+    ///     HotKeys diagnostic view
+    /// </summary>
+    HotKeys,
+    /// <summary>
     ///     Settings diagnostic view
     /// </summary>
     Settings,

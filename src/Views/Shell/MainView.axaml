@@ -75,6 +75,19 @@
         <CommandBarToggleButton
           Classes="Tab"
           Command="{Binding SelectView}"
+          CommandParameter="{x:Static diag:DevToolsViewKind.HotKeys}"
+          IsChecked="{Binding IsHotKeysSelected, Mode=OneWay}"
+          Label="HotKeys">
+          <CommandBarToggleButton.Icon>
+            <Image
+              Classes="Icon"
+              Source="{StaticResource LucideKeyboard}"/>
+          </CommandBarToggleButton.Icon>
+        </CommandBarToggleButton>
+
+        <CommandBarToggleButton
+          Classes="Tab"
+          Command="{Binding SelectView}"
           CommandParameter="{x:Static diag:DevToolsViewKind.Settings}"
           IsChecked="{Binding IsSettingsSelected, Mode=OneWay}"
           Label="Settings">
@@ -106,102 +119,6 @@
             <MenuItem.Icon>
               <Image/>
             </MenuItem.Icon>
-          </MenuItem>
-        </MenuItem>
-
-        <MenuItem Header="_View">
-          <MenuItem Header="Control _Details">
-            <MenuItem
-              Command="{Binding ToggleShowImplementedInterfaces}"
-              Header="Show Implemented Interfaces">
-              <MenuItem.Icon>
-                <CheckBox
-                  BorderThickness="0"
-                  IsChecked="{Binding ShowImplementedInterfaces}"
-                  IsEnabled="False"/>
-              </MenuItem.Icon>
-            </MenuItem>
-            <MenuItem
-              Command="{Binding ToggleShowDetailsPropertyType}"
-              Header="Split Property Type"
-              IsChecked="{Binding ShowDetailsPropertyType}"/>
-          </MenuItem>
-          <MenuItem
-            Command="{Binding ShowHotKeys}"
-            Header="_HotKeys"/>
-        </MenuItem>
-
-        <MenuItem Header="_Overlays">
-          <MenuItem
-            Command="{Binding ToggleVisualizeMarginPadding}"
-            Header="Margin/padding"
-            IsChecked="{Binding ShouldVisualizeMarginPadding}"/>
-          <MenuItem
-            Command="{Binding ToggleDirtyRectsOverlay}"
-            Header="Dirty rects"
-            IsChecked="{Binding ShowDirtyRectsOverlay}"/>
-          <MenuItem
-            Command="{Binding ToggleFpsOverlay}"
-            Header="FPS"
-            IsChecked="{Binding ShowFpsOverlay}"/>
-          <MenuItem
-            Command="{Binding ToggleLayoutTimeGraphOverlay}"
-            Header="Layout time graph"
-            IsChecked="{Binding ShowLayoutTimeGraphOverlay}"/>
-          <MenuItem
-            Command="{Binding ToggleRenderTimeGraphOverlay}"
-            Header="Render time graph"
-            IsChecked="{Binding ShowRenderTimeGraphOverlay}"/>
-          <MenuItem
-            Grid.IsSharedSizeScope="True" Header="Focus Highlighter">
-            <MenuItem.Items>
-              <!--  None  -->
-              <MenuItem
-                Command="{Binding SelectFocusHighlighter}"
-                CommandParameter="{x:Null}"
-                IsChecked="{Binding FocusHighlighter, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Null}}">
-                <MenuItem.Header>
-                  <TextBlock
-                    VerticalAlignment="Center" Text="(none)"/>
-                </MenuItem.Header>
-              </MenuItem>
-              <!--  Red  -->
-              <MenuItem
-                Command="{Binding SelectFocusHighlighter}"
-                CommandParameter="{x:Static Brushes.Red}"
-                IsChecked="{Binding FocusHighlighter, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static Brushes.Red}}">
-                <MenuItem.Header>
-                  <Border Background="Red"/>
-                </MenuItem.Header>
-              </MenuItem>
-              <!--  Blue  -->
-              <MenuItem
-                Command="{Binding SelectFocusHighlighter}"
-                CommandParameter="{x:Static Brushes.Blue}"
-                IsChecked="{Binding FocusHighlighter, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static Brushes.Blue}}">
-                <MenuItem.Header>
-                  <Border Background="Blue"/>
-                </MenuItem.Header>
-              </MenuItem>
-              <!--  Black  -->
-              <MenuItem
-                Command="{Binding SelectFocusHighlighter}"
-                CommandParameter="{x:Static Brushes.Black}"
-                IsChecked="{Binding FocusHighlighter, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static Brushes.Black}}">
-                <MenuItem.Header>
-                  <Border Background="Black"/>
-                </MenuItem.Header>
-              </MenuItem>
-              <!--  White  -->
-              <MenuItem
-                Command="{Binding SelectFocusHighlighter}"
-                CommandParameter="{x:Static Brushes.White}"
-                IsChecked="{Binding FocusHighlighter, Converter={x:Static ObjectConverters.Equal}, ConverterParameter={x:Static Brushes.White}}">
-                <MenuItem.Header>
-                  <Border Background="White"/>
-                </MenuItem.Header>
-              </MenuItem>
-            </MenuItem.Items>
           </MenuItem>
         </MenuItem>
       </MenuItem>

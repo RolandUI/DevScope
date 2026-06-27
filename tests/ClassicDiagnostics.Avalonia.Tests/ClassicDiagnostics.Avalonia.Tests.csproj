@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="ClassicDiagnostics.Avalonia.Elements.Properties" />
     <Using Include="NUnit.Framework" />
   </ItemGroup>
 

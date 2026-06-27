@@ -17,6 +17,7 @@ internal class MainViewModel : ReactiveViewModelBase
 {
     private readonly ElementsPageViewModel _elements;
     private readonly EventsPageViewModel _events;
+    private readonly HotKeyPageViewModel _hotKeys;
     private readonly ElementsTreeViewModel _logicalTree;
     private readonly IPinnedPropertyStore _pinnedProperties = new PinnedPropertyStore();
     private readonly AvaloniaObject _root;
@@ -39,13 +40,15 @@ internal class MainViewModel : ReactiveViewModelBase
         _selectionCoordinator.Attach(_logicalTree, _visualTree);
         _elements = new ElementsPageViewModel(_logicalTree, _visualTree, _selectionCoordinator);
         _events = new EventsPageViewModel(this);
+        _hotKeys = new HotKeyPageViewModel();
         _trace = new TracePageViewModel();
-        _settings = new SettingsPageViewModel();
+        _settings = new SettingsPageViewModel(this);
         Tabs =
         [
             new DevToolsTabItemViewModel(this, DevToolsViewKind.Elements, "Elements", "LucideMousePointerClick"),
             new DevToolsTabItemViewModel(this, DevToolsViewKind.Events, "Events", "LucideRadioTower"),
             new DevToolsTabItemViewModel(this, DevToolsViewKind.Trace, "Trace", "LucideSquareTerminal"),
+            new DevToolsTabItemViewModel(this, DevToolsViewKind.HotKeys, "HotKeys", "LucideKeyboard"),
             new DevToolsTabItemViewModel(this, DevToolsViewKind.Settings, "Settings", "LucideSettings"),
         ];
 
@@ -128,6 +131,8 @@ internal class MainViewModel : ReactiveViewModelBase
 
     public bool IsTraceSelected => SelectedViewKind == DevToolsViewKind.Trace;
 
+    public bool IsHotKeysSelected => SelectedViewKind == DevToolsViewKind.HotKeys;
+
     public bool IsSettingsSelected => SelectedViewKind == DevToolsViewKind.Settings;
 
     public string? FocusedControl
@@ -163,13 +168,16 @@ internal class MainViewModel : ReactiveViewModelBase
     public bool ShowImplementedInterfaces
     {
         get;
-        private set => SetProperty(ref field, value);
+        set
+        {
+            if (SetProperty(ref field, value)) _elements.CurrentTree.UpdatePropertiesView();
+        }
     }
 
     public bool ShowDetailsPropertyType
     {
         get;
-        private set => SetProperty(ref field, value);
+        set => SetProperty(ref field, value);
     }
 
     public IBrush? FocusHighlighter
@@ -190,6 +198,7 @@ internal class MainViewModel : ReactiveViewModelBase
         _logicalTree.Dispose();
         _visualTree.Dispose();
         _events.Dispose();
+        _hotKeys.Dispose();
         _currentFocusHighlightAdorner?.Dispose();
         if (TryGetRenderer() is { } renderer)
         {
@@ -201,11 +210,6 @@ internal class MainViewModel : ReactiveViewModelBase
         }
 
         base.Dispose(disposing);
-    }
-
-    public void ToggleVisualizeMarginPadding()
-    {
-        ShouldVisualizeMarginPadding = !ShouldVisualizeMarginPadding;
     }
 
     private IRenderer? TryGetRenderer()
@@ -245,31 +249,6 @@ internal class MainViewModel : ReactiveViewModelBase
         RaisePropertyChanged(propertyName);
     }
 
-    public void ToggleDirtyRectsOverlay()
-    {
-        ShowDirtyRectsOverlay = !ShowDirtyRectsOverlay;
-    }
-
-    public void ToggleFpsOverlay()
-    {
-        ShowFpsOverlay = !ShowFpsOverlay;
-    }
-
-    public void ToggleLayoutTimeGraphOverlay()
-    {
-        ShowLayoutTimeGraphOverlay = !ShowLayoutTimeGraphOverlay;
-    }
-
-    public void ToggleRenderTimeGraphOverlay()
-    {
-        ShowRenderTimeGraphOverlay = !ShowRenderTimeGraphOverlay;
-    }
-
-    public void ShowHotKeys()
-    {
-        SelectView(DevToolsViewKind.Settings);
-    }
-
     public void SelectControl(Control control)
     {
         SelectView(DevToolsViewKind.Elements);
@@ -278,10 +257,7 @@ internal class MainViewModel : ReactiveViewModelBase
 
     public void EnableSnapshotStyles(bool enable)
     {
-        if (_elements.CurrentDetails != null)
-        {
-            _elements.CurrentDetails.FreezeFrames = enable;
-        }
+        _elements.CurrentDetails?.FreezeFrames = enable;
     }
 
     private void UpdateFocusedControl()
@@ -334,18 +310,8 @@ internal class MainViewModel : ReactiveViewModelBase
         StartupScreenIndex = options.StartupScreenIndex;
         ShowImplementedInterfaces = options.ShowImplementedInterfaces;
         FocusHighlighter = options.FocusHighlighterBrush;
+        _hotKeys.SetOptions(options);
         SelectView(options.LaunchView);
-    }
-
-    public void ToggleShowImplementedInterfaces(object parameter)
-    {
-        ShowImplementedInterfaces = !ShowImplementedInterfaces;
-        _elements.CurrentTree.UpdatePropertiesView();
-    }
-
-    public void ToggleShowDetailsPropertyType(object parameter)
-    {
-        ShowDetailsPropertyType = !ShowDetailsPropertyType;
     }
 
     public void SelectFocusHighlighter(object parameter)
@@ -367,12 +333,15 @@ internal class MainViewModel : ReactiveViewModelBase
         {
             DevToolsViewKind.Events => _events,
             DevToolsViewKind.Trace => _trace,
+            DevToolsViewKind.HotKeys => _hotKeys,
             DevToolsViewKind.Settings => _settings,
             _ => _elements,
         };
-        SelectedViewKind = viewKind is DevToolsViewKind.Events or DevToolsViewKind.Trace or DevToolsViewKind.Settings
-            ? viewKind
-            : DevToolsViewKind.Elements;
+        SelectedViewKind = viewKind is
+            DevToolsViewKind.Events or
+            DevToolsViewKind.Trace or
+            DevToolsViewKind.HotKeys or
+            DevToolsViewKind.Settings ? viewKind : DevToolsViewKind.Elements;
         RaiseTabSelectionChanged();
     }
 
@@ -387,6 +356,7 @@ internal class MainViewModel : ReactiveViewModelBase
         RaisePropertyChanged(nameof(IsElementsSelected));
         RaisePropertyChanged(nameof(IsEventsSelected));
         RaisePropertyChanged(nameof(IsTraceSelected));
+        RaisePropertyChanged(nameof(IsHotKeysSelected));
         RaisePropertyChanged(nameof(IsSettingsSelected));
 
         foreach (var tab in Tabs)
