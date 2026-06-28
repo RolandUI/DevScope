@@ -89,7 +89,7 @@ internal sealed class PropertyInspector : IPropertyInspector
     private static IEnumerable<PropertyViewModel> GetClrProperties(object target, Type type)
     {
         return type
-            .GetProperties()
+            .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
             .Where(IsInspectableProperty)
             .Select(property => new ClrPropertyViewModel(target, property));
     }
