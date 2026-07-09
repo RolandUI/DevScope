@@ -1,11 +1,11 @@
 using Avalonia.Controls.Templates;
-using ClassicDiagnostics.Avalonia.Elements;
-using ClassicDiagnostics.Avalonia.Elements.Trees;
-using ClassicDiagnostics.Avalonia.ViewModels;
-using ClassicDiagnostics.Avalonia.Views;
-using ClassicDiagnostics.Avalonia.Views.Elements;
+using RolandUI.DevScope.Elements;
+using RolandUI.DevScope.Elements.Trees;
+using RolandUI.DevScope.ViewModels;
+using RolandUI.DevScope.Views;
+using RolandUI.DevScope.Views.Elements;
 
-namespace ClassicDiagnostics.Avalonia;
+namespace RolandUI.DevScope;
 
 internal sealed class DevToolsViewRegistry : IDataTemplate
 {

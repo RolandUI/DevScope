@@ -1,8 +1,8 @@
-using ClassicDiagnostics.Avalonia.Rooting;
-using ClassicDiagnostics.Avalonia.Views.Shell;
+using RolandUI.DevScope.Rooting;
+using RolandUI.DevScope.Views.Shell;
 using Application = Avalonia.Application;
 
-namespace ClassicDiagnostics.Avalonia.Hosting;
+namespace RolandUI.DevScope.Hosting;
 
 internal static class DevToolsWindowHost
 {

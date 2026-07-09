@@ -1,7 +1,7 @@
 <UserControl
-  x:Class="ClassicDiagnostics.Avalonia.Views.Elements.Properties.PropertyColumnsView" xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:ClassicDiagnostics.Avalonia.Views.Elements.Properties"
-  xmlns:properties="using:ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels" x:Name="Main"
+  x:Class="RolandUI.DevScope.Views.Elements.Properties.PropertyColumnsView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:RolandUI.DevScope.Views.Elements.Properties"
+  xmlns:properties="using:RolandUI.DevScope.Elements.Properties.ViewModels" x:Name="Main"
   x:DataType="properties:PropertyColumnsViewModel">
 
   <UserControl.Styles>

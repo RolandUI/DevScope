@@ -1,7 +1,7 @@
 <UserControl
-  x:Class="ClassicDiagnostics.Avalonia.Views.Elements.ElementsTreeView" xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:at="clr-namespace:ClassicDiagnostics.Avalonia.AttachedProperties"
-  xmlns:trees="using:ClassicDiagnostics.Avalonia.Elements.Trees" x:DataType="trees:ElementsTreeViewModel">
+  x:Class="RolandUI.DevScope.Views.Elements.ElementsTreeView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:at="clr-namespace:RolandUI.DevScope.AttachedProperties"
+  xmlns:trees="using:RolandUI.DevScope.Elements.Trees" x:DataType="trees:ElementsTreeViewModel">
   <Grid>
     <TreeView
       x:Name="Tree" BorderThickness="0"

@@ -1,8 +1,8 @@
 using Avalonia.VisualTree;
-using ClassicDiagnostics.Avalonia.Shell;
-using ClassicDiagnostics.Avalonia.ViewModels;
+using RolandUI.DevScope.Shell;
+using RolandUI.DevScope.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Trees;
+namespace RolandUI.DevScope.Elements.Trees;
 
 internal class ElementsTreeViewModel : ReactiveViewModelBase
 {

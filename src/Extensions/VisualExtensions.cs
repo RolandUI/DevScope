@@ -1,7 +1,7 @@
-﻿using Avalonia.Media;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 
-namespace ClassicDiagnostics.Avalonia.Extensions;
+namespace RolandUI.DevScope.Extensions;
 
 internal static class VisualExtensions
 {

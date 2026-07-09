@@ -1,8 +1,8 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace ClassicDiagnostics.Avalonia.Extensions;
+namespace RolandUI.DevScope.Extensions;
 
 internal static class ReactiveExtensions
 {

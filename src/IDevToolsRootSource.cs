@@ -1,7 +1,7 @@
 using Avalonia.Controls.ApplicationLifetimes;
 using Application = Avalonia.Application;
 
-namespace ClassicDiagnostics.Avalonia;
+namespace RolandUI.DevScope;
 
 internal interface IDevToolsRootSource
 {

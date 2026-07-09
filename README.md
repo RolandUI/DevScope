@@ -1,12 +1,12 @@
 <div align="center">
 
-<h1>ClassicDiagnostics.Avalonia</h1>
+<h1>DevScope</h1>
 
-**Bringing the classic F12 DevTools back to Avalonia 12+**
+**Local F12 diagnostics compatible with Avalonia 12**
 
 <p align="center">
-  <a href="https://www.nuget.org/packages/ClassicDiagnostics.Avalonia"><img src="https://img.shields.io/nuget/v/ClassicDiagnostics.Avalonia.svg?style=flat-square" alt="NuGet"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square" alt="License"></a>
+  <a href="https://github.com/RolandUI/DevScope/issues"><img src="https://img.shields.io/github/issues/RolandUI/DevScope?style=flat-square" alt="GitHub Issues"></a>
 </p>
 
 </div>
@@ -17,7 +17,7 @@
 
 With the release of Avalonia 12, the beloved open-source F12 DevTools ([Avalonia.Diagnostics](https://github.com/AvaloniaUI/Avalonia.Diagnostics)) has been retired and replaced by the highly advanced, commercial [Avalonia Accelerate](https://avaloniaui.net/Accelerate) suite. 
 
-While the new Accelerate tools are incredibly powerful and represent the future of Avalonia development, we recognize that some developers and small projects still rely on the classic, lightweight, and offline DevTools for basic UI profiling. `ClassicDiagnostics.Avalonia` is a community-maintained migration of the Avalonia 11 `Avalonia.Diagnostics` codebase, adapted to run seamlessly on Avalonia 12. 
+While the new Accelerate tools are incredibly powerful and represent the future of Avalonia development, we recognize that some developers and small projects still rely on the classic, lightweight, and offline DevTools for basic UI profiling. `DevScope` is an independent, community-maintained continuation of the Avalonia 11 `Avalonia.Diagnostics` codebase, adapted to run on Avalonia 12.
 
 Our goal is to provide a smooth transition for developers upgrading to Avalonia 12, while exploring the addition of small, practical utilities in the future.
 
@@ -33,45 +33,28 @@ As an open-source project building upon the incredible legacy of the Avalonia te
 
 ### 1. Install the NuGet package
 
-You can install the latest version using the .NET CLI:
+The package ID is `RolandUI.DevScope`. After the first NuGet release, install it with:
 
 ```bash
-dotnet add package ClassicDiagnostics.Avalonia
+dotnet add package RolandUI.DevScope --prerelease
 ```
 
 or use the NuGet Package Manager in your IDE.
 
 ### 2. Attach the DevTools
 
-To use `ClassicDiagnostics.Avalonia`, simply ensure you have the correct namespace and call the attach method in your window initialization:
+Attach the tools at the application level after Avalonia has finished initializing:
 
 ```csharp
-using Avalonia.Controls;
-using ClassicDiagnostics.Avalonia; // Note the namespace change!
-
-public partial class MainWindow : Window
-{
-    public MainWindow()
-    {
-        InitializeComponent();
-
-#if DEBUG
-        // Attach the classic DevTools
-        this.AttachDevTools();
-#endif
-    }
-}
-```
-
-You can also attach the tools at the application level after Avalonia has finished initializing:
-
-```csharp
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using ClassicDiagnostics.Avalonia;
+using RolandUI.DevScope;
 
 public partial class App : Application
 {
+    private IDisposable? _devToolsSession;
+
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -82,28 +65,40 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
 
 #if DEBUG
-        this.AttachDevTools();
+        _devToolsSession = this.AttachDevTools();
 #endif
     }
 }
 ```
 
+Keeping the returned `IDisposable` allows the application to detach the F12 input subscription explicitly when required.
+
 ## Current Scope
 
-`ClassicDiagnostics.Avalonia` is focused on local, classic F12 diagnostics for Avalonia 12+ applications. The current preview keeps the familiar logical tree, visual tree, events, property details, overlays, hotkeys, and screenshot workflow from the original DevTools lineage.
+`DevScope` is focused on local, classic F12 diagnostics for Avalonia 12+ applications. The current source targets Avalonia 12.1 and supports both `net8.0` and `net10.0` consumers.
+
+The current preview provides a single global desktop DevTools window, logical and visual tree inspection, routed-event monitoring, property inspection and editing, collection navigation, style-class and pseudo-class editing, flags-enum editing, diagnostic overlays, hotkeys, and screenshots.
 
 The project is intentionally lightweight: it does not add a remote debugging service, does not replace Avalonia Accelerate, and does not try to become a full external diagnostics platform.
 
 ## Known Limitations
 
-- Application-level attach currently targets classic desktop lifetimes. Broader lifetime support is planned, but not promised in the current preview.
-- Work toward an application root and a single global DevTools window is in progress; some paths still follow the legacy per-TopLevel behavior.
-- The property editor is still being refactored and does not yet cover every useful Avalonia shape, such as style classes, flags enums, and collection item editing.
-- Trace viewing and diagnostic clock controls are planned features, not current stable capabilities.
+- The DevTools surface currently opens as a desktop `Window`. Single-view roots can be discovered, but Browser, Android, and iOS still need an embedded host ([#3](https://github.com/RolandUI/DevScope/issues/3)).
+- Arrays, lists, dictionaries, and other enumerable values can be inspected and navigated, but their child items are currently read-only ([#1](https://github.com/RolandUI/DevScope/issues/1)).
+- The Trace tab is present but does not capture or display trace entries yet ([#2](https://github.com/RolandUI/DevScope/issues/2)).
+- Diagnostic animation-clock controls are not implemented and require version-sensitive Avalonia internal APIs ([#4](https://github.com/RolandUI/DevScope/issues/4)).
+
+## Roadmap
+
+Planned work is tracked in [GitHub Issues](https://github.com/RolandUI/DevScope/issues). Remote development protocols remain intentionally out of scope.
 
 ## ❤️ Acknowledgements
 
 This project is entirely made possible by the rich legacy of the **Avalonia UI** team and its contributors. We are deeply grateful for their years of effort in maintaining the original `Avalonia.Diagnostics`. 
+
+DevScope is an independent community project and is not affiliated with, sponsored by, or endorsed by AvaloniaUI OÜ.
+
+Avalonia is a registered trademark of AvaloniaUI OÜ.
 
 ## 📄 License
 

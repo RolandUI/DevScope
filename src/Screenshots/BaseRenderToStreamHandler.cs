@@ -1,4 +1,4 @@
-﻿namespace ClassicDiagnostics.Avalonia.Screenshots;
+namespace RolandUI.DevScope.Screenshots;
 
 /// <summary>
 ///     Base class for render Screenshot to stream

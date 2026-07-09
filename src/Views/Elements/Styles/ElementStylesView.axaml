@@ -1,8 +1,8 @@
 <UserControl
-  x:Class="ClassicDiagnostics.Avalonia.Views.Elements.Styles.ElementStylesView" xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:ClassicDiagnostics.Avalonia.Views.Controls"
-  xmlns:elements="using:ClassicDiagnostics.Avalonia.Elements" xmlns:local="using:ClassicDiagnostics.Avalonia.Views.Elements.Styles"
-  xmlns:styles="using:ClassicDiagnostics.Avalonia.Elements.Styles" xmlns:valueConverters="clr-namespace:ClassicDiagnostics.Avalonia.ValueConverters"
+  x:Class="RolandUI.DevScope.Views.Elements.Styles.ElementStylesView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:RolandUI.DevScope.Views.Controls"
+  xmlns:elements="using:RolandUI.DevScope.Elements" xmlns:local="using:RolandUI.DevScope.Views.Elements.Styles"
+  xmlns:styles="using:RolandUI.DevScope.Elements.Styles" xmlns:valueConverters="clr-namespace:RolandUI.DevScope.ValueConverters"
   x:Name="Main" x:DataType="elements:ElementDetailsViewModel">
   <ScrollViewer HorizontalScrollBarVisibility="Disabled">
     <Grid RowDefinitions="Auto,Auto,Auto,*">

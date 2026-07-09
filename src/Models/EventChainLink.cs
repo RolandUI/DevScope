@@ -1,6 +1,6 @@
-﻿using Avalonia.Interactivity;
+using Avalonia.Interactivity;
 
-namespace ClassicDiagnostics.Avalonia.Models;
+namespace RolandUI.DevScope.Models;
 
 internal class EventChainLink(object handler, bool handled, RoutingStrategies route)
 {

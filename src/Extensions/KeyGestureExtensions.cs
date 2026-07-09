@@ -1,6 +1,6 @@
-﻿using Avalonia.Input.Raw;
+using Avalonia.Input.Raw;
 
-namespace ClassicDiagnostics.Avalonia.Extensions;
+namespace RolandUI.DevScope.Extensions;
 
 internal static class KeyGestureExtensions
 {

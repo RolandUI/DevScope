@@ -1,8 +1,8 @@
 using Avalonia.Platform.Storage;
-using ClassicDiagnostics.Avalonia.Views.Shell;
+using RolandUI.DevScope.Views.Shell;
 using Lifetimes = Avalonia.Controls.ApplicationLifetimes;
 
-namespace ClassicDiagnostics.Avalonia.Screenshots;
+namespace RolandUI.DevScope.Screenshots;
 
 /// <summary>
 ///     Show a FileSavePicker to select where save screenshot

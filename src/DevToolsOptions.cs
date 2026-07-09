@@ -1,7 +1,7 @@
-﻿using Avalonia.Media;
-using ClassicDiagnostics.Avalonia.Screenshots;
+using Avalonia.Media;
+using RolandUI.DevScope.Screenshots;
 
-namespace ClassicDiagnostics.Avalonia;
+namespace RolandUI.DevScope;
 
 /// <summary>
 ///     Describes options used to customize DevTools.

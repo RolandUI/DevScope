@@ -1,7 +1,7 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Avalonia.Data.Converters;
 
-namespace ClassicDiagnostics.Avalonia.ValueConverters;
+namespace RolandUI.DevScope.ValueConverters;
 
 internal class EnumToCheckedConverter : IValueConverter
 {

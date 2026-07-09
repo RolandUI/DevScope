@@ -4,9 +4,9 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input.Raw;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
-using ClassicDiagnostics.Avalonia.Shell;
+using RolandUI.DevScope.Shell;
 
-namespace ClassicDiagnostics.Avalonia.Views.Shell;
+namespace RolandUI.DevScope.Views.Shell;
 
 internal partial class MainWindow : Window, IStyleHost
 {

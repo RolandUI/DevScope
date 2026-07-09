@@ -1,8 +1,8 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 
-namespace ClassicDiagnostics.Avalonia.ValueConverters;
+namespace RolandUI.DevScope.ValueConverters;
 
 internal static class CommonConverters
 {

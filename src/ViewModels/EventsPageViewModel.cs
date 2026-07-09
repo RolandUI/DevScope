@@ -1,9 +1,9 @@
 using System.Collections.ObjectModel;
 using Avalonia.Interactivity;
-using ClassicDiagnostics.Avalonia.Models;
-using ClassicDiagnostics.Avalonia.Shell;
+using RolandUI.DevScope.Models;
+using RolandUI.DevScope.Shell;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels;
+namespace RolandUI.DevScope.ViewModels;
 
 internal class EventsPageViewModel : ReactiveViewModelBase
 {

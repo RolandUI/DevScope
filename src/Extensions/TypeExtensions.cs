@@ -1,6 +1,6 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 
-namespace ClassicDiagnostics.Avalonia.Extensions;
+namespace RolandUI.DevScope.Extensions;
 
 internal static class TypeExtensions
 {

@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
-using ClassicDiagnostics.Avalonia.Models;
+using RolandUI.DevScope.Models;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels;
+namespace RolandUI.DevScope.ViewModels;
 
 internal class HotKeyPageViewModel : ReactiveViewModelBase
 {

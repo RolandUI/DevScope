@@ -1,6 +1,6 @@
-using ClassicDiagnostics.Avalonia.ViewModels;
+using RolandUI.DevScope.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Shell;
+namespace RolandUI.DevScope.Shell;
 
 internal sealed class DevToolsTabItemViewModel(
     MainViewModel owner,

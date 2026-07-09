@@ -2,10 +2,10 @@ using Avalonia.Collections;
 using Avalonia.Controls.Diagnostics;
 using Avalonia.Controls.Primitives;
 using Avalonia.LogicalTree;
-using ClassicDiagnostics.Avalonia.Rooting;
-using ClassicDiagnostics.Avalonia.Views.Shell;
+using RolandUI.DevScope.Rooting;
+using RolandUI.DevScope.Views.Shell;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Trees;
+namespace RolandUI.DevScope.Elements.Trees;
 
 internal interface ILogicalTreeProvider
 {

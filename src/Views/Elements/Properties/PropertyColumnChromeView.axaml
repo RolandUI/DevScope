@@ -1,7 +1,7 @@
 <UserControl
-  x:Class="ClassicDiagnostics.Avalonia.Views.Elements.Properties.PropertyColumnChromeView" xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:ClassicDiagnostics.Avalonia.Views.Controls"
-  xmlns:local="using:ClassicDiagnostics.Avalonia.Views.Elements.Properties" xmlns:properties="using:ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels"
+  x:Class="RolandUI.DevScope.Views.Elements.Properties.PropertyColumnChromeView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:RolandUI.DevScope.Views.Controls"
+  xmlns:local="using:RolandUI.DevScope.Views.Elements.Properties" xmlns:properties="using:RolandUI.DevScope.Elements.Properties.ViewModels"
   x:DataType="properties:PropertyColumnViewModel">
 
   <UserControl.DataTemplates>

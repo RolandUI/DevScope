@@ -1,7 +1,7 @@
 <UserControl
-  x:Class="ClassicDiagnostics.Avalonia.Views.Elements.Styles.ElementLayoutView" xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:ClassicDiagnostics.Avalonia.Views.Controls"
-  xmlns:styles="using:ClassicDiagnostics.Avalonia.Elements.Styles" xmlns:valueConverters="clr-namespace:ClassicDiagnostics.Avalonia.ValueConverters"
+  x:Class="RolandUI.DevScope.Views.Elements.Styles.ElementLayoutView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:RolandUI.DevScope.Views.Controls"
+  xmlns:styles="using:RolandUI.DevScope.Elements.Styles" xmlns:valueConverters="clr-namespace:RolandUI.DevScope.ValueConverters"
   x:DataType="styles:ElementLayoutViewModel">
 
   <UserControl.Resources>

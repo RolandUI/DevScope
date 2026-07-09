@@ -1,7 +1,7 @@
 using System.Reflection;
-using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
+using RolandUI.DevScope.Elements.Properties.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Properties;
+namespace RolandUI.DevScope.Elements.Properties;
 
 internal sealed class PropertyInspector : IPropertyInspector
 {

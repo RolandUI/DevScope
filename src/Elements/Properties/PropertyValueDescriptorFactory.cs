@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Properties;
+namespace RolandUI.DevScope.Elements.Properties;
 
 internal static class PropertyValueDescriptorFactory
 {

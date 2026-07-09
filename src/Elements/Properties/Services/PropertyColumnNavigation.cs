@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Properties.Services;
+namespace RolandUI.DevScope.Elements.Properties.Services;
 
 internal static class PropertyColumnNavigation
 {

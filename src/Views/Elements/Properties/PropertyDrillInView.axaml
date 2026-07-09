@@ -1,6 +1,6 @@
 <UserControl
-  x:Class="ClassicDiagnostics.Avalonia.Views.Elements.Properties.PropertyDrillInView" xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:ClassicDiagnostics.Avalonia.Views.Elements.Properties"
-  xmlns:properties="using:ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels" x:DataType="properties:PropertyDrillInViewModel">
+  x:Class="RolandUI.DevScope.Views.Elements.Properties.PropertyDrillInView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:RolandUI.DevScope.Views.Elements.Properties"
+  xmlns:properties="using:RolandUI.DevScope.Elements.Properties.ViewModels" x:DataType="properties:PropertyDrillInViewModel">
   <local:PropertyColumnChromeView DataContext="{Binding CurrentColumn}"/>
 </UserControl>

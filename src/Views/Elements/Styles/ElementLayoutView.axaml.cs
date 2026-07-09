@@ -1,7 +1,7 @@
 using Avalonia.Controls.Shapes;
 using Avalonia.Markup.Xaml;
 
-namespace ClassicDiagnostics.Avalonia.Views.Elements.Styles;
+namespace RolandUI.DevScope.Views.Elements.Styles;
 
 internal partial class ElementLayoutView : UserControl
 {

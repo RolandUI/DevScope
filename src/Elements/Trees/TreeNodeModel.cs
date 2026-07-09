@@ -3,9 +3,9 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using Avalonia.Collections;
 using Avalonia.Controls.Primitives;
-using ClassicDiagnostics.Avalonia.Rooting;
+using RolandUI.DevScope.Rooting;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Trees;
+namespace RolandUI.DevScope.Elements.Trees;
 
 internal sealed class TreeNodeModel : IDisposable
 {

@@ -1,10 +1,10 @@
 using Avalonia.Controls;
-using ClassicDiagnostics.Avalonia.Elements;
-using ClassicDiagnostics.Avalonia.Elements.Trees;
-using ClassicDiagnostics.Avalonia.Shell;
-using ClassicDiagnostics.Avalonia.Views.Elements.Properties;
+using RolandUI.DevScope.Elements;
+using RolandUI.DevScope.Elements.Trees;
+using RolandUI.DevScope.Shell;
+using RolandUI.DevScope.Views.Elements.Properties;
 
-namespace ClassicDiagnostics.Avalonia.Tests.ViewModels;
+namespace RolandUI.DevScope.Tests.ViewModels;
 
 internal sealed class ElementDetailsPropertiesTests
 {

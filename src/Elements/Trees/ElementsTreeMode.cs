@@ -1,4 +1,4 @@
-namespace ClassicDiagnostics.Avalonia.Elements.Trees;
+namespace RolandUI.DevScope.Elements.Trees;
 
 internal enum ElementsTreeMode
 {

@@ -1,10 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>Bringing the classic F12 DevTools back to Avalonia 12+. A community-maintained migration of the Avalonia 11 Avalonia.Diagnostics codebase.</Description>
-    <Authors>Sylinko;The Avalonia Project</Authors>
-    <PackageProjectUrl>https://github.com/Sylinko/ClassicDiagnostics.Avalonia</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Sylinko/ClassicDiagnostics.Avalonia</RepositoryUrl>
+    <AssemblyName>RolandUI.DevScope</AssemblyName>
+    <RootNamespace>RolandUI.DevScope</RootNamespace>
+    <PackageId>RolandUI.DevScope</PackageId>
+    <Title>DevScope</Title>
+    <Description>Local F12 diagnostics compatible with Avalonia 12. An independent, community-maintained continuation of the classic Avalonia.Diagnostics codebase.</Description>
+    <Authors>RolandUI</Authors>
+    <Copyright>Copyright (c) AvaloniaUI OÜ; Copyright (c) 2026 Sylinko; Copyright (c) 2026 RolandUI</Copyright>
+    <PackageProjectUrl>https://github.com/RolandUI/DevScope</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/RolandUI/DevScope</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>avalonia;devtools;diagnostics;f12</PackageTags>

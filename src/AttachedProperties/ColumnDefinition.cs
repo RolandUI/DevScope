@@ -1,4 +1,4 @@
-﻿namespace ClassicDiagnostics.Avalonia.AttachedProperties;
+namespace RolandUI.DevScope.AttachedProperties;
 
 /// <summary>
 ///     See discussion https://github.com/AvaloniaUI/Avalonia/discussions/6773

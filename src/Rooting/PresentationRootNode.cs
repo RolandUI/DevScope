@@ -1,6 +1,6 @@
 using System.Collections.Specialized;
 
-namespace ClassicDiagnostics.Avalonia.Rooting;
+namespace RolandUI.DevScope.Rooting;
 
 internal class PresentationRootNode : AvaloniaObject, IDisposable
 {

@@ -1,7 +1,7 @@
-using ClassicDiagnostics.Avalonia.Elements;
-using ClassicDiagnostics.Avalonia.Elements.Styles;
+using RolandUI.DevScope.Elements;
+using RolandUI.DevScope.Elements.Styles;
 
-namespace ClassicDiagnostics.Avalonia.Views.Elements.Styles;
+namespace RolandUI.DevScope.Views.Elements.Styles;
 
 internal partial class ElementStylesView : ReactiveUserControl<ElementDetailsViewModel>
 {

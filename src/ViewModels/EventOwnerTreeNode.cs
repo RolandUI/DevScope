@@ -1,8 +1,8 @@
-﻿using Avalonia.Collections;
+using Avalonia.Collections;
 using Avalonia.Interactivity;
-using ClassicDiagnostics.Avalonia.Models;
+using RolandUI.DevScope.Models;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels;
+namespace RolandUI.DevScope.ViewModels;
 
 internal class EventOwnerTreeNode : EventTreeNodeBase
 {

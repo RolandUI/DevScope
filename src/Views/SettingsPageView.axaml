@@ -1,6 +1,6 @@
 <UserControl
-  x:Class="ClassicDiagnostics.Avalonia.Views.SettingsPageView" xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:ClassicDiagnostics.Avalonia.ViewModels"
+  x:Class="RolandUI.DevScope.Views.SettingsPageView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:RolandUI.DevScope.ViewModels"
   x:DataType="vm:SettingsPageViewModel">
   <UserControl.Styles>
     <Style Selector="Border.SettingsSection">

@@ -1,6 +1,6 @@
-﻿<ResourceDictionary
+<ResourceDictionary
   xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  xmlns:controls="clr-namespace:ClassicDiagnostics.Avalonia.Views.Controls" x:ClassModifier="internal">
+  xmlns:controls="clr-namespace:RolandUI.DevScope.Views.Controls" x:ClassModifier="internal">
 
   <SolidColorBrush
     x:Key="HighlightBorderBrush" Color="CornflowerBlue"/>

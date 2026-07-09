@@ -1,18 +1,18 @@
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using Avalonia.Threading;
-using ClassicDiagnostics.Avalonia.Models;
-using ClassicDiagnostics.Avalonia.Elements.Trees;
-using ClassicDiagnostics.Avalonia.ViewModels;
-using ClassicDiagnostics.Avalonia.Views.Controls;
-using ClassicDiagnostics.Avalonia.Elements;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
-using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
-using ClassicDiagnostics.Avalonia.Rooting;
-using ClassicDiagnostics.Avalonia.Shell;
+using RolandUI.DevScope.Models;
+using RolandUI.DevScope.Elements.Trees;
+using RolandUI.DevScope.ViewModels;
+using RolandUI.DevScope.Views.Controls;
+using RolandUI.DevScope.Elements;
+using RolandUI.DevScope.Elements.Properties.Models;
+using RolandUI.DevScope.Elements.Properties.Services;
+using RolandUI.DevScope.Elements.Properties.ViewModels;
+using RolandUI.DevScope.Rooting;
+using RolandUI.DevScope.Shell;
 
-namespace ClassicDiagnostics.Avalonia.Tests.ViewModels;
+namespace RolandUI.DevScope.Tests.ViewModels;
 
 internal sealed class TreeProviderTests
 {

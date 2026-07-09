@@ -1,4 +1,4 @@
-﻿namespace ClassicDiagnostics.Avalonia.Views.Controls;
+namespace RolandUI.DevScope.Views.Controls;
 
 //TODO: UpdateSourceTrigger & Binding.ValidationRules could help removing the need for this control.
 internal sealed class CommitTextBox : TextBox

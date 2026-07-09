@@ -1,7 +1,7 @@
 using Avalonia.Input.Raw;
 using Application = Avalonia.Application;
 
-namespace ClassicDiagnostics.Avalonia.Hosting;
+namespace RolandUI.DevScope.Hosting;
 
 internal sealed class DevToolsApplicationSession : IDisposable
 {

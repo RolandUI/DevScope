@@ -1,9 +1,9 @@
-using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
-using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
-using ClassicDiagnostics.Avalonia.Views;
+using RolandUI.DevScope.Elements.Properties.Models;
+using RolandUI.DevScope.Elements.Properties.Services;
+using RolandUI.DevScope.Elements.Properties.ViewModels;
+using RolandUI.DevScope.Views;
 
-namespace ClassicDiagnostics.Avalonia.Views.Elements.Properties;
+namespace RolandUI.DevScope.Views.Elements.Properties;
 
 internal partial class ObjectPropertiesColumnView : ReactiveUserControl<ObjectPropertiesColumnViewModel>
 {

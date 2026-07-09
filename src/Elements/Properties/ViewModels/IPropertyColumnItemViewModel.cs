@@ -1,4 +1,4 @@
-namespace ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
+namespace RolandUI.DevScope.Elements.Properties.ViewModels;
 
 internal interface IPropertyColumnItemViewModel
 {

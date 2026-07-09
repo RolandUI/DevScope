@@ -1,4 +1,4 @@
-﻿namespace ClassicDiagnostics.Avalonia.Views.Controls;
+namespace RolandUI.DevScope.Views.Controls;
 
 internal class FilterTextBox : TextBox
 {

@@ -1,6 +1,6 @@
-﻿using Avalonia.Interactivity;
+using Avalonia.Interactivity;
 
-namespace ClassicDiagnostics.Avalonia.AttachedProperties;
+namespace RolandUI.DevScope.AttachedProperties;
 
 public static class Behaviors
 {

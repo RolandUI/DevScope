@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Interactivity;
 
-namespace ClassicDiagnostics.Avalonia.Models;
+namespace RolandUI.DevScope.Models;
 
 internal class FiredEvent : INotifyPropertyChanged
 {

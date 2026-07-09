@@ -1,6 +1,6 @@
-using ClassicDiagnostics.Avalonia.Shell;
+using RolandUI.DevScope.Shell;
 
-namespace ClassicDiagnostics.Avalonia.Views.Shell;
+namespace RolandUI.DevScope.Views.Shell;
 
 internal partial class MainView : ReactiveUserControl<MainViewModel>
 {

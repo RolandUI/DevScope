@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
-using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
+using RolandUI.DevScope.Elements.Properties.Models;
+using RolandUI.DevScope.Elements.Properties.Services;
+using RolandUI.DevScope.Elements.Properties.ViewModels;
 
-[assembly: InternalsVisibleTo("ClassicDiagnostics.Avalonia.Tests")]
+[assembly: InternalsVisibleTo("RolandUI.DevScope.Tests")]

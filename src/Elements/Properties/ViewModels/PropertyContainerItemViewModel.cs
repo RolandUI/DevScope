@@ -1,7 +1,7 @@
-using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
-using ClassicDiagnostics.Avalonia.ViewModels;
+using RolandUI.DevScope.Elements.Properties.Services;
+using RolandUI.DevScope.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
+namespace RolandUI.DevScope.Elements.Properties.ViewModels;
 
 internal sealed class PropertyContainerItemViewModel(
     string name,

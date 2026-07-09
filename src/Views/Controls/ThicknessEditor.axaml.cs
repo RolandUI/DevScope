@@ -2,7 +2,7 @@ using System.Globalization;
 using Avalonia.Controls.Primitives;
 using Avalonia.Media;
 
-namespace ClassicDiagnostics.Avalonia.Views.Controls;
+namespace RolandUI.DevScope.Views.Controls;
 
 internal class ThicknessEditor : ContentControl
 {

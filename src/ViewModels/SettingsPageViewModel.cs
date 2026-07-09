@@ -1,6 +1,6 @@
-using ClassicDiagnostics.Avalonia.Shell;
+using RolandUI.DevScope.Shell;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels;
+namespace RolandUI.DevScope.ViewModels;
 
 internal sealed class SettingsPageViewModel(MainViewModel mainViewModel) : ReactiveViewModelBase
 {

@@ -1,6 +1,6 @@
 <UserControl
-  x:Class="ClassicDiagnostics.Avalonia.Views.Elements.Properties.ContainerPropertiesColumnView" xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:properties="using:ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels"
+  x:Class="RolandUI.DevScope.Views.Elements.Properties.ContainerPropertiesColumnView" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:properties="using:RolandUI.DevScope.Elements.Properties.ViewModels"
   x:DataType="properties:ContainerPropertiesColumnViewModel">
 
   <Grid RowDefinitions="*,Auto">

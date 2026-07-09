@@ -1,13 +1,13 @@
 using Avalonia.Controls;
-using ClassicDiagnostics.Avalonia.Elements;
-using ClassicDiagnostics.Avalonia.Elements.Trees;
-using ClassicDiagnostics.Avalonia.Shell;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
-using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
-using ClassicDiagnostics.Avalonia.Rooting;
+using RolandUI.DevScope.Elements;
+using RolandUI.DevScope.Elements.Trees;
+using RolandUI.DevScope.Shell;
+using RolandUI.DevScope.Elements.Properties.Models;
+using RolandUI.DevScope.Elements.Properties.Services;
+using RolandUI.DevScope.Elements.Properties.ViewModels;
+using RolandUI.DevScope.Rooting;
 
-namespace ClassicDiagnostics.Avalonia.Tests.ViewModels;
+namespace RolandUI.DevScope.Tests.ViewModels;
 
 internal sealed class ControlDetailsStylesTests
 {

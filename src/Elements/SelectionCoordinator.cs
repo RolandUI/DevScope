@@ -1,8 +1,8 @@
 using Avalonia.Threading;
-using ClassicDiagnostics.Avalonia.Elements.Properties;
-using ClassicDiagnostics.Avalonia.Elements.Trees;
+using RolandUI.DevScope.Elements.Properties;
+using RolandUI.DevScope.Elements.Trees;
 
-namespace ClassicDiagnostics.Avalonia.Elements;
+namespace RolandUI.DevScope.Elements;
 
 internal interface ISelectionCoordinator
 {

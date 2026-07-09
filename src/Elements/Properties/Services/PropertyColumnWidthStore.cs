@@ -1,6 +1,6 @@
-using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
+using RolandUI.DevScope.Elements.Properties.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Properties.Services;
+namespace RolandUI.DevScope.Elements.Properties.Services;
 
 internal sealed class PropertyColumnWidthStore
 {

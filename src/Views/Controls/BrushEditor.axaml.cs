@@ -1,11 +1,11 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
 
-namespace ClassicDiagnostics.Avalonia.Views.Controls;
+namespace RolandUI.DevScope.Views.Controls;
 
 [TemplatePart("PART_ClearButton", typeof(Button))]
 internal class BrushEditor : TemplatedControl

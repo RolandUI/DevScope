@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
-using ClassicDiagnostics.Avalonia.Elements.Trees;
+using RolandUI.DevScope.Elements.Trees;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Search;
+namespace RolandUI.DevScope.Elements.Search;
 
 internal static class TreeSearchService
 {

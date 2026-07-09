@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Properties;
+namespace RolandUI.DevScope.Elements.Properties;
 
 internal static class PropertyStringConversion
 {

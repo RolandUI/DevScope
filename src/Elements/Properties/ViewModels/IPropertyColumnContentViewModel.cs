@@ -1,6 +1,6 @@
-using ClassicDiagnostics.Avalonia.ViewModels;
+using RolandUI.DevScope.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
+namespace RolandUI.DevScope.Elements.Properties.ViewModels;
 
 internal interface IPropertyColumnContentViewModel : IDisposable
 {

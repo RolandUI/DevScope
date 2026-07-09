@@ -1,4 +1,4 @@
-namespace ClassicDiagnostics.Avalonia;
+namespace RolandUI.DevScope;
 
 internal static class AvaloniaMutatedApiAccessor
 {

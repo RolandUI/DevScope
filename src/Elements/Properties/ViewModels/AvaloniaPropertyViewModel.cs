@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
+namespace RolandUI.DevScope.Elements.Properties.ViewModels;
 
 internal sealed class AvaloniaPropertyViewModel(AvaloniaObject target, AvaloniaProperty property) : PropertyViewModel
 {

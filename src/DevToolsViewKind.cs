@@ -1,4 +1,4 @@
-﻿namespace ClassicDiagnostics.Avalonia;
+namespace RolandUI.DevScope;
 
 /// <summary>
 ///     Kinds of diagnostic views available in DevTools

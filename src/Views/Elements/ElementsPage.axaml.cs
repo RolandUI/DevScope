@@ -1,8 +1,8 @@
 using Avalonia.Interactivity;
 using Avalonia.Threading;
-using ClassicDiagnostics.Avalonia.Elements;
+using RolandUI.DevScope.Elements;
 
-namespace ClassicDiagnostics.Avalonia.Views.Elements;
+namespace RolandUI.DevScope.Views.Elements;
 
 internal partial class ElementsPage : ReactiveUserControl<ElementsPageViewModel>
 {

@@ -1,7 +1,7 @@
-using ClassicDiagnostics.Avalonia.Elements.Trees;
-using ClassicDiagnostics.Avalonia.ViewModels;
+using RolandUI.DevScope.Elements.Trees;
+using RolandUI.DevScope.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Search;
+namespace RolandUI.DevScope.Elements.Search;
 
 internal sealed class ElementsFindViewModel : ViewModelBase
 {

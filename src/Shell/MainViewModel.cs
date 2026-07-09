@@ -4,14 +4,14 @@ using Avalonia.Input.Raw;
 using Avalonia.Media;
 using Avalonia.Metadata;
 using Avalonia.Rendering;
-using ClassicDiagnostics.Avalonia.Elements;
-using ClassicDiagnostics.Avalonia.Elements.Properties;
-using ClassicDiagnostics.Avalonia.Elements.Trees;
-using ClassicDiagnostics.Avalonia.Rooting;
-using ClassicDiagnostics.Avalonia.ViewModels;
-using ClassicDiagnostics.Avalonia.Views.Controls;
+using RolandUI.DevScope.Elements;
+using RolandUI.DevScope.Elements.Properties;
+using RolandUI.DevScope.Elements.Trees;
+using RolandUI.DevScope.Rooting;
+using RolandUI.DevScope.ViewModels;
+using RolandUI.DevScope.Views.Controls;
 
-namespace ClassicDiagnostics.Avalonia.Shell;
+namespace RolandUI.DevScope.Shell;
 
 internal class MainViewModel : ReactiveViewModelBase
 {

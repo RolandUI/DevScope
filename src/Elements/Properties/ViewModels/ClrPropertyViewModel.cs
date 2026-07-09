@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Reflection;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
+namespace RolandUI.DevScope.Elements.Properties.ViewModels;
 
 internal sealed class ClrPropertyViewModel(object target, PropertyInfo property) : PropertyViewModel
 {

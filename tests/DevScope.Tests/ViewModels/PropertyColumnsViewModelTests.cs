@@ -1,9 +1,9 @@
 using System.Collections;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
-using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
+using RolandUI.DevScope.Elements.Properties.Models;
+using RolandUI.DevScope.Elements.Properties.Services;
+using RolandUI.DevScope.Elements.Properties.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Tests.ViewModels;
+namespace RolandUI.DevScope.Tests.ViewModels;
 
 internal sealed class PropertyColumnsViewModelTests
 {

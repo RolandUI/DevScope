@@ -1,6 +1,6 @@
-﻿using Avalonia.Threading;
+using Avalonia.Threading;
 
-namespace ClassicDiagnostics.Avalonia.Extensions;
+namespace RolandUI.DevScope.Extensions;
 
 public static class AvaloniaExtensions
 {

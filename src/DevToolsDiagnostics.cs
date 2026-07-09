@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace ClassicDiagnostics.Avalonia;
+namespace RolandUI.DevScope;
 
 internal interface IDevToolsErrorSink
 {
@@ -27,7 +27,7 @@ internal static class DevToolsDiagnostics
         void IDevToolsErrorSink.Report(Exception exception, string message)
         {
             Trace.TraceError(
-                "[ClassicDiagnostics.Avalonia] {0}{1}{2}",
+                "[RolandUI.DevScope] {0}{1}{2}",
                 message,
                 Environment.NewLine,
                 exception);

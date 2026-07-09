@@ -1,4 +1,4 @@
-namespace ClassicDiagnostics.Avalonia.Models;
+namespace RolandUI.DevScope.Models;
 
 /// <summary>
 ///     Description of a hotkey, including the gesture, a brief description, and an optional detailed description

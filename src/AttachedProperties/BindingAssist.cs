@@ -1,7 +1,7 @@
-﻿using System.Collections;
+using System.Collections;
 using Avalonia.Controls.Templates;
 
-namespace ClassicDiagnostics.Avalonia.AttachedProperties;
+namespace RolandUI.DevScope.AttachedProperties;
 
 /// <summary>
 /// Provides attached properties for binding assistance.

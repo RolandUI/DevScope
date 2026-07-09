@@ -1,7 +1,7 @@
-﻿<Window
-  x:Class="ClassicDiagnostics.Avalonia.Views.Shell.MainWindow" xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:diag="using:ClassicDiagnostics.Avalonia"
-  xmlns:shell="using:ClassicDiagnostics.Avalonia.Shell" xmlns:shellViews="using:ClassicDiagnostics.Avalonia.Views.Shell"
+<Window
+  x:Class="RolandUI.DevScope.Views.Shell.MainWindow" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:diag="using:RolandUI.DevScope"
+  xmlns:shell="using:RolandUI.DevScope.Shell" xmlns:shellViews="using:RolandUI.DevScope.Views.Shell"
   Title="Native DevTools Reborn in Avalonia 12" x:DataType="shell:MainViewModel">
   <Window.DataTemplates>
     <diag:DevToolsViewRegistry/>
@@ -11,20 +11,20 @@
     <SimpleTheme/>
     <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Simple/Simple.xaml"/>
     <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Simple.xaml"/>
-    <StyleInclude Source="avares://ClassicDiagnostics.Avalonia/Assets/Styles.axaml"/>
-    <StyleInclude Source="avares://ClassicDiagnostics.Avalonia/Views/Controls/FilterTextBox.axaml"/>
+    <StyleInclude Source="avares://RolandUI.DevScope/Assets/Styles.axaml"/>
+    <StyleInclude Source="avares://RolandUI.DevScope/Views/Controls/FilterTextBox.axaml"/>
   </Window.Styles>
 
   <Window.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceInclude Source="avares://ClassicDiagnostics.Avalonia/Assets/Controls/CommandBar.axaml"/>
-        <ResourceInclude Source="avares://ClassicDiagnostics.Avalonia/Assets/Controls/ListBoxItem.axaml"/>
-        <ResourceInclude Source="avares://ClassicDiagnostics.Avalonia/Assets/Controls/ScrollBar.axaml"/>
-        <ResourceInclude Source="avares://ClassicDiagnostics.Avalonia/Assets/Controls/TabItem.axaml"/>
-        <ResourceInclude Source="avares://ClassicDiagnostics.Avalonia/Assets/Controls/TreeViewItem.axaml"/>
-        <ResourceInclude Source="avares://ClassicDiagnostics.Avalonia/Views/Controls/BrushEditor.axaml"/>
-        <ResourceInclude Source="avares://ClassicDiagnostics.Avalonia/Views/Controls/ThicknessEditor.axaml"/>
+        <ResourceInclude Source="avares://RolandUI.DevScope/Assets/Controls/CommandBar.axaml"/>
+        <ResourceInclude Source="avares://RolandUI.DevScope/Assets/Controls/ListBoxItem.axaml"/>
+        <ResourceInclude Source="avares://RolandUI.DevScope/Assets/Controls/ScrollBar.axaml"/>
+        <ResourceInclude Source="avares://RolandUI.DevScope/Assets/Controls/TabItem.axaml"/>
+        <ResourceInclude Source="avares://RolandUI.DevScope/Assets/Controls/TreeViewItem.axaml"/>
+        <ResourceInclude Source="avares://RolandUI.DevScope/Views/Controls/BrushEditor.axaml"/>
+        <ResourceInclude Source="avares://RolandUI.DevScope/Views/Controls/ThicknessEditor.axaml"/>
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Window.Resources>

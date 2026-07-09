@@ -1,10 +1,10 @@
 using System.ComponentModel;
-using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
-using ClassicDiagnostics.Avalonia.Elements.Search;
-using ClassicDiagnostics.Avalonia.Elements.Trees;
-using ClassicDiagnostics.Avalonia.ViewModels;
+using RolandUI.DevScope.Elements.Properties.ViewModels;
+using RolandUI.DevScope.Elements.Search;
+using RolandUI.DevScope.Elements.Trees;
+using RolandUI.DevScope.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Elements;
+namespace RolandUI.DevScope.Elements;
 
 internal sealed class ElementsPageViewModel : ReactiveViewModelBase
 {

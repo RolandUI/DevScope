@@ -1,8 +1,8 @@
 <UserControl
-  x:Class="ClassicDiagnostics.Avalonia.Views.Elements.ElementsPage" xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:ClassicDiagnostics.Avalonia.Views.Controls"
-  xmlns:elements="using:ClassicDiagnostics.Avalonia.Elements" xmlns:propertiesViews="using:ClassicDiagnostics.Avalonia.Views.Elements.Properties"
-  xmlns:stylesViews="using:ClassicDiagnostics.Avalonia.Views.Elements.Styles" xmlns:trees="using:ClassicDiagnostics.Avalonia.Elements.Trees"
+  x:Class="RolandUI.DevScope.Views.Elements.ElementsPage" xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:RolandUI.DevScope.Views.Controls"
+  xmlns:elements="using:RolandUI.DevScope.Elements" xmlns:propertiesViews="using:RolandUI.DevScope.Views.Elements.Properties"
+  xmlns:stylesViews="using:RolandUI.DevScope.Views.Elements.Styles" xmlns:trees="using:RolandUI.DevScope.Elements.Trees"
   x:Name="Self" x:DataType="elements:ElementsPageViewModel">
 
   <UserControl.Styles>

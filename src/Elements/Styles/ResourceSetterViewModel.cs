@@ -1,8 +1,8 @@
 using Avalonia.Input.Platform;
 using Avalonia.Media;
-using ClassicDiagnostics.Avalonia.ViewModels;
+using RolandUI.DevScope.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Styles;
+namespace RolandUI.DevScope.Elements.Styles;
 
 internal class ResourceSetterViewModel(
     AvaloniaProperty property,

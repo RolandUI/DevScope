@@ -1,6 +1,6 @@
-using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
+using RolandUI.DevScope.Elements.Properties.Services;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
+namespace RolandUI.DevScope.Elements.Properties.ViewModels;
 
 internal sealed class PropertyColumnPropertyItemViewModel(PropertyViewModel property) : IPropertyColumnItemViewModel
 {

@@ -1,15 +1,15 @@
 using Avalonia;
 using Avalonia.Headless;
 using Avalonia.Themes.Simple;
-using ClassicDiagnostics.Avalonia.Elements;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Models;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
-using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
-using ClassicDiagnostics.Avalonia.Elements.Trees;
-using ClassicDiagnostics.Avalonia.Rooting;
-using ClassicDiagnostics.Avalonia.Shell;
+using RolandUI.DevScope.Elements;
+using RolandUI.DevScope.Elements.Properties.Models;
+using RolandUI.DevScope.Elements.Properties.Services;
+using RolandUI.DevScope.Elements.Properties.ViewModels;
+using RolandUI.DevScope.Elements.Trees;
+using RolandUI.DevScope.Rooting;
+using RolandUI.DevScope.Shell;
 
-namespace ClassicDiagnostics.Avalonia.Tests;
+namespace RolandUI.DevScope.Tests;
 
 public static class AvaloniaHeadlessTestApp
 {

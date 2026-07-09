@@ -1,7 +1,7 @@
-﻿using ClassicDiagnostics.Avalonia.Hosting;
+using RolandUI.DevScope.Hosting;
 using Application = Avalonia.Application;
 
-namespace ClassicDiagnostics.Avalonia;
+namespace RolandUI.DevScope;
 
 public static class DevTools
 {
@@ -28,7 +28,7 @@ public static class DevTools
     ///          singleViewLifetime.MainView = new MainView();
     ///
     ///       base.OnFrameworkInitializationCompleted();
-    ///       this.AttachDevTools(new ClassicDiagnostics.Avalonia.DevToolsOptions()
+    ///       this.AttachDevTools(new RolandUI.DevScope.DevToolsOptions()
     ///           {
     ///              StartupScreenIndex = 1,
     ///           });

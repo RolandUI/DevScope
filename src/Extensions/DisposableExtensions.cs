@@ -1,4 +1,4 @@
-namespace ClassicDiagnostics.Avalonia.Extensions;
+namespace RolandUI.DevScope.Extensions;
 
 internal static class DisposableExtensions
 {

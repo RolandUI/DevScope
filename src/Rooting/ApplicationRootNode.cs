@@ -1,9 +1,9 @@
-﻿using Avalonia.Controls.Templates;
+using Avalonia.Controls.Templates;
 using Avalonia.Rendering;
-using ClassicDiagnostics.Avalonia.Views.Shell;
+using RolandUI.DevScope.Views.Shell;
 using Lifetimes = Avalonia.Controls.ApplicationLifetimes;
 
-namespace ClassicDiagnostics.Avalonia.Rooting;
+namespace RolandUI.DevScope.Rooting;
 
 internal class ApplicationRootNode : PresentationRootNode, ICloseable
 {

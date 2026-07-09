@@ -1,10 +1,10 @@
 using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.VisualTree;
-using ClassicDiagnostics.Avalonia.Elements.Trees;
-using ClassicDiagnostics.Avalonia.Views.Controls;
+using RolandUI.DevScope.Elements.Trees;
+using RolandUI.DevScope.Views.Controls;
 
-namespace ClassicDiagnostics.Avalonia.Views.Elements;
+namespace RolandUI.DevScope.Views.Elements;
 
 internal partial class ElementsTreeView : ReactiveUserControl<ElementsTreeViewModel>
 {

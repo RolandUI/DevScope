@@ -1,4 +1,4 @@
-﻿namespace ClassicDiagnostics.Avalonia;
+namespace RolandUI.DevScope;
 
 /// <summary>
 ///     Contains data formats related to dev tools.
@@ -14,5 +14,5 @@ public static class DevToolsDataFormats
     ///     Gets the clipboard data format representing a selector.
     ///     It's used for quick format recognition in IDEs.
     /// </summary>
-    public static DataFormat<string> Selector { get; } = DataFormat.CreateStringPlatformFormat("Avalonia_DevTools_Selector");
+    public static DataFormat<string> Selector { get; } = DataFormat.CreateStringPlatformFormat("RolandUI_DevScope_Selector");
 }

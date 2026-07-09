@@ -4,10 +4,10 @@ using System.ComponentModel;
 using Avalonia.Collections;
 using Avalonia.Controls.Primitives;
 using Avalonia.Media;
-using ClassicDiagnostics.Avalonia.Models;
-using ClassicDiagnostics.Avalonia.ViewModels;
+using RolandUI.DevScope.Models;
+using RolandUI.DevScope.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Trees;
+namespace RolandUI.DevScope.Elements.Trees;
 
 internal sealed class TreeNodeViewModel : ViewModelBase, IDisposable
 {

@@ -5,12 +5,12 @@ using Avalonia.Data.Converters;
 using Avalonia.Layout;
 using Avalonia.Markup.Xaml.Converters;
 using Avalonia.Media;
-using ClassicDiagnostics.Avalonia.Elements.Properties;
-using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
-using ClassicDiagnostics.Avalonia.Views.Controls;
+using RolandUI.DevScope.Elements.Properties;
+using RolandUI.DevScope.Elements.Properties.ViewModels;
+using RolandUI.DevScope.Views.Controls;
 using Path = Avalonia.Controls.Shapes.Path;
 
-namespace ClassicDiagnostics.Avalonia.Views.Elements.Properties;
+namespace RolandUI.DevScope.Views.Elements.Properties;
 
 internal class PropertyValueEditorView : ReactiveUserControl<PropertyViewModel>
 {

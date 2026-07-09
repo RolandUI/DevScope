@@ -3,15 +3,15 @@ using System.ComponentModel;
 using System.Reflection;
 using Avalonia.Controls.Metadata;
 using Avalonia.Threading;
-using ClassicDiagnostics.Avalonia.Elements.Properties;
-using ClassicDiagnostics.Avalonia.Elements.Properties.Services;
-using ClassicDiagnostics.Avalonia.Elements.Properties.ViewModels;
-using ClassicDiagnostics.Avalonia.Elements.Styles;
-using ClassicDiagnostics.Avalonia.Elements.Trees;
-using ClassicDiagnostics.Avalonia.ViewModels;
+using RolandUI.DevScope.Elements.Properties;
+using RolandUI.DevScope.Elements.Properties.Services;
+using RolandUI.DevScope.Elements.Properties.ViewModels;
+using RolandUI.DevScope.Elements.Styles;
+using RolandUI.DevScope.Elements.Trees;
+using RolandUI.DevScope.ViewModels;
 using DataGridCollectionView = Avalonia.Collections.DataGridCollectionView;
 
-namespace ClassicDiagnostics.Avalonia.Elements;
+namespace RolandUI.DevScope.Elements;
 
 internal class ElementDetailsViewModel : ReactiveViewModelBase, IClassesChangedListener
 {

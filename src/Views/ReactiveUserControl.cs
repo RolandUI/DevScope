@@ -1,6 +1,6 @@
-using ClassicDiagnostics.Avalonia.ViewModels;
+using RolandUI.DevScope.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Views;
+namespace RolandUI.DevScope.Views;
 
 internal abstract class ReactiveUserControl<TViewModel> : UserControl where TViewModel : ViewModelBase
 {

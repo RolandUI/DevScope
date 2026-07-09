@@ -1,4 +1,4 @@
 using Avalonia.Headless;
-using ClassicDiagnostics.Avalonia.Tests;
+using RolandUI.DevScope.Tests;
 
 [assembly: AvaloniaTestApplication(typeof(AvaloniaHeadlessTestApp))]

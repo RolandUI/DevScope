@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Properties;
+namespace RolandUI.DevScope.Elements.Properties;
 
 internal sealed class ClrPropertyAccessor : IPropertyAccessor
 {

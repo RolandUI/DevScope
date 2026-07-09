@@ -1,4 +1,4 @@
-namespace ClassicDiagnostics.Avalonia.Elements.Properties;
+namespace RolandUI.DevScope.Elements.Properties;
 
 internal readonly record struct PropertyInspectionOptions(
     bool ShowImplementedInterfaces,

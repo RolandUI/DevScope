@@ -1,8 +1,8 @@
-﻿using Avalonia.Interactivity;
+using Avalonia.Interactivity;
 using Avalonia.Threading;
-using ClassicDiagnostics.Avalonia.ViewModels;
+using RolandUI.DevScope.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Models;
+namespace RolandUI.DevScope.Models;
 
 internal class EventTreeNode(EventOwnerTreeNode parent, RoutedEvent @event, EventsPageViewModel viewModel) : EventTreeNodeBase(parent, @event.Name)
 {

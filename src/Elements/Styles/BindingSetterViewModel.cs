@@ -2,7 +2,7 @@ using Avalonia.Input.Platform;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Styles;
+namespace RolandUI.DevScope.Elements.Styles;
 
 internal class BindingSetterViewModel : SetterViewModel
 {

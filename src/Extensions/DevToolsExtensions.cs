@@ -1,7 +1,7 @@
 using Avalonia.Controls.Primitives;
-using ClassicDiagnostics.Avalonia.Views.Shell;
+using RolandUI.DevScope.Views.Shell;
 
-namespace ClassicDiagnostics.Avalonia.Extensions;
+namespace RolandUI.DevScope.Extensions;
 
 internal static class DevToolsExtensions
 {

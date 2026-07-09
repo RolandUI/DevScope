@@ -1,8 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels;
+namespace RolandUI.DevScope.ViewModels;
 
 internal class FilterViewModel : ViewModelBase, INotifyDataErrorInfo
 {

@@ -1,6 +1,6 @@
-using ClassicDiagnostics.Avalonia.ViewModels;
+using RolandUI.DevScope.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Elements.Styles;
+namespace RolandUI.DevScope.Elements.Styles;
 
 internal class PseudoClassViewModel : ViewModelBase
 {

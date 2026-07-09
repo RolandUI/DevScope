@@ -1,6 +1,6 @@
 using Avalonia.Interactivity;
 
-namespace ClassicDiagnostics.Avalonia.ViewModels;
+namespace RolandUI.DevScope.ViewModels;
 
 internal class ReactiveViewModelBase : ViewModelBase, IDisposable
 {

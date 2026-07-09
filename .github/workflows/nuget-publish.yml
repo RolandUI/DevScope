@@ -22,11 +22,11 @@ jobs:
 
       - name: Restore dependencies
         run: |
-          dotnet restore src/ClassicDiagnostics.Avalonia.csproj
+          dotnet restore src/DevScope.csproj
 
       - name: Build
         run: |
-          dotnet build src/ClassicDiagnostics.Avalonia.csproj --configuration Release --no-restore
+          dotnet build src/DevScope.csproj --configuration Release --no-restore
 
       - name: Pack
         env:
@@ -34,11 +34,11 @@ jobs:
         run: |
           $year = (Get-Date).Year
           $version = "${{ github.event.release.tag_name }}" -replace '^v',''
-          $copyright = "Copyright (c) AvaloniaUI OÜ. Migration by Sylinko"
+          $copyright = "Copyright (c) AvaloniaUI OÜ; Copyright (c) 2026 Sylinko; Copyright (c) 2026 RolandUI"
           
           $notes = $null -ne $env:RELEASE_BODY ? ($env:RELEASE_BODY -replace '`r`n', '%0A' -replace '`n', '%0A' -replace '`r', '%0A' -replace '"', '\"') : "Release $version"
           
-          dotnet pack src/ClassicDiagnostics.Avalonia.csproj --configuration Release --no-build -p:PackageVersion=$version -p:Copyright="$copyright" -p:PackageReleaseNotes="$notes" -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -o ${{ github.workspace }}/out
+          dotnet pack src/DevScope.csproj --configuration Release --no-build -p:PackageVersion=$version -p:Copyright="$copyright" -p:PackageReleaseNotes="$notes" -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -o ${{ github.workspace }}/out
 
       - name: Upload NuGet packages to Release
         uses: softprops/action-gh-release@v3

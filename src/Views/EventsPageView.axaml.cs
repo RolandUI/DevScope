@@ -1,12 +1,12 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
-using ClassicDiagnostics.Avalonia.Models;
-using ClassicDiagnostics.Avalonia.ViewModels;
-using ClassicDiagnostics.Avalonia.Views.Controls;
+using RolandUI.DevScope.Models;
+using RolandUI.DevScope.ViewModels;
+using RolandUI.DevScope.Views.Controls;
 
-namespace ClassicDiagnostics.Avalonia.Views;
+namespace RolandUI.DevScope.Views;
 
 internal partial class EventsPageView : ReactiveUserControl<EventsPageViewModel>
 {

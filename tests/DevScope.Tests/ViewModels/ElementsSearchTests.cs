@@ -1,10 +1,10 @@
 using Avalonia.Controls;
-using ClassicDiagnostics.Avalonia.Elements;
-using ClassicDiagnostics.Avalonia.Elements.Search;
-using ClassicDiagnostics.Avalonia.Elements.Trees;
-using ClassicDiagnostics.Avalonia.Shell;
+using RolandUI.DevScope.Elements;
+using RolandUI.DevScope.Elements.Search;
+using RolandUI.DevScope.Elements.Trees;
+using RolandUI.DevScope.Shell;
 
-namespace ClassicDiagnostics.Avalonia.Tests.ViewModels;
+namespace RolandUI.DevScope.Tests.ViewModels;
 
 internal sealed class ElementsSearchTests
 {

@@ -1,7 +1,7 @@
-﻿using Avalonia.Collections;
-using ClassicDiagnostics.Avalonia.ViewModels;
+using Avalonia.Collections;
+using RolandUI.DevScope.ViewModels;
 
-namespace ClassicDiagnostics.Avalonia.Models;
+namespace RolandUI.DevScope.Models;
 
 internal abstract class EventTreeNodeBase : ViewModelBase
 {

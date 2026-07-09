@@ -1,4 +1,4 @@
-namespace ClassicDiagnostics.Avalonia.Elements.Properties;
+namespace RolandUI.DevScope.Elements.Properties;
 
 internal sealed class PropertyValueChildDescriptor(string name, object? value, bool isReadOnly = true)
 {
