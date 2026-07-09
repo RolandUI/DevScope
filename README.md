@@ -15,9 +15,9 @@
 
 ## 👋 Introduction
 
-With the release of Avalonia 12, the beloved open-source F12 DevTools ([Avalonia.Diagnostics](https://github.com/AvaloniaUI/Avalonia.Diagnostics)) has been retired and replaced by the highly advanced, commercial [Avalonia Accelerate](https://avaloniaui.net/Accelerate) suite. 
+With the release of Avalonia 12, the open-source F12 DevTools ([Avalonia.Diagnostics](https://github.com/AvaloniaUI/Avalonia.Diagnostics)) was retired and replaced by the commercial [Avalonia Accelerate](https://avaloniaui.net/Accelerate) suite.
 
-While the new Accelerate tools are incredibly powerful and represent the future of Avalonia development, we recognize that some developers and small projects still rely on the classic, lightweight, and offline DevTools for basic UI profiling. `DevScope` is an independent, community-maintained continuation of the Avalonia 11 `Avalonia.Diagnostics` codebase, adapted to run on Avalonia 12.
+`DevScope` continues the work of [Sylinko/ClassicDiagnostics.Avalonia](https://github.com/Sylinko/ClassicDiagnostics.Avalonia), a community migration of the Avalonia 11 `Avalonia.Diagnostics` codebase to Avalonia 12. DevScope is an independent continuation focused on preserving the classic, lightweight, local, and offline diagnostics workflow.
 
 Our goal is to provide a smooth transition for developers upgrading to Avalonia 12, while exploring the addition of small, practical utilities in the future.
 
@@ -98,11 +98,12 @@ Maintainers should follow the [DevScope Release Guide](docs/RELEASING.md). It de
 
 ## ❤️ Acknowledgements
 
-This project is entirely made possible by the rich legacy of the **Avalonia UI** team and its contributors. We are deeply grateful for their years of effort in maintaining the original `Avalonia.Diagnostics`. 
+DevScope builds on the work of two open-source projects:
 
-DevScope is an independent community project and is not affiliated with, sponsored by, or endorsed by AvaloniaUI OÜ.
+- [Avalonia.Diagnostics](https://github.com/AvaloniaUI/Avalonia.Diagnostics), the original F12 DevTools maintained by the Avalonia UI team and contributors.
+- [ClassicDiagnostics.Avalonia](https://github.com/Sylinko/ClassicDiagnostics.Avalonia), Sylinko's Avalonia 12 migration that DevScope directly continues.
 
-Avalonia is a registered trademark of AvaloniaUI OÜ.
+We are grateful to both projects and their contributors. DevScope is an independent community project and is not affiliated with, sponsored by, or endorsed by the Avalonia UI project. Avalonia and Avalonia Accelerate are trademarks of their respective owners.
 
 ## 📄 License
 
