@@ -33,7 +33,7 @@ As an open-source project building upon the incredible legacy of the Avalonia te
 
 ### 1. Install the NuGet package
 
-The package ID is `RolandUI.DevScope`. After the first NuGet release, install it with:
+The package ID is `RolandUI.DevScope`. Install the current preview with:
 
 ```bash
 dotnet add package RolandUI.DevScope --prerelease
