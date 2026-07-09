@@ -20,23 +20,30 @@ Use prerelease versions such as `0.1.0-preview.1` until the public API is ready 
 
 ## One-time repository setup
 
-The workflow currently authenticates to NuGet with the `NUGET_API_KEY` GitHub Actions secret. Before the first release:
+DevScope uses NuGet Trusted Publishing. It does not store a long-lived NuGet API key in GitHub. The workflow requests a GitHub OIDC token, and `NuGet/login@v1` exchanges that token once for a short-lived NuGet API key immediately before package publication.
 
-1. Confirm that the `RolandUI.DevScope` package ID can be published by the RolandUI NuGet account.
-2. Create a scoped NuGet API key that permits pushing new packages matching `RolandUI.DevScope`.
-3. Store it without printing the value:
+Before the first release, create this policy under the RolandUI account on the nuget.org **Trusted Publishing** page:
 
-   ```powershell
-   gh secret set NUGET_API_KEY --repo RolandUI/DevScope
-   ```
+| Field | Value |
+| --- | --- |
+| Policy Name | `DevScope GitHub Release` |
+| Package Owner | `RolandUI` |
+| Repository Owner | `RolandUI` |
+| Repository | `DevScope` |
+| Workflow File | `nuget-publish.yml` |
+| Environment | Leave empty |
 
-4. Confirm that the secret name exists:
+The workflow file field contains only the filename, not `.github/workflows/nuget-publish.yml`. Leave Environment empty because the release job does not declare a GitHub Actions environment.
 
-   ```powershell
-   gh secret list --repo RolandUI/DevScope
-   ```
+The repository workflow must retain both permissions:
 
-Repository audit on `2026-07-10`: `NUGET_API_KEY` was not configured, so the first public release remains blocked until this setup is complete.
+```yaml
+permissions:
+  contents: write
+  id-token: write
+```
+
+`contents: write` allows release asset uploads. `id-token: write` allows GitHub to issue the OIDC token used by Trusted Publishing. No `NUGET_API_KEY` repository secret is required.
 
 ## 1. Define and lock the release
 
@@ -150,7 +157,7 @@ Before publishing the draft, verify:
 
 - the tag resolves to the recorded release candidate commit;
 - the title, release notes, compatibility information, and known limitations are correct;
-- `NUGET_API_KEY` is listed in repository secrets;
+- the nuget.org Trusted Publishing policy is active and exactly matches the repository and workflow fields above;
 - there is no existing NuGet version with the same number.
 
 Publishing the draft starts the release workflow:
@@ -169,7 +176,8 @@ The `Publish NuGet Package` workflow will:
 2. restore and build `src/DevScope.csproj` in Release mode;
 3. pack `RolandUI.DevScope` using the tag as the package version;
 4. attach `.nupkg` and `.snupkg` files to the GitHub Release;
-5. push the packages to nuget.org.
+5. exchange the GitHub OIDC token for a short-lived NuGet credential;
+6. push the packages to nuget.org.
 
 Find and watch the run:
 
@@ -210,7 +218,7 @@ Close the release issue only after all publication checks pass.
 
 ## Failure and recovery rules
 
-- If publication fails before NuGet accepts the package, correct the credential or workflow problem and rerun the failed workflow. The workflow uses `--skip-duplicate`, so a partial retry is safe.
+- If publication fails before NuGet accepts the package, correct the Trusted Publishing policy, OIDC permission, or workflow problem and rerun the failed workflow. The workflow uses `--skip-duplicate`, so a partial retry is safe.
 - If NuGet accepted the package, its version is immutable. Never overwrite, delete, move, or reuse that version; publish a new patch or prerelease version for corrections.
 - If a bad package reaches NuGet, unlist it when appropriate and create a follow-up release. Deleting the GitHub Release does not remove the NuGet package.
 - Do not move or recreate a public release tag after publication.

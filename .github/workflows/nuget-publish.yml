@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   build-and-publish:
@@ -48,12 +49,18 @@ jobs:
         with:
           files: ${{ github.workspace }}/out/*.*nupkg
 
+      - name: NuGet trusted publishing login
+        uses: NuGet/login@v1
+        id: nuget_login
+        with:
+          user: RolandUI
+
       - name: Publish to NuGet
+        env:
+          NUGET_API_KEY: ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
         run: |
           $packages = Get-ChildItem -Path "${{ github.workspace }}/out" -Filter "*.*nupkg"
           if ($null -eq $packages) { throw 'No nupkg files found!' }
           foreach ($pkg in $packages) {
-            dotnet nuget push $pkg.FullName --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+            dotnet nuget push $pkg.FullName --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
           }
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
