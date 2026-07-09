@@ -39,9 +39,12 @@ internal sealed class PropertyExplorerViewModel : ReactiveViewModelBase
     public ObjectPropertiesColumnViewModel? RootObjectColumn =>
         NavigationMode == PropertyNavigationMode.Columns ? Columns.RootObjectColumn : DrillIn.RootObjectColumn;
 
-    public void SetMode(PropertyNavigationMode mode)
+    public void SetMode(object? mode)
     {
-        NavigationMode = mode;
+        if (mode is PropertyNavigationMode navigationMode)
+        {
+            NavigationMode = navigationMode;
+        }
     }
 
     public void OpenRoot(object target, string title)

@@ -50,7 +50,7 @@ internal static class VisualExtensions
             using (var bitmap = new RenderTargetBitmap(pixelSize, dpiVector))
             {
                 bitmap.Render(root);
-                bitmap.Save(destination);
+                bitmap.Save(destination, PngBitmapEncoderOptions.Default);
             }
         }
         finally
