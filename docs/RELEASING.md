@@ -186,6 +186,14 @@ gh run list --repo $repo --workflow nuget-publish.yml --limit 5
 gh run watch <run-id> --repo $repo --exit-status
 ```
 
+If GitHub records the published release event but no run is created, use the workflow's tag-bound manual recovery trigger. It validates that the release is already published and checks out the immutable release tag rather than `main`:
+
+```powershell
+gh workflow run nuget-publish.yml --repo $repo --ref main -f tag=$tag
+```
+
+Do not use the manual trigger before the matching GitHub Release is published, and never use it to publish an untagged commit.
+
 If the run fails, inspect it before retrying:
 
 ```powershell
@@ -219,6 +227,7 @@ Close the release issue only after all publication checks pass.
 ## Failure and recovery rules
 
 - If publication fails before NuGet accepts the package, correct the Trusted Publishing policy, OIDC permission, or workflow problem and rerun the failed workflow. The workflow uses `--skip-duplicate`, so a partial retry is safe.
+- If the `release: published` event is recorded but does not create a run, use the documented `workflow_dispatch` recovery with the existing immutable release tag.
 - If NuGet accepted the package, its version is immutable. Never overwrite, delete, move, or reuse that version; publish a new patch or prerelease version for corrections.
 - If a bad package reaches NuGet, unlist it when appropriate and create a follow-up release. Deleting the GitHub Release does not remove the NuGet package.
 - Do not move or recreate a public release tag after publication.

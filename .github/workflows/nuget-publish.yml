@@ -3,6 +3,12 @@ name: Publish NuGet Package
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published DevScope release tag (for example v0.1.0-preview.1)
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -12,12 +18,35 @@ jobs:
   build-and-publish:
     runs-on: windows-latest
     steps:
+      - name: Resolve published release
+        id: release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          $tag = $env:EVENT_NAME -eq 'release' ? $env:EVENT_TAG : $env:INPUT_TAG
+          if ($tag -notmatch '^v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$') {
+            throw "Invalid release tag: $tag"
+          }
+
+          $release = gh api "repos/${{ github.repository }}/releases/tags/$tag" | ConvertFrom-Json
+          if ($release.draft -or $null -eq $release.published_at) {
+            throw "Release $tag must already be published."
+          }
+
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          "version=$($tag -replace '^v','')" >> $env:GITHUB_OUTPUT
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
           lfs: true
+          ref: ${{ steps.release.outputs.tag }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -34,19 +63,20 @@ jobs:
 
       - name: Pack
         env:
-          RELEASE_BODY: ${{ github.event.release.body }}
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
         run: |
-          $year = (Get-Date).Year
-          $version = "${{ github.event.release.tag_name }}" -replace '^v',''
-          $copyright = "Copyright (c) AvaloniaUI OÜ; Copyright (c) 2026 Sylinko; Copyright (c) 2026 RolandUI"
-          
-          $notes = $null -ne $env:RELEASE_BODY ? ($env:RELEASE_BODY -replace '`r`n', '%0A' -replace '`n', '%0A' -replace '`r', '%0A' -replace '"', '\"') : "Release $version"
-          
-          dotnet pack src/DevScope.csproj --configuration Release --no-build -p:PackageVersion=$version -p:Copyright="$copyright" -p:PackageReleaseNotes="$notes" -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -o ${{ github.workspace }}/out
+          $release = gh api "repos/${{ github.repository }}/releases/tags/$env:RELEASE_TAG" | ConvertFrom-Json
+          $notes = $null -ne $release.body ? $release.body : "Release $env:VERSION"
+          $notes = $notes -replace '%', '%25' -replace ';', '%3B' -replace ',', '%2C' -replace '"', '%22' -replace "`r", '%0D' -replace "`n", '%0A'
+
+          dotnet pack src/DevScope.csproj --configuration Release --no-build -p:PackageVersion=$env:VERSION -p:PackageReleaseNotes="$notes" -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -o ${{ github.workspace }}/out
 
       - name: Upload NuGet packages to Release
         uses: softprops/action-gh-release@v3
         with:
+          tag_name: ${{ steps.release.outputs.tag }}
           files: ${{ github.workspace }}/out/*.*nupkg
 
       - name: NuGet trusted publishing login
@@ -59,8 +89,8 @@ jobs:
         env:
           NUGET_API_KEY: ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
         run: |
-          $packages = Get-ChildItem -Path "${{ github.workspace }}/out" -Filter "*.*nupkg"
-          if ($null -eq $packages) { throw 'No nupkg files found!' }
+          $packages = @(Get-ChildItem -Path "${{ github.workspace }}/out" -Filter "*.nupkg" | Where-Object Name -NotLike "*.snupkg")
+          if ($packages.Count -ne 1) { throw "Expected exactly one primary nupkg, found $($packages.Count)." }
           foreach ($pkg in $packages) {
             dotnet nuget push $pkg.FullName --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
           }
