@@ -6,7 +6,7 @@ internal sealed class PropertyValueChildViewModel(
     string group
 ) : PropertyViewModel
 {
-    public override Type AssignedType => descriptor.ValueType;
+    public override Type AssignedType => Value?.GetType() ?? descriptor.ValueType;
 
     public override Type? DeclaringType { get; } = declaringType;
 
@@ -24,15 +24,44 @@ internal sealed class PropertyValueChildViewModel(
 
     public override Type PropertyType => descriptor.ValueType;
 
+    public override string? ValueError
+    {
+        get;
+        protected set
+        {
+            if (SetProperty(ref field, value))
+            {
+                RaisePropertyChanged(nameof(Value));
+            }
+        }
+    }
+
     public override object? Value
     {
         get => descriptor.Value;
         set
         {
+            var result = descriptor.Write(value);
+            ValueError = result.ErrorMessage;
+
+            if (result.IsSuccess)
+            {
+                RaisePropertyStateChanged();
+            }
         }
     }
 
     public override void Update()
     {
+        RaisePropertyStateChanged();
+    }
+
+    private void RaisePropertyStateChanged()
+    {
+        RaisePropertyChanged(nameof(Value));
+        RaisePropertyChanged(nameof(AssignedType));
+        RaisePropertyChanged(nameof(Type));
+        RaisePropertyChanged(nameof(TypeTooltip));
+        RaisePropertyChanged(nameof(AssignedTypeTooltip));
     }
 }

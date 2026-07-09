@@ -10,6 +10,7 @@ internal abstract class PropertyViewModel : ViewModelBase
     public abstract Type AssignedType { get; }
     public abstract Type? DeclaringType { get; }
     public abstract object? Value { get; set; }
+    public virtual string? ValueError { get; protected set; }
     public abstract string Priority { get; }
     public abstract bool? IsAttached { get; }
     public abstract Type PropertyType { get; }

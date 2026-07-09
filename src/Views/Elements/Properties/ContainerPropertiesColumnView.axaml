@@ -1,6 +1,7 @@
 <UserControl
   x:Class="RolandUI.DevScope.Views.Elements.Properties.ContainerPropertiesColumnView" xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:properties="using:RolandUI.DevScope.Elements.Properties.ViewModels"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:RolandUI.DevScope.Views.Elements.Properties"
+  xmlns:properties="using:RolandUI.DevScope.Elements.Properties.ViewModels"
   x:DataType="properties:ContainerPropertiesColumnViewModel">
 
   <Grid RowDefinitions="*,Auto">
@@ -27,13 +28,10 @@
           </DataGridTemplateColumn.CellTemplate>
         </DataGridTemplateColumn>
         <DataGridTemplateColumn
-          x:DataType="properties:PropertyContainerItemViewModel" Header="Value"
-          IsReadOnly="True">
+          x:DataType="properties:PropertyContainerItemViewModel" Header="Value">
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate DataType="properties:PropertyContainerItemViewModel">
-              <TextBlock
-                Text="{Binding ValueText}"
-                ToolTip.Tip="{Binding ValueText}"/>
+              <local:PropertyValueEditorView/>
             </DataTemplate>
           </DataGridTemplateColumn.CellTemplate>
         </DataGridTemplateColumn>

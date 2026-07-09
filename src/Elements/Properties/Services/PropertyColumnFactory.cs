@@ -56,7 +56,7 @@ internal sealed class PropertyColumnFactory(
     {
         var content = new ContainerPropertiesColumnViewModel(target, title, path, kind);
         var column = new PropertyColumnViewModel(owner, content);
-        content.SelectedItemChanged += (_, item) => owner.OpenFrom(column, item);
+        content.SelectedItemChanged += (_, item) => owner.OpenFrom(column, (IPropertyColumnItemViewModel?)item);
         return column;
     }
 }

@@ -29,6 +29,23 @@ internal class PropertyValueEditorView : ReactiveUserControl<PropertyViewModel>
         base.OnDataContextChanged(e);
 
         Content = UpdateControl();
+
+        if (Content is Control editor && ViewModel is { } viewModel)
+        {
+            viewModel.GetObservable(property => property.ValueError)
+                .Subscribe(error =>
+                {
+                    if (string.IsNullOrWhiteSpace(error))
+                    {
+                        DataValidationErrors.ClearErrors(editor);
+                    }
+                    else
+                    {
+                        DataValidationErrors.SetError(editor, new InvalidOperationException(error));
+                    }
+                })
+                .DisposeWith(_cleanup);
+        }
     }
 
     protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)

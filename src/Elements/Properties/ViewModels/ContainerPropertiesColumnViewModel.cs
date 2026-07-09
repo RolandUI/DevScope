@@ -154,11 +154,23 @@ internal sealed class ContainerPropertiesColumnViewModel : ReactiveViewModelBase
     {
         if (Kind == PropertyValueDescriptorKind.Dictionary)
         {
-            var (key, value) = GetDictionaryEntry(entry);
-            return new PropertyContainerItemViewModel($"[{key}]", key, value, index);
+            var (key, _) = GetDictionaryEntry(entry);
+            var descriptor = Target is IDictionary dictionary
+                ? PropertyValueDescriptorFactory.CreateDictionaryChild(dictionary, key)
+                : PropertyValueDescriptorFactory.CreateReadOnlyChild($"[{key}]", null);
+            return new PropertyContainerItemViewModel(descriptor, key, index, Target.GetType());
         }
 
-        return new PropertyContainerItemViewModel($"[{index}]", null, entry, index);
+        var child = Kind switch
+        {
+            PropertyValueDescriptorKind.Array when Target is Array array =>
+                PropertyValueDescriptorFactory.CreateArrayChild(array, index),
+            PropertyValueDescriptorKind.List when Target is IList list =>
+                PropertyValueDescriptorFactory.CreateListChild(list, index),
+            _ => PropertyValueDescriptorFactory.CreateReadOnlyChild($"[{index}]", entry),
+        };
+
+        return new PropertyContainerItemViewModel(child, null, index, Target.GetType());
     }
 
     private void HandleFilterRefreshFilter(object? sender, EventArgs args)
