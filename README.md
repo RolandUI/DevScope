@@ -89,6 +89,10 @@ The embedded host works at the Avalonia single-view lifetime level, including br
 
 The Trace tab captures in-process [`System.Diagnostics.Trace`](https://learn.microsoft.com/dotnet/api/system.diagnostics.trace) events while a DevScope session is open. It keeps a bounded 1,000-entry buffer and supports live filtering, pause/resume, clear, and optional auto-scroll. Applications can route Avalonia logging into this source with Avalonia's `LogToTrace` startup configuration.
 
+The Trace tab also contains an **experimental animation clock** for Avalonia 12.1. Select an animatable control or subtree in the Elements tab, attach the clock, then pause, resume, advance by a deterministic millisecond step, reset to zero, or detach it. The clock is inherited only by the selected subtree, so DevScope and the rest of the inspected application continue running normally. Detaching DevScope restores the exact previous clock-property value; animations that captured the diagnostic clock continue on a normal pass-through timeline until they finish.
+
+This feature uses the internal Avalonia 12.1 `IClock`, `ClockBase`, and `Animatable.Clock` shape behind one compatibility-checked adapter. If that shape changes, the controls report an unavailable diagnostic instead of attempting the mutation. Avalonia animations capture their clock when they start, so animations that were already running before attachment keep their original clock; start or restart the target animation after attachment to control it.
+
 The project is intentionally lightweight: it does not add a remote debugging service, does not replace Avalonia Accelerate, and does not try to become a full external diagnostics platform.
 
 ## Roadmap

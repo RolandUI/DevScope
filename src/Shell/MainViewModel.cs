@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Avalonia.Animation;
 using Avalonia.Input.Raw;
 using Avalonia.Media;
 using Avalonia.Metadata;
@@ -43,7 +44,7 @@ internal class MainViewModel : ReactiveViewModelBase
         _elements = new ElementsPageViewModel(_logicalTree, _visualTree, _selectionCoordinator);
         _events = new EventsPageViewModel(this);
         _hotKeys = new HotKeyPageViewModel();
-        _trace = new TracePageViewModel();
+        _trace = new TracePageViewModel(GetSelectedAnimationTarget);
         _settings = new SettingsPageViewModel(this);
         Tabs =
         [
@@ -320,6 +321,11 @@ internal class MainViewModel : ReactiveViewModelBase
     public void SelectFocusHighlighter(object parameter)
     {
         FocusHighlighter = parameter as IBrush;
+    }
+
+    private Animatable? GetSelectedAnimationTarget()
+    {
+        return _elements.CurrentTree.SelectedNode?.Model.Target as Animatable;
     }
 
     public void Close()

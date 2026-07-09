@@ -1,6 +1,9 @@
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
+using System.Globalization;
+using Avalonia.Animation;
 using Avalonia.Threading;
+using RolandUI.DevScope.AnimationTiming;
 using RolandUI.DevScope.Tracing;
 
 namespace RolandUI.DevScope.ViewModels;
@@ -16,6 +19,9 @@ internal sealed class TracePageViewModel : ReactiveViewModelBase
     private readonly ConcurrentQueue<PendingTraceEntry> _pending = new();
     private readonly Action<Action> _postToUi;
     private readonly ITraceCaptureSource _source;
+    private readonly IAnimationClockAdapter _animationClockAdapter;
+    private readonly Func<Animatable?> _selectedAnimationTarget;
+    private IAnimationClockSession? _animationClockSession;
     private int _capturePaused;
     private int _drainScheduled;
     private int _generation;
@@ -28,20 +34,34 @@ internal sealed class TracePageViewModel : ReactiveViewModelBase
     {
     }
 
+    internal TracePageViewModel(Func<Animatable?> selectedAnimationTarget)
+        : this(
+            new SystemTraceCaptureSource(),
+            action => Dispatcher.UIThread.Post(action, DispatcherPriority.Background),
+            selectedAnimationTarget: selectedAnimationTarget)
+    {
+    }
+
     internal TracePageViewModel(
         ITraceCaptureSource source,
         Action<Action> postToUi,
         int bufferLimit = DefaultBufferLimit,
-        int drainBatchSize = DefaultDrainBatchSize)
+        int drainBatchSize = DefaultDrainBatchSize,
+        Func<Animatable?>? selectedAnimationTarget = null,
+        IAnimationClockAdapter? animationClockAdapter = null)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(bufferLimit);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(drainBatchSize);
 
         _source = source;
         _postToUi = postToUi;
+        _selectedAnimationTarget = selectedAnimationTarget ?? (static () => null);
+        _animationClockAdapter = animationClockAdapter ?? AvaloniaAnimationClockAdapter.Instance;
         _bufferLimit = bufferLimit;
         _drainBatchSize = drainBatchSize;
         _source.EntryReceived += HandleEntryReceived;
+        AnimationClockStatus = _animationClockAdapter.Compatibility.Diagnostic;
+        UpdateAnimationClockPresentation();
         UpdateStatus();
     }
 
@@ -85,6 +105,126 @@ internal sealed class TracePageViewModel : ReactiveViewModelBase
         private set => SetProperty(ref field, value);
     } = string.Empty;
 
+    public bool IsAnimationClockSupported => _animationClockAdapter.Compatibility.IsSupported;
+
+    public bool IsAnimationClockAttached
+    {
+        get;
+        private set => SetProperty(ref field, value);
+    }
+
+    public bool IsAnimationClockPaused
+    {
+        get;
+        private set => SetProperty(ref field, value);
+    }
+
+    public decimal? AnimationClockStepMilliseconds
+    {
+        get;
+        set => SetProperty(ref field, value);
+    } = 16.667m;
+
+    public string AnimationClockTarget
+    {
+        get;
+        private set => SetProperty(ref field, value);
+    } = "No target attached";
+
+    public string AnimationClockState
+    {
+        get;
+        private set => SetProperty(ref field, value);
+    } = "Detached";
+
+    public string AnimationClockTime
+    {
+        get;
+        private set => SetProperty(ref field, value);
+    } = "0.000 s";
+
+    public string AnimationClockStatus
+    {
+        get;
+        private set => SetProperty(ref field, value);
+    } = string.Empty;
+
+    public void AttachAnimationClock()
+    {
+        if (!IsAnimationClockSupported)
+        {
+            AnimationClockStatus = _animationClockAdapter.Compatibility.Diagnostic;
+            return;
+        }
+
+        var target = _selectedAnimationTarget();
+        if (target is null)
+        {
+            AnimationClockStatus = "Select an animatable control in the Elements tree before attaching the clock.";
+            return;
+        }
+
+        if (_animationClockSession is { Target: var currentTarget } && ReferenceEquals(currentTarget, target))
+        {
+            AnimationClockStatus = $"The experimental clock is already attached to {target.GetType().Name}.";
+            return;
+        }
+
+        DetachAnimationClockCore(updateStatus: false);
+        if (!_animationClockAdapter.TryAttach(target, out var session, out var diagnostic) || session is null)
+        {
+            AnimationClockStatus = diagnostic;
+            UpdateAnimationClockPresentation();
+            return;
+        }
+
+        _animationClockSession = session;
+        _animationClockSession.Changed += HandleAnimationClockChanged;
+        AnimationClockStatus =
+            $"{diagnostic} Start or restart target animations while attached so they use the diagnostic clock.";
+        UpdateAnimationClockPresentation();
+    }
+
+    public void PauseAnimationClock()
+    {
+        RunAnimationClockAction(
+            static session => session.Pause(),
+            "Diagnostic animation time is paused. DevScope remains live.");
+    }
+
+    public void ResumeAnimationClock()
+    {
+        RunAnimationClockAction(
+            static session => session.Resume(),
+            "Diagnostic animation time is following the application render clock.");
+    }
+
+    public void StepAnimationClock()
+    {
+        if (AnimationClockStepMilliseconds is not > 0m)
+        {
+            AnimationClockStatus = "Step size must be greater than zero milliseconds.";
+            return;
+        }
+
+        var amount = TimeSpan.FromMilliseconds((double)AnimationClockStepMilliseconds.Value);
+        RunAnimationClockAction(
+            session => session.Advance(amount),
+            $"Advanced diagnostic animation time by {amount.TotalMilliseconds.ToString("0.###", CultureInfo.InvariantCulture)} ms.");
+    }
+
+    public void ResetAnimationClock()
+    {
+        RunAnimationClockAction(
+            static session => session.Reset(),
+            "Diagnostic animation time reset to zero.");
+    }
+
+    public void DetachAnimationClock()
+    {
+        DetachAnimationClockCore(updateStatus: true);
+    }
+
     public void Clear()
     {
         Interlocked.Increment(ref _generation);
@@ -106,6 +246,7 @@ internal sealed class TracePageViewModel : ReactiveViewModelBase
         }
 
         _source.EntryReceived -= HandleEntryReceived;
+        DetachAnimationClockCore(updateStatus: false);
         _source.Dispose();
         Interlocked.Increment(ref _generation);
         while (_pending.TryDequeue(out _))
@@ -113,6 +254,71 @@ internal sealed class TracePageViewModel : ReactiveViewModelBase
         }
 
         base.Dispose(disposing);
+    }
+
+    private void RunAnimationClockAction(Action<IAnimationClockSession> action, string successStatus)
+    {
+        if (_animationClockSession is not { } session)
+        {
+            AnimationClockStatus = "Attach the experimental clock to the selected target first.";
+            return;
+        }
+
+        try
+        {
+            action(session);
+            AnimationClockStatus = successStatus;
+            UpdateAnimationClockPresentation();
+        }
+        catch (Exception error)
+        {
+            AnimationClockStatus = $"Animation clock command failed: {error.GetType().Name}: {error.Message}";
+        }
+    }
+
+    private void DetachAnimationClockCore(bool updateStatus)
+    {
+        Exception? detachError = null;
+        if (_animationClockSession is { } session)
+        {
+            session.Changed -= HandleAnimationClockChanged;
+            _animationClockSession = null;
+            try
+            {
+                session.Dispose();
+            }
+            catch (Exception error)
+            {
+                detachError = error;
+            }
+        }
+
+        if (updateStatus)
+        {
+            AnimationClockStatus = detachError is null
+                ? "Experimental clock detached. The previous target clock value and normal animation flow were restored."
+                : $"Animation clock detach reported {detachError.GetType().Name}: {detachError.Message}";
+        }
+
+        UpdateAnimationClockPresentation();
+    }
+
+    private void HandleAnimationClockChanged(object? sender, EventArgs e)
+    {
+        UpdateAnimationClockPresentation();
+    }
+
+    private void UpdateAnimationClockPresentation()
+    {
+        var session = _animationClockSession;
+        IsAnimationClockAttached = session is not null;
+        IsAnimationClockPaused = session?.IsPaused == true;
+        AnimationClockTarget = session?.Target.GetType().Name ?? "No target attached";
+        AnimationClockState = session is null
+            ? IsAnimationClockSupported ? "Detached" : "Unavailable"
+            : session.IsPaused ? "Paused" : "Running";
+        AnimationClockTime =
+            (session?.CurrentTime.TotalSeconds ?? 0).ToString("0.000", CultureInfo.InvariantCulture) + " s";
     }
 
     private void HandleEntryReceived(TraceEntry entry)

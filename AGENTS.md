@@ -49,6 +49,7 @@ Hard scope boundaries:
 - `src/DevTools.cs`: public application-level attach API.
 - `src/Hosting/DevToolsApplicationSession.cs`: application-lifetime input subscription and session ownership.
 - `src/Hosting/DevToolsHostManager.cs`: per-application desktop-window or embedded single-view host selection and lifecycle.
+- `src/AnimationTiming/AvaloniaAnimationClockAdapter.cs`: the only version-sensitive boundary for experimental Avalonia animation-clock access.
 - `src/IDevToolsRootSource.cs` and `src/Rooting/`: application and presentation-root discovery.
 - `src/Shell/` and `src/Views/Shell/`: DevTools shell, tabs, overlays, and host window.
 - `src/Elements/`: tree inspection, selection, property inspection/editing, styles, and layout diagnostics.
@@ -117,4 +118,4 @@ Requirements:
 
 ## Context From Project Adoption
 
-The project is already migrated to Avalonia `12.1.0`. Dedicated desktop and embedded single-view hosts, application-root inspection, style and pseudo-class editing, flags-enum editing, mutable collection item editing, collection navigation, and a bounded Trace view are present. The current open roadmap covers experimental diagnostic clock controls.
+The project is already migrated to Avalonia `12.1.0`. Dedicated desktop and embedded single-view hosts, application-root inspection, style and pseudo-class editing, flags-enum editing, mutable collection item editing, collection navigation, a bounded Trace view, and compatibility-checked experimental animation clock controls are present.

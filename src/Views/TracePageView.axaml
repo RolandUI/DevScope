@@ -3,8 +3,68 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:RolandUI.DevScope.ViewModels"
   xmlns:tracing="using:RolandUI.DevScope.Tracing"
   x:DataType="vm:TracePageViewModel">
-  <Grid Margin="8" RowDefinitions="Auto,*,Auto" RowSpacing="8">
-    <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
+  <Grid Margin="8" RowDefinitions="Auto,Auto,*,Auto" RowSpacing="8">
+    <Border
+      BorderBrush="{DynamicResource ThemeControlMidBrush}"
+      BorderThickness="1"
+      Padding="8">
+      <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="12">
+          <TextBlock FontWeight="SemiBold" Text="Experimental animation clock"/>
+          <TextBlock Grid.Column="1" Text="{Binding AnimationClockTarget}"/>
+          <TextBlock Grid.Column="2" Text="{Binding AnimationClockState}"/>
+          <TextBlock Grid.Column="3" FontFamily="monospace" Text="{Binding AnimationClockTime}"/>
+        </Grid>
+
+        <TextBlock
+          Grid.Row="1"
+          Foreground="{DynamicResource ThemeForegroundLowBrush}"
+          Text="{Binding AnimationClockStatus}"
+          TextWrapping="Wrap"/>
+
+        <ScrollViewer
+          Grid.Row="2"
+          HorizontalScrollBarVisibility="Auto"
+          VerticalScrollBarVisibility="Disabled">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button
+              Command="{Binding AttachAnimationClock}"
+              Content="Attach selected"
+              IsEnabled="{Binding IsAnimationClockSupported}"/>
+            <Button
+              Command="{Binding PauseAnimationClock}"
+              Content="Pause"
+              IsEnabled="{Binding IsAnimationClockAttached}"/>
+            <Button
+              Command="{Binding ResumeAnimationClock}"
+              Content="Resume"
+              IsEnabled="{Binding IsAnimationClockAttached}"/>
+            <NumericUpDown
+              Width="96"
+              FormatString="0.000"
+              Increment="1"
+              Minimum="0.001"
+              Maximum="60000"
+              Value="{Binding AnimationClockStepMilliseconds, Mode=TwoWay}"/>
+            <TextBlock Text="ms" VerticalAlignment="Center"/>
+            <Button
+              Command="{Binding StepAnimationClock}"
+              Content="Step"
+              IsEnabled="{Binding IsAnimationClockAttached}"/>
+            <Button
+              Command="{Binding ResetAnimationClock}"
+              Content="Reset to 0"
+              IsEnabled="{Binding IsAnimationClockAttached}"/>
+            <Button
+              Command="{Binding DetachAnimationClock}"
+              Content="Detach"
+              IsEnabled="{Binding IsAnimationClockAttached}"/>
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
       <TextBox
         Grid.Column="0"
         PlaceholderText="Filter message, category, or severity"
@@ -26,7 +86,7 @@
 
     <DataGrid
       x:Name="TraceGrid"
-      Grid.Row="1"
+      Grid.Row="2"
       BorderThickness="0"
       CanUserResizeColumns="True"
       IsReadOnly="True"
@@ -57,7 +117,7 @@
     </DataGrid>
 
     <TextBlock
-      Grid.Row="2"
+      Grid.Row="3"
       Foreground="{DynamicResource ThemeForegroundLowBrush}"
       Text="{Binding Status}"/>
   </Grid>
