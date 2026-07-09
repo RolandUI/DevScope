@@ -8,7 +8,7 @@ using RolandUI.DevScope.Shell;
 
 namespace RolandUI.DevScope.Views.Shell;
 
-internal partial class MainWindow : Window, IStyleHost
+internal partial class MainWindow : Window, IStyleHost, IDevToolsVisual
 {
     private readonly HashSet<Popup> _frozenPopupStates;
     private readonly IDisposable? _inputSubscription;
@@ -82,7 +82,7 @@ internal partial class MainWindow : Window, IStyleHost
                 if (_root is ICloseable newClosable)
                 {
                     newClosable.Closed += HandleRootClosed;
-                    ViewModel = new MainViewModel(_root);
+                    ViewModel = new MainViewModel(_root, Close);
                     DataContext = ViewModel;
                 }
                 else

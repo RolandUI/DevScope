@@ -13,6 +13,8 @@ public static class DevTools
     /// <remarks>
     ///     Attach DevTools should only be called after application initialization is complete. A good point is
     ///     <see cref="Application.OnFrameworkInitializationCompleted" />
+    ///     Repeated calls for the same application share one session and input subscription. The first active
+    ///     attachment supplies the options until all returned handles are disposed.
     /// </remarks>
     /// <example>
     ///     <code>
@@ -38,6 +40,8 @@ public static class DevTools
     /// </example>
     public static IDisposable AttachDevTools(this Application application, DevToolsOptions? options = null)
     {
-        return Design.IsDesignMode ? Disposable.Empty : new DevToolsApplicationSession(application, options ?? new DevToolsOptions());
+        return Design.IsDesignMode
+            ? Disposable.Empty
+            : DevToolsApplicationSession.Attach(application, options ?? new DevToolsOptions());
     }
 }

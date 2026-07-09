@@ -11,6 +11,7 @@ using RolandUI.DevScope.Elements.Properties.Services;
 using RolandUI.DevScope.Elements.Properties.ViewModels;
 using RolandUI.DevScope.Rooting;
 using RolandUI.DevScope.Shell;
+using RolandUI.DevScope.Extensions;
 
 namespace RolandUI.DevScope.Tests.ViewModels;
 
@@ -177,8 +178,69 @@ internal sealed class TreeProviderTests
         });
     }
 
+    [Test]
+    public void TreeProvidersExcludeDevToolsVisualsAndTrackFilteredIndexes()
+    {
+        AvaloniaTestFixture.RunOnUIThread(() =>
+        {
+            var first = new Border();
+            var devTools = new TestDevToolsControl();
+            var second = new Border();
+            var inserted = new Border();
+            var root = new Grid();
+            root.Children.Add(first);
+            root.Children.Add(devTools);
+            root.Children.Add(second);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(first.DoesBelongToDevTool(), Is.False);
+                Assert.That(devTools.DoesBelongToDevTool(), Is.True);
+                Assert.That(second.DoesBelongToDevTool(), Is.False);
+            });
+
+            var logicalRoot = new LogicalTreeProvider().Create(root).Single();
+            var visualRoot = new VisualTreeProvider().Create(root).Single();
+
+            try
+            {
+                AssertFilteredChildren(logicalRoot, first, second);
+                AssertFilteredChildren(visualRoot, first, second);
+
+                root.Children.Insert(1, inserted);
+
+                AssertFilteredChildren(logicalRoot, first, inserted, second);
+                AssertFilteredChildren(visualRoot, first, inserted, second);
+
+                root.Children.Remove(devTools);
+                root.Children.Remove(first);
+
+                AssertFilteredChildren(logicalRoot, inserted, second);
+                AssertFilteredChildren(visualRoot, inserted, second);
+            }
+            finally
+            {
+                logicalRoot.Dispose();
+                visualRoot.Dispose();
+            }
+        });
+    }
+
+    private static void AssertFilteredChildren(TreeNodeModel root, params Control[] expected)
+    {
+        var actual = root.Children.Select(x => (Control)x.Target).ToArray();
+        Assert.That(actual, Is.EqualTo(expected));
+        Assert.That(root.Children.Select(x => x.Target), Has.None.InstanceOf<IDevToolsVisual>());
+    }
+
     private sealed class TestRootSource(ObservableCollection<TopLevel> windows) : IDevToolsRootSource
     {
+        public DevToolsHostKind HostKind => DevToolsHostKind.DesktopWindow;
+
         public IReadOnlyList<TopLevel> Items => windows;
+    }
+
+    private sealed class TestDevToolsControl : Border, IDevToolsVisual
+    {
     }
 }

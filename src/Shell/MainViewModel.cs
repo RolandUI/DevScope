@@ -25,11 +25,13 @@ internal class MainViewModel : ReactiveViewModelBase
     private readonly SettingsPageViewModel _settings;
     private readonly TracePageViewModel _trace;
     private readonly ElementsTreeViewModel _visualTree;
+    private readonly Action? _close;
     private IDisposable? _currentFocusHighlightAdorner;
     private IScreenshotHandler? _screenshotHandler;
 
-    public MainViewModel(AvaloniaObject root)
+    public MainViewModel(AvaloniaObject root, Action? close = null)
     {
+        _close = close;
         _root = root;
         _selectionCoordinator = new SelectionCoordinator(
             _pinnedProperties,
@@ -318,6 +320,11 @@ internal class MainViewModel : ReactiveViewModelBase
     public void SelectFocusHighlighter(object parameter)
     {
         FocusHighlighter = parameter as IBrush;
+    }
+
+    public void Close()
+    {
+        _close?.Invoke();
     }
 
     public void SelectView(object? parameter)

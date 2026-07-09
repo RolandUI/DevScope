@@ -3,7 +3,6 @@ using Avalonia.Controls.Diagnostics;
 using Avalonia.Controls.Primitives;
 using Avalonia.LogicalTree;
 using RolandUI.DevScope.Rooting;
-using RolandUI.DevScope.Views.Shell;
 
 namespace RolandUI.DevScope.Elements.Trees;
 
@@ -54,9 +53,31 @@ internal sealed class LogicalTreeProvider : ILogicalTreeProvider
         protected override void Initialize(AvaloniaList<TreeNodeModel> nodes)
         {
             _subscription = target.LogicalChildren.ForEachItem(
-                (i, item) => nodes.Insert(i, provider.CreateNode((AvaloniaObject)item, Owner!)),
-                (i, _) => RemoveAndDisposeAt(nodes, i),
+                (i, item) => AddNode(nodes, i, (AvaloniaObject)item),
+                (_, item) => RemoveNode(nodes, (AvaloniaObject)item),
                 () => DisposeAndClear(nodes));
+        }
+
+        private void AddNode(AvaloniaList<TreeNodeModel> nodes, int sourceIndex, AvaloniaObject item)
+        {
+            if (!ShouldInspect(item))
+            {
+                return;
+            }
+
+            var nodeIndex = target.LogicalChildren
+                .Take(sourceIndex)
+                .Count(child => ShouldInspect((AvaloniaObject)child));
+            nodes.Insert(nodeIndex, provider.CreateNode(item, Owner!));
+        }
+
+        private static void RemoveNode(AvaloniaList<TreeNodeModel> nodes, AvaloniaObject item)
+        {
+            var node = nodes.FirstOrDefault(x => ReferenceEquals(x.Target, item));
+            if (node is not null)
+            {
+                RemoveAndDispose(nodes, node);
+            }
         }
     }
 
@@ -90,7 +111,7 @@ internal sealed class LogicalTreeProvider : ILogicalTreeProvider
 
             void HandleGroupRemoved(object? sender, TopLevel e)
             {
-                if (e is MainWindow)
+                if (e.DoesBelongToDevTool())
                 {
                     return;
                 }
@@ -115,13 +136,18 @@ internal sealed class LogicalTreeProvider : ILogicalTreeProvider
 
         private void AddRoot(AvaloniaList<TreeNodeModel> nodes, TopLevel root)
         {
-            if (root is MainWindow)
+            if (root.DoesBelongToDevTool())
             {
                 return;
             }
 
             nodes.Add(provider.CreateNode(root, Owner!));
         }
+    }
+
+    private static bool ShouldInspect(AvaloniaObject item)
+    {
+        return item is not Visual visual || !visual.DoesBelongToDevTool();
     }
 }
 
@@ -190,10 +216,32 @@ internal sealed class VisualTreeProvider : IVisualTreeProvider
             }
 
             target.VisualChildren.ForEachItem(
-                    (i, item) => nodes.Insert(i, provider.CreateNode(item, Owner!)),
-                    (i, _) => RemoveAndDisposeAt(nodes, i),
+                    (i, item) => AddNode(nodes, i, item),
+                    (_, item) => RemoveNode(nodes, item),
                     () => DisposeAndClear(nodes))
                 .AddTo(_subscriptions);
+        }
+
+        private void AddNode(AvaloniaList<TreeNodeModel> nodes, int sourceIndex, Visual item)
+        {
+            if (!ShouldInspect(item))
+            {
+                return;
+            }
+
+            var nodeIndex = target.VisualChildren
+                .Take(sourceIndex)
+                .Count(ShouldInspect);
+            nodes.Insert(nodeIndex, provider.CreateNode(item, Owner!));
+        }
+
+        private static void RemoveNode(AvaloniaList<TreeNodeModel> nodes, Visual item)
+        {
+            var node = nodes.FirstOrDefault(x => ReferenceEquals(x.Target, item));
+            if (node is not null)
+            {
+                RemoveAndDispose(nodes, node);
+            }
         }
 
         private static IObservable<PopupRoot?>? GetHostedPopupRootObservable(Visual visual)
@@ -308,7 +356,7 @@ internal sealed class VisualTreeProvider : IVisualTreeProvider
 
             void HandleGroupRemoved(object? sender, TopLevel e)
             {
-                if (e is MainWindow)
+                if (e.DoesBelongToDevTool())
                 {
                     return;
                 }
@@ -333,12 +381,17 @@ internal sealed class VisualTreeProvider : IVisualTreeProvider
 
         private void AddRoot(AvaloniaList<TreeNodeModel> nodes, TopLevel root)
         {
-            if (root is MainWindow)
+            if (root.DoesBelongToDevTool())
             {
                 return;
             }
 
             nodes.Add(provider.CreateNode(root, Owner!));
         }
+    }
+
+    private static bool ShouldInspect(AvaloniaObject item)
+    {
+        return item is not Visual visual || !visual.DoesBelongToDevTool();
     }
 }

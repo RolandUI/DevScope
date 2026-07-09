@@ -3,9 +3,37 @@ using Application = Avalonia.Application;
 
 namespace RolandUI.DevScope;
 
+internal enum DevToolsHostKind
+{
+    DesktopWindow,
+    EmbeddedSingleView,
+}
+
 internal interface IDevToolsRootSource
 {
+    DevToolsHostKind HostKind { get; }
+
     IReadOnlyList<TopLevel> Items { get; }
+}
+
+internal interface IDevToolsSingleViewLifetime
+{
+    Control? MainView { get; set; }
+
+    TopLevel? TopLevel { get; }
+}
+
+internal sealed class DevToolsSingleViewLifetime(ISingleViewApplicationLifetime lifetime) : IDevToolsSingleViewLifetime
+{
+    private readonly ISingleViewApplicationLifetime _lifetime = lifetime ?? throw new ArgumentNullException(nameof(lifetime));
+
+    public Control? MainView
+    {
+        get => _lifetime.MainView;
+        set => _lifetime.MainView = value;
+    }
+
+    public TopLevel? TopLevel => (_lifetime as ISingleTopLevelApplicationLifetime)?.TopLevel;
 }
 
 internal static class DevToolsRootSources
@@ -47,6 +75,8 @@ internal sealed class ClassicDesktopApplicationRootSource(
     private readonly Application _application = application ?? throw new ArgumentNullException(nameof(application));
     private readonly IClassicDesktopStyleApplicationLifetime _lifetime = lifetime ?? throw new ArgumentNullException(nameof(lifetime));
 
+    public DevToolsHostKind HostKind => DevToolsHostKind.DesktopWindow;
+
     public IReadOnlyList<TopLevel> Items => _lifetime.Windows;
 
     public override int GetHashCode()
@@ -61,13 +91,25 @@ internal sealed class ClassicDesktopApplicationRootSource(
     }
 }
 
-internal sealed class SingleViewApplicationRootSource(
-    Application application,
-    ISingleViewApplicationLifetime lifetime
-) : IDevToolsRootSource
+internal sealed class SingleViewApplicationRootSource : IDevToolsRootSource
 {
-    private readonly Application _application = application ?? throw new ArgumentNullException(nameof(application));
-    private readonly ISingleViewApplicationLifetime _lifetime = lifetime ?? throw new ArgumentNullException(nameof(lifetime));
+    private readonly Application _application;
+    private readonly IDevToolsSingleViewLifetime _lifetime;
+
+    public SingleViewApplicationRootSource(Application application, ISingleViewApplicationLifetime lifetime)
+        : this(application, new DevToolsSingleViewLifetime(lifetime))
+    {
+    }
+
+    internal SingleViewApplicationRootSource(Application application, IDevToolsSingleViewLifetime lifetime)
+    {
+        _application = application ?? throw new ArgumentNullException(nameof(application));
+        _lifetime = lifetime ?? throw new ArgumentNullException(nameof(lifetime));
+    }
+
+    public DevToolsHostKind HostKind => DevToolsHostKind.EmbeddedSingleView;
+
+    internal IDevToolsSingleViewLifetime Lifetime => _lifetime;
 
     public IReadOnlyList<TopLevel> Items
     {
@@ -75,10 +117,7 @@ internal sealed class SingleViewApplicationRootSource(
         {
             return _lifetime switch
             {
-                // Browser/iOS single-view lifetimes expose the actual host through the
-                // private-api ISingleTopLevelApplicationLifetime. Prefer it as the presentation
-                // root. MainView is only a clue for finding its TopLevel, not an Application child.
-                ISingleTopLevelApplicationLifetime { TopLevel: { } topLevel } => [topLevel],
+                { TopLevel: { } topLevel } => [topLevel],
                 { MainView: { } mainView } when TopLevel.GetTopLevel(mainView) is { } mainViewTopLevel => [mainViewTopLevel],
                 _ => []
             };
@@ -100,6 +139,8 @@ internal sealed class SingleViewApplicationRootSource(
 internal sealed class SingleTopLevelRootSource(TopLevel topLevel) : IDevToolsRootSource
 {
     public TopLevel TopLevel { get; } = topLevel ?? throw new ArgumentNullException(nameof(topLevel));
+
+    public DevToolsHostKind HostKind => DevToolsHostKind.DesktopWindow;
 
     public IReadOnlyList<TopLevel> Items { get; } = [topLevel];
 

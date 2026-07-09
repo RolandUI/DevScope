@@ -111,7 +111,7 @@
 
         <MenuItem Header="_File">
           <MenuItem
-            Command="{Binding $parent[Window].Close}"
+            Command="{Binding Close}"
             Header="E_xit"/>
           <MenuItem
             Command="{Binding Shot}"

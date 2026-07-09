@@ -48,7 +48,7 @@ Hard scope boundaries:
 
 - `src/DevTools.cs`: public application-level attach API.
 - `src/Hosting/DevToolsApplicationSession.cs`: application-lifetime input subscription and session ownership.
-- `src/Hosting/DevToolsWindowHost.cs`: global desktop DevTools host.
+- `src/Hosting/DevToolsHostManager.cs`: per-application desktop-window or embedded single-view host selection and lifecycle.
 - `src/IDevToolsRootSource.cs` and `src/Rooting/`: application and presentation-root discovery.
 - `src/Shell/` and `src/Views/Shell/`: DevTools shell, tabs, overlays, and host window.
 - `src/Elements/`: tree inspection, selection, property inspection/editing, styles, and layout diagnostics.
@@ -86,7 +86,7 @@ Do not scatter direct internal Avalonia calls through views or viewmodels.
 - Do not block the inspected application UI thread with diagnostics processing.
 - Keep DevTools controls out of the inspected application tree and selection results.
 - Preserve existing behavior on classic desktop while adding new lifetime or platform support.
-- Update README limitations whenever a capability is completed or its support boundary changes.
+- Update README platform behavior whenever a capability is completed or its support boundary changes.
 
 ## Release Workflow
 
@@ -117,4 +117,4 @@ Requirements:
 
 ## Context From Project Adoption
 
-The project is already migrated to Avalonia `12.1.0`. A single global desktop DevTools window, application-root inspection, style and pseudo-class editing, flags-enum editing, and collection navigation are present. The current open roadmap covers mutable collection item editing, a real Trace view, an embedded single-view host, and experimental diagnostic clock controls.
+The project is already migrated to Avalonia `12.1.0`. Dedicated desktop and embedded single-view hosts, application-root inspection, style and pseudo-class editing, flags-enum editing, mutable collection item editing, collection navigation, and a bounded Trace view are present. The current open roadmap covers experimental diagnostic clock controls.

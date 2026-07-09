@@ -13,7 +13,7 @@
 
 <br/>
 
-## 👋 Introduction
+## Introduction
 
 With the release of Avalonia 12, the open-source F12 DevTools ([Avalonia.Diagnostics](https://github.com/AvaloniaUI/Avalonia.Diagnostics)) was retired and replaced by the commercial [Avalonia Accelerate](https://avaloniaui.net/Accelerate) suite.
 
@@ -21,7 +21,7 @@ With the release of Avalonia 12, the open-source F12 DevTools ([Avalonia.Diagnos
 
 Our goal is to provide a smooth transition for developers upgrading to Avalonia 12, while exploring the addition of small, practical utilities in the future.
 
-## 🤝 Community & Commitments
+## Community & Commitments
 
 As an open-source project building upon the incredible legacy of the Avalonia team, we want to be fully transparent about our scope and intentions. We maintain a humble stance and respect the official ecosystem:
 
@@ -29,7 +29,7 @@ As an open-source project building upon the incredible legacy of the Avalonia te
 2. **Accelerate Banner intact**: The banner promoting Avalonia Accelerate within the classic DevTools will **not** be removed. We believe it is fair and necessary to help promote the official tool.
 3. **No Remote Dev Protocols**: We will not develop, maintain, or reverse-engineer remote development protocols or features. Our focus is strictly bounded to the local, classic F12 DevTools experience.
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Install the NuGet package
 
@@ -61,6 +61,10 @@ public partial class App : Application
         {
             desktop.MainWindow = new MainWindow();
         }
+        else if (ApplicationLifetime is ISingleViewApplicationLifetime singleView)
+        {
+            singleView.MainView = new AppView();
+        }
 
         base.OnFrameworkInitializationCompleted();
 
@@ -71,13 +75,17 @@ public partial class App : Application
 }
 ```
 
-Keeping the returned `IDisposable` allows the application to detach the F12 input subscription explicitly when required.
+Keeping the returned `IDisposable` allows the application to detach the F12 input subscription explicitly when required. Repeated `AttachDevTools()` calls for the same `Application` share one session and one input subscription; disposing the final returned handle closes the surface and detaches the session. The options from the first active attachment are used until that shared session is fully detached.
 
 ## Current Scope
 
 `DevScope` is focused on local, classic F12 diagnostics for Avalonia 12+ applications. The current source targets Avalonia 12.1 and supports both `net8.0` and `net10.0` consumers.
 
-The current preview provides a single global desktop DevTools window, logical and visual tree inspection, routed-event monitoring, property inspection and editing, collection navigation, style-class and pseudo-class editing, flags-enum editing, diagnostic overlays, hotkeys, and screenshots.
+The current preview provides one active DevTools surface per application, logical and visual tree inspection, routed-event monitoring, property inspection and editing, mutable collection item editing, collection navigation, style-class and pseudo-class editing, flags-enum editing, diagnostic overlays, hotkeys, and screenshots.
+
+Classic desktop lifetimes open the existing dedicated DevTools window; pressing the configured gesture again activates that window. `ISingleViewApplicationLifetime` applications instead open the same DevTools `MainView` as a full-size in-app overlay, and repeated activation toggles it closed. DevScope uses the host `OverlayLayer` when available and otherwise temporarily wraps the original `MainView`; closing the overlay or disposing the session restores the original visual tree and releases owned subscriptions.
+
+The embedded host works at the Avalonia single-view lifetime level, including browser and mobile hosts that provide an initialized `MainView`. Activation still depends on the configured key gesture reaching Avalonia's input manager: browsers can reserve F12 for their own tools, and touch-only devices may need a different `DevToolsOptions.Gesture`. DevScope does not add a remote or out-of-process activation channel.
 
 The Trace tab captures in-process [`System.Diagnostics.Trace`](https://learn.microsoft.com/dotnet/api/system.diagnostics.trace) events while a DevScope session is open. It keeps a bounded 1,000-entry buffer and supports live filtering, pause/resume, clear, and optional auto-scroll. Applications can route Avalonia logging into this source with Avalonia's `LogToTrace` startup configuration.
 
@@ -91,7 +99,7 @@ Planned work is tracked in [GitHub Issues](https://github.com/RolandUI/DevScope/
 
 Maintainers should follow the [DevScope Release Guide](docs/RELEASING.md). It defines the release gate, version and tag rules, GitHub Release workflow, NuGet verification, and recovery procedure.
 
-## ❤️ Acknowledgements
+## Acknowledgements
 
 DevScope builds on the work of two open-source projects:
 
@@ -100,6 +108,6 @@ DevScope builds on the work of two open-source projects:
 
 We are grateful to both projects and their contributors. DevScope is an independent community project and is not affiliated with, sponsored by, or endorsed by the Avalonia UI project. Avalonia and Avalonia Accelerate are trademarks of their respective owners.
 
-## 📄 License
+## License
 
 This project is licensed under the [MIT License](LICENSE), continuing the open-source spirit of the original codebase.
