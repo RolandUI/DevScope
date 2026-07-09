@@ -88,6 +88,15 @@ Do not scatter direct internal Avalonia calls through views or viewmodels.
 - Preserve existing behavior on classic desktop while adding new lifetime or platform support.
 - Update README limitations whenever a capability is completed or its support boundary changes.
 
+## Release Workflow
+
+- Treat `docs/RELEASING.md` as the release source of truth.
+- Use one release-tracking issue with locked scope, explicit deferrals, validation evidence, and the final release commit.
+- Release only from a clean, pushed `main` commit after the complete Debug/Release and `net8.0`/`net10.0` gate passes.
+- Prepare and review a draft GitHub Release before publication. Publishing the draft is externally visible and requires explicit release authorization.
+- Let `.github/workflows/nuget-publish.yml` create and publish the NuGet artifacts; do not publish them manually from a development machine.
+- Verify the GitHub Release, workflow run, NuGet registration, package hash, and consumer restore before closing the release issue.
+
 ## Validation
 
 Run validation proportional to the change. The normal full matrix is:

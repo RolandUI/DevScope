@@ -92,6 +92,10 @@ The project is intentionally lightweight: it does not add a remote debugging ser
 
 Planned work is tracked in [GitHub Issues](https://github.com/RolandUI/DevScope/issues). Remote development protocols remain intentionally out of scope.
 
+## Releasing
+
+Maintainers should follow the [DevScope Release Guide](docs/RELEASING.md). It defines the release gate, version and tag rules, GitHub Release workflow, NuGet verification, and recovery procedure.
+
 ## ❤️ Acknowledgements
 
 This project is entirely made possible by the rich legacy of the **Avalonia UI** team and its contributors. We are deeply grateful for their years of effort in maintaining the original `Avalonia.Diagnostics`. 
