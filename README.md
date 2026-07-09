@@ -81,13 +81,6 @@ The current preview provides a single global desktop DevTools window, logical an
 
 The project is intentionally lightweight: it does not add a remote debugging service, does not replace Avalonia Accelerate, and does not try to become a full external diagnostics platform.
 
-## Known Limitations
-
-- The DevTools surface currently opens as a desktop `Window`. Single-view roots can be discovered, but Browser, Android, and iOS still need an embedded host ([#3](https://github.com/RolandUI/DevScope/issues/3)).
-- Arrays, lists, dictionaries, and other enumerable values can be inspected and navigated, but their child items are currently read-only ([#1](https://github.com/RolandUI/DevScope/issues/1)).
-- The Trace tab is present but does not capture or display trace entries yet ([#2](https://github.com/RolandUI/DevScope/issues/2)).
-- Diagnostic animation-clock controls are not implemented and require version-sensitive Avalonia internal APIs ([#4](https://github.com/RolandUI/DevScope/issues/4)).
-
 ## Roadmap
 
 Planned work is tracked in [GitHub Issues](https://github.com/RolandUI/DevScope/issues). Remote development protocols remain intentionally out of scope.
