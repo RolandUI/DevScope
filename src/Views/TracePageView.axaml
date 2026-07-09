@@ -1,6 +1,64 @@
 <UserControl
   x:Class="RolandUI.DevScope.Views.TracePageView" xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:RolandUI.DevScope.ViewModels"
+  xmlns:tracing="using:RolandUI.DevScope.Tracing"
   x:DataType="vm:TracePageViewModel">
-  <Grid/>
+  <Grid Margin="8" RowDefinitions="Auto,*,Auto" RowSpacing="8">
+    <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="8">
+      <TextBox
+        Grid.Column="0"
+        PlaceholderText="Filter message, category, or severity"
+        Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"/>
+      <ToggleButton
+        Grid.Column="1"
+        Content="Pause capture"
+        IsChecked="{Binding IsPaused, Mode=TwoWay}"/>
+      <CheckBox
+        Grid.Column="2"
+        Content="Auto-scroll"
+        IsChecked="{Binding AutoScroll, Mode=TwoWay}"
+        VerticalAlignment="Center"/>
+      <Button
+        Grid.Column="3"
+        Command="{Binding Clear}"
+        Content="Clear"/>
+    </Grid>
+
+    <DataGrid
+      x:Name="TraceGrid"
+      Grid.Row="1"
+      BorderThickness="0"
+      CanUserResizeColumns="True"
+      IsReadOnly="True"
+      ItemsSource="{Binding Entries}"
+      RowBackground="Transparent">
+      <DataGrid.Columns>
+        <DataGridTextColumn
+          x:DataType="tracing:TraceEntry"
+          Binding="{Binding Timestamp, StringFormat={}{0:HH:mm:ss.fff}}"
+          Header="Time"
+          Width="Auto"/>
+        <DataGridTextColumn
+          x:DataType="tracing:TraceEntry"
+          Binding="{Binding Severity}"
+          Header="Severity"
+          Width="Auto"/>
+        <DataGridTextColumn
+          x:DataType="tracing:TraceEntry"
+          Binding="{Binding Category}"
+          Header="Category"
+          Width="Auto"/>
+        <DataGridTextColumn
+          x:DataType="tracing:TraceEntry"
+          Binding="{Binding Message}"
+          Header="Message"
+          Width="*"/>
+      </DataGrid.Columns>
+    </DataGrid>
+
+    <TextBlock
+      Grid.Row="2"
+      Foreground="{DynamicResource ThemeForegroundLowBrush}"
+      Text="{Binding Status}"/>
+  </Grid>
 </UserControl>

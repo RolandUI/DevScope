@@ -79,6 +79,8 @@ Keeping the returned `IDisposable` allows the application to detach the F12 inpu
 
 The current preview provides a single global desktop DevTools window, logical and visual tree inspection, routed-event monitoring, property inspection and editing, collection navigation, style-class and pseudo-class editing, flags-enum editing, diagnostic overlays, hotkeys, and screenshots.
 
+The Trace tab captures in-process [`System.Diagnostics.Trace`](https://learn.microsoft.com/dotnet/api/system.diagnostics.trace) events while a DevScope session is open. It keeps a bounded 1,000-entry buffer and supports live filtering, pause/resume, clear, and optional auto-scroll. Applications can route Avalonia logging into this source with Avalonia's `LogToTrace` startup configuration.
+
 The project is intentionally lightweight: it does not add a remote debugging service, does not replace Avalonia Accelerate, and does not try to become a full external diagnostics platform.
 
 ## Roadmap

@@ -199,6 +199,7 @@ internal class MainViewModel : ReactiveViewModelBase
         _visualTree.Dispose();
         _events.Dispose();
         _hotKeys.Dispose();
+        _trace.Dispose();
         _currentFocusHighlightAdorner?.Dispose();
         if (TryGetRenderer() is { } renderer)
         {
