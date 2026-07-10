@@ -2,6 +2,7 @@
   x:Class="RolandUI.DevScope.Views.Elements.ElementsPage" xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:RolandUI.DevScope.Views.Controls"
   xmlns:elements="using:RolandUI.DevScope.Elements" xmlns:propertiesViews="using:RolandUI.DevScope.Views.Elements.Properties"
+  xmlns:propertyViewModels="using:RolandUI.DevScope.Elements.Properties.ViewModels"
   xmlns:stylesViews="using:RolandUI.DevScope.Views.Elements.Styles" xmlns:trees="using:RolandUI.DevScope.Elements.Trees"
   x:Name="Self" x:DataType="elements:ElementsPageViewModel">
 
@@ -147,11 +148,23 @@
         IsVisible="{Binding CurrentDetails, Converter={x:Static ObjectConverters.IsNotNull}}">
         <TabItem
           Classes="DetailsTab" Header="Styles">
-          <stylesViews:ElementStylesView DataContext="{Binding #Self.ViewModel?.CurrentDetails}"/>
+          <ContentControl Content="{Binding CurrentDetails}">
+            <ContentControl.ContentTemplate>
+              <DataTemplate x:DataType="elements:ElementDetailsViewModel">
+                <stylesViews:ElementStylesView/>
+              </DataTemplate>
+            </ContentControl.ContentTemplate>
+          </ContentControl>
         </TabItem>
         <TabItem
           Classes="DetailsTab" Header="Properties">
-          <propertiesViews:PropertyExplorerView DataContext="{Binding #Self.ViewModel?.CurrentPropertyExplorer}"/>
+          <ContentControl Content="{Binding CurrentPropertyExplorer}">
+            <ContentControl.ContentTemplate>
+              <DataTemplate x:DataType="propertyViewModels:PropertyExplorerViewModel">
+                <propertiesViews:PropertyExplorerView/>
+              </DataTemplate>
+            </ContentControl.ContentTemplate>
+          </ContentControl>
         </TabItem>
       </TabControl>
     </Grid>
