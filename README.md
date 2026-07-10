@@ -101,7 +101,7 @@ Planned work is tracked in [GitHub Issues](https://github.com/RolandUI/DevScope/
 
 ## Releasing
 
-Maintainers should follow the [DevScope Release Guide](docs/RELEASING.md). It defines the release gate, version and tag rules, GitHub Release workflow, NuGet verification, and recovery procedure.
+Maintainers should follow the [DevScope Release Guide](docs/RELEASING.md). It defines the release gate, version and tag rules, GitHub Release workflow, nuget.org and GitHub Packages verification, and recovery procedure.
 
 ## Acknowledgements
 

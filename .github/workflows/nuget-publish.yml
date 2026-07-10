@@ -13,6 +13,7 @@ on:
 permissions:
   contents: write
   id-token: write
+  packages: write
 
 jobs:
   build-and-publish:
@@ -93,4 +94,16 @@ jobs:
           if ($packages.Count -ne 1) { throw "Expected exactly one primary nupkg, found $($packages.Count)." }
           foreach ($pkg in $packages) {
             dotnet nuget push $pkg.FullName --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
+          }
+
+      - name: Publish to GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          dotnet nuget add source --username "${{ github.actor }}" --password $env:GITHUB_TOKEN --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+
+          $packages = @(Get-ChildItem -Path "${{ github.workspace }}/out" -Filter "*.nupkg" | Where-Object Name -NotLike "*.snupkg")
+          if ($packages.Count -ne 1) { throw "Expected exactly one primary nupkg, found $($packages.Count)." }
+          foreach ($pkg in $packages) {
+            dotnet nuget push $pkg.FullName --source github --skip-duplicate --no-symbols
           }

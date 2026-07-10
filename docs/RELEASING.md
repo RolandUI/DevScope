@@ -1,6 +1,6 @@
 # DevScope Release Guide
 
-This runbook is the source of truth for publishing `RolandUI.DevScope` to NuGet and creating the matching GitHub Release. It adopts AvaScope's release-gate principle, but it matches DevScope's simpler release workflow: publishing a GitHub Release triggers `.github/workflows/nuget-publish.yml`.
+This runbook is the source of truth for publishing `RolandUI.DevScope` to nuget.org and GitHub Packages, and for creating the matching GitHub Release. It adopts AvaScope's release-gate principle, but it matches DevScope's simpler release workflow: publishing a GitHub Release triggers `.github/workflows/nuget-publish.yml`.
 
 Publishing a GitHub Release is the irreversible step. Complete every preparation and validation step before changing a draft release to published.
 
@@ -14,13 +14,13 @@ Every release must have:
 - a clean, pushed `main` commit that passed the full release gate;
 - reviewed release notes;
 - a successful GitHub Actions release run;
-- a matching immutable NuGet package and GitHub Release assets.
+- matching immutable packages on nuget.org and GitHub Packages, plus GitHub Release assets.
 
-Use prerelease versions such as `0.1.0-preview.1` until the public API is ready for a stable release. Never reuse a version that has reached NuGet.
+Use prerelease versions such as `0.1.0-preview.1` until the public API is ready for a stable release. Never reuse a version that has reached either package registry.
 
 ## One-time repository setup
 
-DevScope uses NuGet Trusted Publishing. It does not store a long-lived NuGet API key in GitHub. The workflow requests a GitHub OIDC token, and `NuGet/login@v1` exchanges that token once for a short-lived NuGet API key immediately before package publication.
+DevScope uses NuGet Trusted Publishing for nuget.org. It does not store a long-lived NuGet API key in GitHub. The workflow requests a GitHub OIDC token, and `NuGet/login@v1` exchanges that token once for a short-lived NuGet API key immediately before package publication.
 
 Before the first release, create this policy under the RolandUI account on the nuget.org **Trusted Publishing** page:
 
@@ -35,15 +35,18 @@ Before the first release, create this policy under the RolandUI account on the n
 
 The workflow file field contains only the filename, not `.github/workflows/nuget-publish.yml`. Leave Environment empty because the release job does not declare a GitHub Actions environment.
 
-The repository workflow must retain both permissions:
+The repository workflow must retain all three permissions:
 
 ```yaml
 permissions:
   contents: write
   id-token: write
+  packages: write
 ```
 
-`contents: write` allows release asset uploads. `id-token: write` allows GitHub to issue the OIDC token used by Trusted Publishing. No `NUGET_API_KEY` repository secret is required.
+`contents: write` allows release asset uploads. `id-token: write` allows GitHub to issue the OIDC token used by Trusted Publishing. `packages: write` allows the workflow's built-in `GITHUB_TOKEN` to publish to GitHub Packages. No `NUGET_API_KEY` or GitHub Packages repository secret is required.
+
+The GitHub Packages NuGet registry is `https://nuget.pkg.github.com/RolandUI/index.json`. The package's `RepositoryUrl` links it to `RolandUI/DevScope`; a package first created by this workflow should inherit the public repository's visibility and grant this repository Actions access. After the first publication, verify the repository link, public visibility, and Actions access on the package settings page. If the organization disables automatic permission inheritance, configure those settings explicitly before the next release. Keep nuget.org as the primary consumer feed; GitHub Packages is the repository-integrated secondary registry.
 
 ## 1. Define and lock the release
 
@@ -88,6 +91,7 @@ Review the release-facing metadata:
 
 - package ID: `RolandUI.DevScope`;
 - project and repository URLs: `https://github.com/RolandUI/DevScope`;
+- GitHub Packages registry: `https://nuget.pkg.github.com/RolandUI/index.json`;
 - license and preserved attribution;
 - README installation and compatibility text;
 - release notes, including breaking changes and known limitations.
@@ -158,7 +162,7 @@ Before publishing the draft, verify:
 - the tag resolves to the recorded release candidate commit;
 - the title, release notes, compatibility information, and known limitations are correct;
 - the nuget.org Trusted Publishing policy is active and exactly matches the repository and workflow fields above;
-- there is no existing NuGet version with the same number.
+- there is no existing package version with the same number on nuget.org or GitHub Packages.
 
 Publishing the draft starts the release workflow:
 
@@ -177,7 +181,8 @@ The `Publish NuGet Package` workflow will:
 3. pack `RolandUI.DevScope` using the tag as the package version;
 4. attach `.nupkg` and `.snupkg` files to the GitHub Release;
 5. exchange the GitHub OIDC token for a short-lived NuGet credential;
-6. push the packages to nuget.org.
+6. push the package and symbols to nuget.org;
+7. authenticate with the workflow `GITHUB_TOKEN` and push the primary `.nupkg` to GitHub Packages.
 
 Find and watch the run:
 
@@ -202,23 +207,25 @@ gh run view <run-id> --repo $repo --log-failed
 
 ## 6. Verify the published release
 
-Confirm the tag, release assets, and NuGet registration:
+Confirm the tag, release assets, nuget.org registration, and GitHub Packages registration:
 
 ```powershell
 git ls-remote --tags origin "refs/tags/$tag"
 gh release view $tag --repo $repo --json url,tagName,isDraft,assets
 $versions = Invoke-RestMethod "https://api.nuget.org/v3-flatcontainer/rolandui.devscope/index.json"
 $versions.versions -contains $version
+$githubVersion = gh api --paginate "/orgs/RolandUI/packages/nuget/RolandUI.DevScope/versions" --jq ".[] | select(.name == `"$version`") | .name"
+$githubVersion -eq $version
 ```
 
-The final expression must return `True`. NuGet indexing can take a few minutes; retry verification before treating a successful workflow as failed.
+Both registry expressions must return `True`. Registry indexing can take a few minutes; retry verification before treating a successful workflow as failed. The `gh` account used for verification must be able to read the organization package.
 
 Install the exact published version in a disposable sample or real consumer application and confirm that it restores for both supported target frameworks. Then update the release issue with:
 
 - GitHub Release URL;
 - workflow run URL;
 - tag and commit hash;
-- NuGet version;
+- nuget.org and GitHub Packages versions;
 - published package SHA-256;
 - smoke-test result.
 
@@ -226,9 +233,10 @@ Close the release issue only after all publication checks pass.
 
 ## Failure and recovery rules
 
-- If publication fails before NuGet accepts the package, correct the Trusted Publishing policy, OIDC permission, or workflow problem and rerun the failed workflow. The workflow uses `--skip-duplicate`, so a partial retry is safe.
+- If publication fails before either registry accepts the package, correct the Trusted Publishing policy, token permission, or workflow problem and rerun the failed workflow. Both pushes use `--skip-duplicate`, so a partial retry is safe.
+- If nuget.org succeeds but GitHub Packages fails, fix the GitHub package visibility or Actions access and rerun the workflow. The immutable nuget.org version will be skipped and the GitHub Packages push will be retried.
 - If the `release: published` event is recorded but does not create a run, use the documented `workflow_dispatch` recovery with the existing immutable release tag.
-- If NuGet accepted the package, its version is immutable. Never overwrite, delete, move, or reuse that version; publish a new patch or prerelease version for corrections.
-- If a bad package reaches NuGet, unlist it when appropriate and create a follow-up release. Deleting the GitHub Release does not remove the NuGet package.
+- If either registry accepted the package, treat its version as immutable. Never overwrite, delete, move, or reuse that version; publish a new patch or prerelease version for corrections.
+- If a bad package reaches a registry, unlist or delete it only when appropriate and create a follow-up release. Deleting the GitHub Release does not remove either registry package.
 - Do not move or recreate a public release tag after publication.
 - Do not publish manually from a developer machine while the GitHub workflow is the documented release path.
