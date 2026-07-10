@@ -33,10 +33,10 @@ As an open-source project building upon the incredible legacy of the Avalonia te
 
 ### 1. Install the NuGet package
 
-The package ID is `RolandUI.DevScope`. Install the current preview with:
+The package ID is `RolandUI.DevScope`. Install the current release with:
 
 ```bash
-dotnet add package RolandUI.DevScope --prerelease
+dotnet add package RolandUI.DevScope --version 0.1.0
 ```
 
 or use the NuGet Package Manager in your IDE.
@@ -81,7 +81,7 @@ Keeping the returned `IDisposable` allows the application to detach the F12 inpu
 
 `DevScope` is focused on local, classic F12 diagnostics for Avalonia 12+ applications. The current source targets Avalonia 12.1 and supports both `net8.0` and `net10.0` consumers.
 
-The current preview provides one active DevTools surface per application, logical and visual tree inspection, routed-event monitoring, property inspection and editing, mutable collection item editing, collection navigation, style-class and pseudo-class editing, flags-enum editing, diagnostic overlays, hotkeys, and screenshots.
+The current release provides one active DevTools surface per application, logical and visual tree inspection, routed-event monitoring, property inspection and editing, mutable collection item editing, collection navigation, style-class and pseudo-class editing, flags-enum editing, diagnostic overlays, hotkeys, and screenshots.
 
 Classic desktop lifetimes open the existing dedicated DevTools window; pressing the configured gesture again activates that window. `ISingleViewApplicationLifetime` applications instead open the same DevTools `MainView` as a full-size in-app overlay, and repeated activation toggles it closed. DevScope uses the host `OverlayLayer` when available and otherwise temporarily wraps the original `MainView`; closing the overlay or disposing the session restores the original visual tree and releases owned subscriptions.
 
