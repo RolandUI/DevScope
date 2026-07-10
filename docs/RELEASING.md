@@ -214,11 +214,12 @@ git ls-remote --tags origin "refs/tags/$tag"
 gh release view $tag --repo $repo --json url,tagName,isDraft,assets
 $versions = Invoke-RestMethod "https://api.nuget.org/v3-flatcontainer/rolandui.devscope/index.json"
 $versions.versions -contains $version
-$githubVersion = gh api --paginate "/orgs/RolandUI/packages/nuget/RolandUI.DevScope/versions" --jq ".[] | select(.name == `"$version`") | .name"
+gh auth refresh --hostname github.com --scopes read:packages
+$githubVersion = gh api --paginate "/users/RolandUI/packages/nuget/RolandUI.DevScope/versions" --jq ".[] | select(.name == `"$version`") | .name"
 $githubVersion -eq $version
 ```
 
-Both registry expressions must return `True`. Registry indexing can take a few minutes; retry verification before treating a successful workflow as failed. The `gh` account used for verification must be able to read the organization package.
+Both registry expressions must return `True`. Registry indexing can take a few minutes; retry verification before treating a successful workflow as failed. The `gh` account used for verification must have the `read:packages` scope.
 
 Install the exact published version in a disposable sample or real consumer application and confirm that it restores for both supported target frameworks. Then update the release issue with:
 
