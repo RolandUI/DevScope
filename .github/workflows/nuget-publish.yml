@@ -42,7 +42,7 @@ jobs:
           "version=$($tag -replace '^v','')" >> $env:GITHUB_OUTPUT
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: true
@@ -50,7 +50,7 @@ jobs:
           ref: ${{ steps.release.outputs.tag }}
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
 
@@ -105,5 +105,5 @@ jobs:
           $packages = @(Get-ChildItem -Path "${{ github.workspace }}/out" -Filter "*.nupkg" | Where-Object Name -NotLike "*.snupkg")
           if ($packages.Count -ne 1) { throw "Expected exactly one primary nupkg, found $($packages.Count)." }
           foreach ($pkg in $packages) {
-            dotnet nuget push $pkg.FullName --source github --skip-duplicate --no-symbols
+            dotnet nuget push $pkg.FullName --api-key $env:GITHUB_TOKEN --source github --skip-duplicate --no-symbols
           }
